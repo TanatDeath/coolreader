@@ -65,6 +65,7 @@ public enum ReaderCommand
 	DCMD_EINK_ONYX_RECENT(506),
 	DCMD_EINK_ONYX_REPAINT_SCREEN(507),
 	DCMD_EINK_ONYX_SCREENSHOT(508),
+	DCMD_ADD_BOOK_TAGS(509),
 
 	// definitions from android/jni/readerview.h
 	DCMD_OPEN_RECENT_BOOK(2000),

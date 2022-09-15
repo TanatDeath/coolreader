@@ -23,6 +23,14 @@
 class LVGifImageSource;
 class LVImageDecoderCallback;
 
+// https://www.oreilly.com/library/view/programming-web-graphics/1565924789/ch01s02.html:
+// "If a file does not have a global color table and does not have local color tables,
+// the image will be rendered using the application's default color table, with unpredictable results"
+// "The GIF specification suggests that the first two elements of a color table be black (0) and white (1),
+// but this is not necessarily always the case".
+// Let's get the same values as MuPDF's mupdf/source/fitz/load-gif.c (which does it via a hardcoded table).
+#define GIF_DEFAULT_PALETTE_COLOR_VALUE(b) ( b == 0 ? 0x000000 : ( b == 1 ? 0xFFFFFF : (b<<16|b<<8|b) ) )
+
 class LVGifFrame
 {
 protected:

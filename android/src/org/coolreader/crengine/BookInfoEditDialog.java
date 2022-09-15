@@ -7,6 +7,7 @@ import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
 import org.coolreader.dic.TranslationDirectionDialog;
+import org.coolreader.layouts.FlowLayout;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 
@@ -20,6 +21,7 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -67,6 +69,8 @@ public class BookInfoEditDialog extends BaseDialog {
 	private ImageButton btnStar5;
 	private int attrStar;
 	private int attrStarFilled;
+	FlowLayout mViewTags;
+	ArrayList<BookTag> mBookTagsList;
 
 	protected void updateGlobalMargin(ViewGroup v,
 									  boolean left, boolean top, boolean right, boolean bottom) {
@@ -104,6 +108,75 @@ public class BookInfoEditDialog extends BaseDialog {
 
         super.onCreate();
 		L.v("BookInfoEditDialog is created");
+	}
+
+	private void refreshBookTags() {
+		mViewTags.removeAllViews();
+		if (mBookInfo != null) {
+			mActivity.waitForCRDBService(() ->
+				mActivity.getDB().loadTags(mBookInfo.getFileInfo(), tags -> {
+					String stags = "";
+					mBookTagsList = tags;
+					for (BookTag bookTag : mBookTagsList) {
+						if (bookTag.isSelected) {
+							addTagButton(bookTag, false);
+							stags = stags + '|' + bookTag.name;
+						}
+					}
+					addTagButton(null, true);
+					if (!StrUtils.isEmptyStr(stags))
+						mBookInfo.getFileInfo().setTags(stags.substring(1));
+					else
+						mBookInfo.getFileInfo().setTags("");
+				}));
+		}
+	}
+
+	private void addTagButton(BookTag bookTag, boolean isEditButton) {
+		int colorIcon = themeColors.get(R.attr.colorIcon);
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+		//LinearLayout dicButton = new LinearLayout(mActivity);
+		View buttonView = mInflater.inflate(R.layout.tag_flow_item, null);
+		LinearLayout dicButton = buttonView.findViewById(R.id.tag_flow_item_body);
+		String txt = mActivity.getString(R.string.edit_tags);
+		if (!isEditButton) txt = bookTag.name;
+		TextView tvText = buttonView.findViewById(R.id.tag_flow_item_text);
+		tvText.setText(txt);
+		if (!isEditButton)
+			dicButton.setBackgroundColor(CoverpageManager.randomColor((bookTag.name).hashCode()));
+		else {
+			Utils.setDashedView(dicButton);
+			tvText.setTypeface(null, Typeface.BOLD);
+		}
+		dicButton.setPadding(5, 5, 5, 5);
+		if (isEditButton) {
+			dicButton.setOnClickListener(v -> {
+				FileInfo fiTED = mBookInfo.getFileInfo();
+				TagsEditDialog dlgTagsEditDialog = new TagsEditDialog(mActivity, fiTED, true,
+					new TagsEditDialog.TagsEditDialogCloseCallback() {
+						@Override
+						public void onOk() {
+							refreshBookTags();
+						}
+
+						@Override
+						public void onCancel() {
+
+						}
+					});
+				dlgTagsEditDialog.show();
+			});
+		}
+		ImageView btnDel = buttonView.findViewById(R.id.tag_flow_value_del);
+		Utils.hideView(btnDel);
+		TextView tv = new TextView(mActivity);
+		tv.setText(" ");
+		tv.setPadding(5, 0, 0, 0);
+		tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
+		tv.setTextColor(mActivity.getTextColor(colorIcon));
+		mActivity.tintViewIcons(dicButton);
+		mViewTags.addView(dicButton);
+		mViewTags.addView(tv);
 	}
 	
 	class AuthorItem {
@@ -587,6 +660,9 @@ public class BookInfoEditDialog extends BaseDialog {
 		});
 
 		buttonsLayout = mainView.findViewById(R.id.base_dlg_button_panel);
+
+		mViewTags = mainView.findViewById(R.id.tagsFlowList);
+		refreshBookTags();
 		updateGlobalMargin(buttonsLayout, true, true, true, false);
 
 		setView(mainView);

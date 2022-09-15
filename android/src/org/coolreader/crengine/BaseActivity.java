@@ -554,7 +554,8 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.attr_icons8_circle,
 						 R.attr.attr_icons8_square,
 						 R.attr.attr_icons8_refresh_screen,
-						 R.attr.attr_icons8_screenshot
+						 R.attr.attr_icons8_screenshot,
+						 R.attr.attr_icons8_tag
 		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
 		int btnPrevDrawableRes = a.getResourceId(0, 0);
@@ -672,6 +673,7 @@ public class BaseActivity extends Activity implements Settings {
 		int brEinkOnyxRecent = a.getResourceId(101, 0);
 		int brEinkOnyxRepaintScreen = a.getResourceId(102, 0);
 		int brEinkOnyxScreenshot = a.getResourceId(103, 0);
+		int brTag = a.getResourceId(104, 0);
 
 		a.recycle();
 		if (btnPrevDrawableRes != 0) {
@@ -859,6 +861,7 @@ public class BaseActivity extends Activity implements Settings {
 		if (brEinkOnyxRepaintScreen != 0) ReaderAction.EINK_ONYX_REPAINT_SCREEN.setIconId(brEinkOnyxRepaintScreen);
 		if (brEinkOnyxScreenshot != 0) ReaderAction.EINK_ONYX_SCREENSHOT.setIconId(brEinkOnyxScreenshot);
 
+		if (brTag != 0) ReaderAction.ADD_BOOK_TAGS.setIconId(brTag);
 	}
 
 	public void setCurrentTheme(InterfaceTheme theme) {
@@ -1652,6 +1655,7 @@ public class BaseActivity extends Activity implements Settings {
 	private int mEinkOnyxScreenFullUpdateMethod = 0;
 	private int mEinkOnyxExtraDelayFullRefresh = -1;
 	public boolean mOnyxDontUpdateLibrary = false;
+	public boolean mOnyxSwitchToA2 = true;
 
 	public EinkScreen.EinkUpdateMode getScreenUpdateMode() {
 		return mScreenUpdateMode;
@@ -1661,7 +1665,7 @@ public class BaseActivity extends Activity implements Settings {
 		if (null != mEinkScreen) {
 			mScreenUpdateMode = screenUpdateMode;
 			if (mEinkScreen.getUpdateMode() != screenUpdateMode || mEinkScreen.getUpdateMode() == EinkScreen.EinkUpdateMode.Active) {
-				mEinkScreen.setupController(mScreenUpdateMode, mScreenUpdateInterval, view, false);
+				mEinkScreen.setupController(mScreenUpdateMode, mScreenUpdateInterval, view, false, false);
 			}
 		}
 	}
@@ -1697,6 +1701,10 @@ public class BaseActivity extends Activity implements Settings {
 		mOnyxDontUpdateLibrary = dont;
 	}
 
+	public void setOnyxSwitchToA2(boolean swi) {
+		mOnyxSwitchToA2 = swi;
+	}
+
 	public void setScreenFullUpdateMethod(int method) {
 		if (null != mEinkScreen) {
 			mEinkOnyxScreenFullUpdateMethod = method;
@@ -1721,7 +1729,7 @@ public class BaseActivity extends Activity implements Settings {
 		if (null != mEinkScreen) {
 			mScreenUpdateInterval = screenUpdateInterval;
 			if (mEinkScreen.getUpdateInterval() != screenUpdateInterval) {
-				mEinkScreen.setupController(mScreenUpdateMode, screenUpdateInterval, view, false);
+				mEinkScreen.setupController(mScreenUpdateMode, screenUpdateInterval, view, false, false);
 			}
 		}
 	}
@@ -1777,6 +1785,10 @@ public class BaseActivity extends Activity implements Settings {
 		showToast(msg, Toast.LENGTH_LONG);
 	}
 
+	public void showClassicToast(String msg) {
+		showClassicToast(msg, Toast.LENGTH_LONG);
+	}
+
 	public void showCloudToast(String msg, boolean verbose) {
 		if (verbose) showToast(msg, Toast.LENGTH_LONG);
 		else log.i(msg);
@@ -1796,6 +1808,13 @@ public class BaseActivity extends Activity implements Settings {
 			Toast toast = Toast.makeText(this, msg, duration);
 			toast.show();
 		}
+	}
+
+	public void showClassicToast(String msg, int duration) {
+		log.v("showing classic toast: " + msg);
+		// classic Toast
+		Toast toast = Toast.makeText(this, msg, duration);
+		toast.show();
 	}
 
 	public void showToast(String msg, View view) {
@@ -2421,6 +2440,8 @@ public class BaseActivity extends Activity implements Settings {
 			setScreenExtraDelayFullRefresh(Utils.parseInt(value, -1));
 		} else if (key.equals(PROP_APP_EINK_ONYX_DONT_UPDATE_LIBRARY)) {
 			setOnyxDontUpdateLibrary(Utils.parseInt(value, 0) == 0? false : true);
+		} else if (key.equals(PROP_APP_EINK_ONYX_SWITCH_TO_A2)) {
+			setOnyxSwitchToA2(Utils.parseInt(value, 1) == 0? false : true);
 		} else if (key.equals(PROP_APP_SCREEN_UPDATE_INTERVAL)) {
 			setScreenUpdateInterval(Utils.parseInt(value, 10), getContentView());
 		} else if (key.equals(PROP_APP_SCREEN_BLACKPAGE_INTERVAL)) {
@@ -3335,11 +3356,13 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_AUTHOR, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_SERIES, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_GENRES, "0");
+			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_TAGS, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_DATES, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_COMMON, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_AUTHOR, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_SERIES, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_GENRES, "0");
+			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_TAGS, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_RATING, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_STATE, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SEC_GROUP_DATES, "0");

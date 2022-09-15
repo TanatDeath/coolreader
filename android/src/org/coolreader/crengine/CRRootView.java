@@ -786,6 +786,8 @@ public class CRRootView extends ViewGroup {
 				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_folder_author, R.drawable.icons8_folder_author));
 			else if (item.isBooksByGenreRoot())
 				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_theatre_mask, R.drawable.icons8_theatre_mask));
+			else if (item.isBooksByTagRoot())
+				setImageResourceSmall(image,Utils.resolveResourceIdByAttr(mActivity, R.attr.attr_icons8_tag, R.drawable.icons8_tag));
 			//else if (item.isBooksByGenreRoot() // CR implementation
 			else if (item.isBooksByBookdateRoot() || item.isBooksByDocdateRoot() ||
 					item.isBooksByPublyearRoot() || item.isBooksByFiledateRoot())
@@ -809,6 +811,12 @@ public class CRRootView extends ViewGroup {
 						});
 					} else mActivity.showDirectory(item, "");
 			});
+			if (item.isBooksByTagRoot())
+				view.setOnLongClickListener(v -> {
+					TagsEditDialog dlg1 = new TagsEditDialog(mActivity, null, true, null);
+					dlg1.show();
+					return true;
+				});
 			mLibraryScroll.addView(view);
 		}
 		mLibraryScroll.invalidate();

@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.provider.Browser;
 import androidx.annotation.ColorInt;
 
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -42,6 +43,8 @@ import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.MaxHeightLinearLayout;
 import org.coolreader.crengine.MaxHeightScrollView;
+import org.coolreader.crengine.Settings;
+import org.coolreader.layouts.FlowLayout;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.crengine.Services;
 import org.coolreader.utils.StrUtils;
@@ -73,6 +76,7 @@ public class DicToastView {
     public static int IS_OFFLINE = 11;
     public static int IS_USERDIC = 12;
     public static int IS_ONYXAPI = 13;
+    public static int IS_REVERSO = 14;
 
     public static int mColorIconL = Color.GRAY;
 
@@ -406,6 +410,91 @@ public class DicToastView {
         return s;
     }
 
+    private static void initRecentDics(ViewGroup vg, String findText, boolean fullScreen) {
+        int newTextSize = mActivity.settings().getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
+        int iCntRecent = 0;
+        vg.removeAllViews();
+        for (final Dictionaries.DictInfo di : mActivity.mDictionaries.diRecent) {
+            if (!di.equals(mActivity.mDictionaries.getCurDictionary())) {
+                iCntRecent++;
+            }
+        }
+        if (iCntRecent == 0) iCntRecent++;
+        List<Dictionaries.DictInfo> diAllDicts = new ArrayList<>();
+        for (final Dictionaries.DictInfo di: mActivity.mDictionaries.diRecent) {
+            diAllDicts.add(di);
+        }
+        for (final Dictionaries.DictInfo di: mActivity.mDictionaries.getAddDicts()) {
+            diAllDicts.add(di);
+        }
+        ArrayList<String> added = new ArrayList<>();
+        for (final Dictionaries.DictInfo di: diAllDicts) {
+            if (!added.contains(di.id)) {
+                added.add(di.id);
+                Button dicButton = new Button(mActivity);
+                String sAdd = di.getAddText(mActivity);
+                String sName = di.shortName;
+                if (StrUtils.isEmptyStr(sName)) sName = di.name;
+                if (StrUtils.isEmptyStr(sAdd))
+                    dicButton.setText(sName);
+                else
+                    dicButton.setText(sName + ": " + sAdd);
+                dicButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
+                dicButton.setTextColor(mActivity.getTextColor(colorIcon));
+                dicButton.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+                Utils.setSolidButton1(dicButton);
+                if (isEInk) Utils.setSolidButtonEink(dicButton);
+                dicButton.setPadding(10, 20, 10, 20);
+                //dicButton.setBackground(null);
+                LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+                llp.setMargins(8, 4, 4, 8);
+                dicButton.setLayoutParams(llp);
+                //dicButton.setMaxWidth((mReaderView.getRequestedWidth() - 20) / iCntRecent); // This is not needed anymore - since we use FlowLayout
+                dicButton.setMaxLines(1);
+                dicButton.setEllipsize(TextUtils.TruncateAt.END);
+                TextView tv = new TextView(mActivity);
+                tv.setText(" ");
+                tv.setPadding(5, 10, 5, 10);
+                tv.setLayoutParams(llp);
+                tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
+                tv.setTextColor(mActivity.getTextColor(colorIcon));
+                vg.addView(dicButton);
+                vg.addView(tv);
+                dicButton.setOnClickListener(v -> {
+                    mActivity.mDictionaries.setAdHocDict(di);
+                    mActivity.mDictionaries.setAdHocFromTo(
+                            mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
+                    doDismiss();
+                    try {
+                        mActivity.mDictionaries.findInDictionary(findText, fullScreen,
+                                mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
+                    } catch (Dictionaries.DictionaryException e) {
+                        // do nothing
+                    }
+                });
+                dicButton.setOnLongClickListener(v -> {
+//                    mActivity.editBookTransl(CoolReader.EDIT_BOOK_TRANSL_ONLY_CHOOSE_QUICK, false,
+//                            mReaderView.getSurface(), mReaderView.getBookInfo().getFileInfo().parent,
+//                            mReaderView.getBookInfo().getFileInfo(),
+//                            StrUtils.getNonEmptyStr(mReaderView.mBookInfo.getFileInfo().lang_from, true),
+//                            StrUtils.getNonEmptyStr(mReaderView.mBookInfo.getFileInfo().lang_to, true),
+//                            "", null, TranslationDirectionDialog.FOR_COMMON, s -> {
+//                                mActivity.mDictionaries.setAdHocDict(di);
+//                                String sSText = selection.text;
+//                                mActivity.findInDictionary(sSText, false, null);
+//                                if (!mReaderView.getSettings().getBool(mReaderView.PROP_APP_SELECTION_PERSIST, false))
+//                                    mReaderView.clearSelection();
+//                                closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
+//                            });
+                    return true;
+                });
+                if (isEInk) Utils.setBtnBackground(dicButton, null, isEInk);
+            }
+        }
+    }
+
     private static void simpleToast(Toast t, boolean fullScreen) {
         mInflater = (LayoutInflater) t.anchor.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View dicContent;
@@ -444,6 +533,7 @@ public class DicToastView {
         ImageButton btnToUserDic;
         ImageButton btnCopyToCb;
         ImageButton btnTransl;
+        LinearLayout llUpperRowRecent;
         MaxHeightScrollView sv = null;
         if (fullScreen) {
             dad = new DicArticleDlg("DicArticleDlg",
@@ -470,6 +560,7 @@ public class DicToastView {
                 iv = dad.mBody.findViewById(R.id.dic_pic);
             }
             dicTable = dad.mBody.findViewById(R.id.dic_table);
+            llUpperRowRecent = dad.mBody.findViewById(R.id.upper_row_ll_recent);
         } else {
             PopupWindow window = (PopupWindow) toastWindow;
             window.setWidth(WindowManager.LayoutParams.FILL_PARENT);
@@ -501,6 +592,7 @@ public class DicToastView {
             }
             dicTable = window.getContentView().findViewById(R.id.dic_table);
             sv =  window.getContentView().findViewById(R.id.dic_scrollV);
+            llUpperRowRecent = window.getContentView().findViewById(R.id.upper_row_ll_recent);
         }
         CoolReader cr = mActivity;
         if (!fullScreen) {
@@ -521,11 +613,16 @@ public class DicToastView {
         setBtnBackgroundColor(tvMore, colr2);
         setBtnBackgroundColor(tvClose, colr2);
         if (tvTerm != null) {
+            final String findText = StrUtils.getNonEmptyStr(t.sFindText, true);
             tvTerm.setText(updTerm(t.sFindText));
             tvTerm.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             setBtnBackgroundColor(tvClose, colr2);
-            setBtnBackgroundColor(tvClose, colr2);
-            setBtnBackgroundColor(tvClose, colr2);
+            if (llUpperRowRecent != null) {
+                ViewGroup recentDicsPanel = (ViewGroup) mInflater.inflate(R.layout.recent_dic_panel_scroll, null, true);
+                LinearLayout ll = recentDicsPanel.findViewById(R.id.ll_dic_buttons);
+                initRecentDics(ll, findText, fullScreen);
+                llUpperRowRecent.addView(recentDicsPanel);
+            }
             btnRemove1sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             Utils.setSolidButton1(btnRemove1sym);
             if (isEInk) Utils.setSolidButtonEink(btnRemove1sym);
@@ -535,7 +632,6 @@ public class DicToastView {
             btnRemove3sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             Utils.setSolidButton1(btnRemove3sym);
             if (isEInk) Utils.setSolidButtonEink(btnRemove3sym);
-            final String findText = StrUtils.getNonEmptyStr(t.sFindText, true);
             Utils.setSolidButton1(btnDicExtended);
             if (isEInk) Utils.setSolidButtonEink(btnDicExtended);
             btnDicExtended.setOnClickListener(v -> {
@@ -612,6 +708,14 @@ public class DicToastView {
                 if (StrUtils.getNonEmptyStr(t.mDicName, true).equals("[HIDE]")) tvLblDic.setText("");
                 else tvLblDic.setText(t.mDicName);
             }
+            if (!fullScreen) {
+                tvLblDic.setPaintFlags(tvLblDic.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+                tvLblDic.setOnClickListener(v -> {
+                    DictsDlg dlg = new DictsDlg(mActivity, mActivity.getReaderView(), t.sFindText, null, false);
+                    doDismiss();
+                    dlg.show();
+                });
+            }
         }
         tvMore.setOnClickListener(v -> {
             String ss = sFindText;
@@ -623,7 +727,8 @@ public class DicToastView {
                     Dictionaries.wikiSearch.WIKI_FIND_LIST, t.mUseFirstLink, null);
             doDismiss();
         });
-        if (t.dicType != IS_WIKI) ((ViewGroup)tvMore.getParent()).removeView(tvMore);
+        if (t.dicType != IS_WIKI) Utils.hideView(tvMore);
+            else Utils.hideView(llUpperRowRecent);
         tvClose.setOnClickListener(v -> doDismiss());
         tvFull.setOnClickListener(v -> {
             if (Dictionaries.wikiSearch == null) Dictionaries.wikiSearch = new WikiSearch();
@@ -820,7 +925,7 @@ public class DicToastView {
                 if ((t.dicType == IS_DICTCC) || (t.dicType == IS_LINGUEE) ||
                         (t.dicType == IS_GRAMOTA) || (t.dicType == IS_GLOSBE) ||
                         (t.dicType == IS_TURENG) || (t.dicType == IS_URBAN) ||
-                        (t.dicType == IS_ONYXAPI)) {
+                        (t.dicType == IS_ONYXAPI) || (t.dicType == IS_REVERSO)) {
                     String s = StrUtils.getNonEmptyStr(t.mDicName,true);
                     if (s.contains("?")) s = s.substring(0, s.indexOf("?"));
                     tvYnd1.setText(s);
@@ -846,6 +951,7 @@ public class DicToastView {
                     if (t.dicType == IS_TURENG) sLink = t.mDicName;
                     if (t.dicType == IS_URBAN) sLink = t.mDicName;
                     if (t.dicType == IS_ONYXAPI) sLink = t.mDicName;
+                    if (t.dicType == IS_REVERSO) sLink = t.mDicName;
                     Uri uri = Uri.parse(sLink);
                     Context context = t.anchor.getContext();
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
@@ -984,6 +1090,14 @@ public class DicToastView {
                 tvLblDic.setText(t.mCurDict.shortName);
             else
                 tvLblDic.setText(t.mDicName);
+            if (!fullScreen) {
+                tvLblDic.setPaintFlags(tvLblDic.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+                tvLblDic.setOnClickListener(v -> {
+                    DictsDlg dlg = new DictsDlg(mActivity, mActivity.getReaderView(), t.sFindText, null, false);
+                    doDismiss();
+                    dlg.show();
+                });
+            }
         }
         //tvMore.setPaintFlags(tvMore.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         tvMore.setOnClickListener(v -> {
@@ -1135,6 +1249,7 @@ public class DicToastView {
         EditText edtDicTranls;
         ViewGroup body;
         ViewGroup body2;
+        LinearLayout llUpperRowRecent;
         DicArticleDlg dad = null;
         if (fullScreen) {
             dad = new DicArticleDlg("DicArticleDlg",
@@ -1152,6 +1267,7 @@ public class DicToastView {
             edtDicTranls = dad.mBody.findViewById(R.id.edt_dic_tranls);
             body = dad.mBody.findViewById(R.id.items_list);
             body2 = dad.mBody.findViewById(R.id.items_list2);
+            llUpperRowRecent = dad.mBody.findViewById(R.id.upper_row_ll_recent);
         } else {
             PopupWindow window = (PopupWindow) toastWindow;
             window.setWidth(WindowManager.LayoutParams.FILL_PARENT);
@@ -1172,6 +1288,7 @@ public class DicToastView {
             edtDicTranls = window.getContentView().findViewById(R.id.edt_dic_tranls);
             body = window.getContentView().findViewById(R.id.items_list);
             body2 = window.getContentView().findViewById(R.id.items_list2);
+            llUpperRowRecent = window.getContentView().findViewById(R.id.upper_row_ll_recent);
         }
         if (fullScreen)
             ll1.setBackgroundColor(Color.argb(0, Color.red(colorFill), Color.green(colorFill), Color.blue(colorFill)));
@@ -1184,12 +1301,24 @@ public class DicToastView {
                 tvLblDic.setText(t.mCurDict.shortName);
             else
                 tvLblDic.setText(t.mDicName);
+            if (!fullScreen) {
+                tvLblDic.setPaintFlags(tvLblDic.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+                tvLblDic.setOnClickListener(v -> {
+                    DictsDlg dlg = new DictsDlg(mActivity, mActivity.getReaderView(), t.sFindText, null, false);
+                    doDismiss();
+                    dlg.show();
+                });
+            }
         }
         if (tvTerm != null) {
             tvTerm.setText(updTerm(t.sFindText));
+            if (llUpperRowRecent != null) {
+                ViewGroup recentDicsPanel = (ViewGroup) mInflater.inflate(R.layout.recent_dic_panel_scroll, null, true);
+                LinearLayout ll = recentDicsPanel.findViewById(R.id.ll_dic_buttons);
+                initRecentDics(ll, updTerm(t.sFindText), fullScreen);
+                llUpperRowRecent.addView(recentDicsPanel);
+            }
             tvTerm.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
-            setBtnBackgroundColor(tvClose, colr2);
-            setBtnBackgroundColor(tvClose, colr2);
             setBtnBackgroundColor(tvClose, colr2);
             btnRemove1sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             Utils.setSolidButton1(btnRemove1sym);

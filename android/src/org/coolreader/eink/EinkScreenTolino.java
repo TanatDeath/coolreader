@@ -69,7 +69,7 @@ public class EinkScreenTolino extends EinkScreenNook {
 						mRefreshNumber = -1;
 				}
 			} else {
-				setupController(mUpdateMode, mUpdateInterval, view, false);
+				setupController(mUpdateMode, mUpdateInterval, view, false, false);
 			}
 		}
 	}

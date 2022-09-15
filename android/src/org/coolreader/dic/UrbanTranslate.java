@@ -48,6 +48,7 @@ public class UrbanTranslate {
 				if (llc == null) {
 					String sTitle = s;
 					DicStruct dsl = new DicStruct();
+					dsl.srcText = s;
 					Lemma lemma = null;
 					Document docJsoup = Jsoup.parse(urlBuilder.build().url(), 180000); // three minutes
 					Elements resDivs = docJsoup.select("div.definition");

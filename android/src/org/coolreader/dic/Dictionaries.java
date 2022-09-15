@@ -69,6 +69,8 @@ public class Dictionaries {
 	public static final String GLOSBE_ONLINE = "https://glosbe.com/{src_lang}/{dst_lang}/";
 	public static final String TURENG_ONLINE = "https://tureng.com/en/{langpair}";
 	public static final String URBAN_ONLINE = "https://urbandictionary.com/define.php";
+	public static final String REVERSO_DIC_ONLINE_ROOT = "https://context.reverso.net";
+	public static final String REVERSO_DIC_ONLINE = "https://context.reverso.net/translation/{src_lang_name}-{dst_lang_name}";
 
 	public static DeeplTranslate deeplTranslate = null;
 	public static DictCCTranslate dictCCTranslate = null;
@@ -83,6 +85,7 @@ public class Dictionaries {
 	public static UrbanTranslate urbanTranslate = null;
 	public static OfflineDicTranslate offlineTranslate = null;
 	public static OnyxapiTranslate onyxapiTranslate = null;
+	public static ReversoTranslate reversoTranslate = null;
 
 	public static OkHttpClient client = new OkHttpClient.Builder().
 		connectTimeout(20,TimeUnit.SECONDS).
@@ -387,6 +390,8 @@ public class Dictionaries {
 				Intent.ACTION_SEND, 19, R.drawable.icons8_offline_dics2, null, "", true, "Offline"),
 		new DictInfo("OnyxDictAPI", "OnyxDict API", "", "",
 				Intent.ACTION_SEND, 20, R.drawable.onyx_dictionary, null, "", true, "OnyxApi"),
+		new DictInfo("Reveso context (online)", "Reverso context (online)", "", "",
+				Intent.ACTION_SEND, 21, R.drawable.reverso_context, null, REVERSO_DIC_ONLINE, true, "ReversoO"),
 	};
 
 	public static List<DictInfo> dictsSendTo = new ArrayList<>();
@@ -1356,7 +1361,28 @@ public class Dictionaries {
 				onyxapiTranslate.onyxapiTranslate(cr, s, fullScreen,
 						langf, lang, curDict, view, extended, null, dcb);
 				break;
+			case 21:
+				if (!FlavourConstants.PREMIUM_FEATURES) {
+					cr.showToast(R.string.only_in_premium);
+					return;
+				}
+				if (StrUtils.isEmptyStr(langf)) langf = sLang;
+				if (StrUtils.isEmptyStr(lang)||StrUtils.isEmptyStr(langf)) {
+					if (cr.getReaderView() != null)
+						if (cr.getReaderView().mBookInfo != null) {
+							FileInfo fi = cr.getReaderView().mBookInfo.getFileInfo();
+							FileInfo dfi = getFileParent(fi);
+							editTransl(cr, fullScreen, dfi, fi, langf, lang, s, TranslationDirectionDialog.FOR_COMMON);
+						};
+					return;
+				}
+				if (reversoTranslate == null) reversoTranslate = new ReversoTranslate();
+				reversoTranslate.reversoTranslate(cr, s, fullScreen,
+						reversoTranslate.reversoGetDefLangCode(langf),
+						reversoTranslate.reversoGetDefLangCode(lang), curDict, view, "", null, dcb);
+				break;
 			}
+
 
 
 	}

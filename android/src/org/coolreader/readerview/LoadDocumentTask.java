@@ -5,6 +5,7 @@ import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
 import org.coolreader.cloud.CloudSync;
 import org.coolreader.crengine.BackgroundThread;
+import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.DeviceInfo;
@@ -123,6 +124,8 @@ public class LoadDocumentTask extends Task {
 	@Override
 	public void work() throws IOException {
 		BackgroundThread.ensureBackground();
+		// Onyx - to prevent flicker
+		mReaderView.toggleScreenUpdateModeMode(true);
 		mReaderView.coverPageBytes = null;
 		log.i("Loading document " + filename);
 		mReaderView.doc.doCommand(ReaderCommand.DCMD_SET_INTERNAL_STYLES.nativeId, disableInternalStyles ? 0 : 1);
@@ -175,7 +178,7 @@ public class LoadDocumentTask extends Task {
 				log.i("Document " + filename + " is loaded successfully");
 				if (pos != null) {
 					log.i("Restoring position : " + pos);
-					mReaderView.restorePositionBackground(pos);
+					mReaderView.restorePositionBackground(pos, false);
 				}
 			} else {
 				// Opened from memory buffer
@@ -299,7 +302,7 @@ public class LoadDocumentTask extends Task {
 													final String finalPos = pos;
 													BackgroundThread.instance().executeBackground(() -> {
 														log.i("Restoring position : " + finalPos);
-														mReaderView.restorePositionBackground(finalPos);
+														mReaderView.restorePositionBackground(finalPos, false);
 													});
 												}
 												Services.getHistory().updateBookAccess(mReaderView.mBookInfo, mReaderView.getTimeElapsed());
@@ -328,9 +331,9 @@ public class LoadDocumentTask extends Task {
 			mReaderView.selectionModeActive = false;
 			mReaderView.selectionModeWasActive = false;
 			mReaderView.inspectorModeActive = false;
-			mReaderView.toggleScreenUpdateModeMode(false);
+			//mReaderView.toggleScreenUpdateModeMode(false);
 
-			mReaderView.drawPage(); //plotn - possibly it is unnesessary - due to new progress. But maybe not - page was empty last time
+			//mReaderView.drawPage(); //plotn - possibly it is unnesessary - due to new progress. But maybe not - page was empty last time
 
 			mActivity.showReader();
 			if (null != doneHandler)
@@ -352,8 +355,11 @@ public class LoadDocumentTask extends Task {
 
 			UserDicDlg.updDicSearchHistoryAll(mActivity);
 			mReaderView.mOpened = true;
-			mReaderView.highlightBookmarks();
+			mReaderView.highlightBookmarks(false);
 			mReaderView.saveCurrentBookToOnyxLib();
+			// Onyx - to prevent flicker
+			mReaderView.drawPage();
+			mReaderView.toggleScreenUpdateModeMode(false);
 			//OnyxCover.setCoverPage(mActivity, mReaderView.mBookInfo.getFileInfo());
 		}
 	}
@@ -384,5 +390,7 @@ public class LoadDocumentTask extends Task {
 			log.e("LoadDocumentTask: Calling error handler");
 			errorHandler.run();
 		}
+		// Onyx - to prevent flicker
+		mReaderView.toggleScreenUpdateModeMode(false);
 	}
 }

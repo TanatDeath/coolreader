@@ -67,8 +67,11 @@ public class FileInfo implements Parcelable {
 	public final static String FILE_DATE_GROUP_PREFIX = "@filedateGroup:";
 	public final static String FILE_DATE_PREFIX = "@filedate:";
 	public final static String GENRE_TAG = "@genreRoot";
+	public final static String TAG_TAG = "@tagRoot";
 	public final static String GENRE_GROUP_PREFIX = "@genreGroup:";
+	public final static String TAG_GROUP_PREFIX = "@tagGroup:";
 	public final static String GENRE_PREFIX = "@genre:";
+	public final static String TAG_PREFIX = "@tag:";
 	public final static String RATING_TAG = "@ratingRoot";
 	public final static String STATE_TAG = "@stateRoot";
 	public final static String STATE_TO_READ_TAG = "@stateToReadRoot";
@@ -106,7 +109,8 @@ public class FileInfo implements Parcelable {
 			BOOK_DATE_PREFIX, DOC_DATE_TAG, DOC_DATE_GROUP_PREFIX, DOC_DATE_PREFIX,
 		 	PUBL_YEAR_TAG, PUBL_YEAR_GROUP_PREFIX, PUBL_YEAR_PREFIX,
 			FILE_DATE_TAG, FILE_DATE_GROUP_PREFIX, FILE_DATE_PREFIX,
-			GENRE_TAG, GENRE_GROUP_PREFIX, GENRE_PREFIX, RATING_TAG, STATE_TAG,
+			GENRE_TAG, TAG_TAG, GENRE_GROUP_PREFIX, TAG_GROUP_PREFIX,
+			GENRE_PREFIX, TAG_PREFIX, RATING_TAG, STATE_TAG,
 			STATE_TO_READ_TAG, STATE_READING_TAG, STATE_FINISHED_TAG,
 			TITLE_TAG, TITLE_TAG_LEVEL, TITLE_GROUP_PREFIX, SEARCH_SHORTCUT_TAG,
 			ROOT_WINDOW_TAG, QSEARCH_SHORTCUT_TAG
@@ -125,6 +129,8 @@ public class FileInfo implements Parcelable {
 	public boolean need_to_update_ver; // file was saved in old format
 	public String genre; // Genre list written directly
 	public String genre_list; // Genre list from genre table
+	public String tags; // Tag list written directly
+	public String tag_list; // Tag list from tags table
 	public String genre_tmp; // Genre - for grouping in order not to calculate many times
 	public String annotation;
 	public String srclang;
@@ -648,6 +654,8 @@ public class FileInfo implements Parcelable {
 		saved_with_ver = v.saved_with_ver;
 		genre = v.genre;
 		genre_list = v.genre_list;
+		tags = v.tags;
+		tag_list = v.tag_list;
 		//if (StrUtils.isEmptyStr(genre_list)) genre_list = v.genre;
 		annotation = v.annotation;
 		srclang = v.srclang;
@@ -675,6 +683,7 @@ public class FileInfo implements Parcelable {
 		links = v.links;
 		authorsLFM = v.authorsLFM;
 		genre_list = v.genre_list;
+		tag_list = v.tag_list;
 		crc32 = v.crc32;
 		description = v.description;
 		domVersion = v.domVersion;
@@ -740,6 +749,8 @@ public class FileInfo implements Parcelable {
 		if (StrUtils.getNonEmptyStr(arcname, true).toUpperCase().contains(find)) return true;
 		if (StrUtils.getNonEmptyStr(genre, true).toUpperCase().contains(find)) return true;
 		if (StrUtils.getNonEmptyStr(genre_list, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(tags, true).toUpperCase().contains(find)) return true;
+		if (StrUtils.getNonEmptyStr(tag_list, true).toUpperCase().contains(find)) return true;
 		if (StrUtils.getNonEmptyStr(annotation, true).toUpperCase().contains(find)) return true;
 		if (StrUtils.getNonEmptyStr(translator, true).toUpperCase().contains(find)) return true;
 		if (StrUtils.getNonEmptyStr(docauthor, true).toUpperCase().contains(find)) return true;
@@ -1053,6 +1064,11 @@ public class FileInfo implements Parcelable {
 		return GENRE_TAG.equals(pathname);
 	}
 
+	public boolean isBooksByTagRoot()
+	{
+		return TAG_TAG.equals(pathname);
+	}
+
 	public boolean isBooksByLitresGenreRoot()
 	{
 		return LITRES_GENRE_TAG.equals(pathname);
@@ -1126,6 +1142,11 @@ public class FileInfo implements Parcelable {
 	public boolean isBooksByGenreDir()
 	{
 		return pathname!=null && pathname.startsWith(GENRE_PREFIX);
+	}
+
+	public boolean isBooksByTagDir()
+	{
+		return pathname!=null && pathname.startsWith(TAG_PREFIX);
 	}
 
 	public boolean isBooksByLitresGenreDir()
@@ -1221,6 +1242,13 @@ public class FileInfo implements Parcelable {
 	public long getGenreId()
 	{
 		if (!isBooksByGenreDir())
+			return 0;
+		return id;
+	}
+
+	public long getTagId()
+	{
+		if (!isBooksByTagDir())
 			return 0;
 		return id;
 	}
@@ -1477,6 +1505,7 @@ public class FileInfo implements Parcelable {
 		modified = setAuthors(file.getAuthors()) || modified;
 		modified = setAuthorsLFM(file.getAuthorsLFM()) || modified;
 		modified = setGenres(file.getGenres()) || modified;
+		modified = setTags(file.getTags()) || modified;
 		modified = setSeriesName(file.getSeriesName()) || modified;
 		modified = setSeriesNumber(file.getSeriesNumber()) || modified;
 		modified = setReadingState(file.getReadingState()) || modified;
@@ -1818,9 +1847,9 @@ public class FileInfo implements Parcelable {
 	public String getGenres() {
 		String genreR = this.genre_list;
 		if (StrUtils.isEmptyStr(genreR)) genreR = this.genre;
-		if (genreR!=null) {
+		if (genreR != null) {
 			String[] list = genreR.split("\\|");
-			ArrayList<String> arrS = new ArrayList<String>();
+			ArrayList<String> arrS = new ArrayList<>();
 			for (String s : list) {
 				s = s.replaceAll("\\s+", " ").trim();
 				if (!arrS.contains(s)) arrS.add(s);
@@ -1842,7 +1871,7 @@ public class FileInfo implements Parcelable {
 			return false;
 		if (genres!=null) {
 			String[] list = genres.split("\\|");
-			ArrayList<String> arrS = new ArrayList<String>();
+			ArrayList<String> arrS = new ArrayList<>();
 			for (String s : list) {
 				s = s.replaceAll("\\s+", " ").trim();
 				if (!arrS.contains(s)) arrS.add(s);
@@ -1857,6 +1886,52 @@ public class FileInfo implements Parcelable {
 		} else {
 			this.genre = null;
 			this.genre_list = null;
+		}
+		return true;
+	}
+
+	public String getTags() {
+		String tagR = this.tag_list;
+		if (StrUtils.isEmptyStr(tagR)) tagR = this.tags;
+		if (tagR != null) {
+			String[] list = tagR.split("\\|");
+			ArrayList<String> arrS = new ArrayList<String>();
+			for (String s : list) {
+				s = s.replaceAll("\\s+", " ").trim();
+				if (!arrS.contains(s)) arrS.add(s);
+			}
+			String resS = "";
+			for (String s : arrS) {
+				resS = resS + "|" + s;
+			}
+			if (resS.length() > 0) resS = resS.substring(1);
+			return resS;
+		}
+		return null;
+	}
+
+	public boolean setTags(String tags) {
+		String tagR = this.tag_list;
+		if (StrUtils.isEmptyStr(tagR)) tagR = this.tags;
+		if ((eq(tagR, tags)) && (!StrUtils.isEmptyStr(this.tag_list)))
+			return false;
+		if (tags != null) {
+			String[] list = tags.split("\\|");
+			ArrayList<String> arrS = new ArrayList<String>();
+			for (String s : list) {
+				s = s.replaceAll("\\s+", " ").trim();
+				if (!arrS.contains(s)) arrS.add(s);
+			}
+			String resS = "";
+			for (String s : arrS) {
+				resS = resS + "|" + s;
+			}
+			if (resS.length() > 0) resS = resS.substring(1);
+			this.tags = resS;
+			this.tag_list = resS;
+		} else {
+			this.tags = null;
+			this.tag_list = null;
 		}
 		return true;
 	}
@@ -1924,6 +1999,16 @@ public class FileInfo implements Parcelable {
 			return false;
 		this.genre = genre;
 		this.genre_list = genre;
+		return true;
+	}
+
+	public boolean setTag(String tag) {
+		String tagR = this.tag_list;
+		if (StrUtils.isEmptyStr(tagR)) tagR = this.tags;
+		if (eq(tagR, genre))
+			return false;
+		this.tags = tag;
+		this.tag_list = tag;
 		return true;
 	}
 
@@ -2391,6 +2476,8 @@ public class FileInfo implements Parcelable {
 		if (!StrUtils.euqalsIgnoreNulls(title, other.title, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(genre, other.genre, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(genre_list, other.genre_list, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(tags, other.tags, true)) return false;
+		if (!StrUtils.euqalsIgnoreNulls(tag_list, other.tag_list, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(annotation, other.annotation, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(srclang, other.srclang, true)) return false;
 		if (!StrUtils.euqalsIgnoreNulls(bookdate, other.bookdate, true)) return false;

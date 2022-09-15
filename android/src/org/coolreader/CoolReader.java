@@ -1747,6 +1747,15 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		mSensorManager.registerListener(deviceOrientation.getEventListener(), accelerometer, SensorManager.SENSOR_DELAY_UI);
 		mSensorManager.registerListener(deviceOrientation.getEventListener(), magnetometer, SensorManager.SENSOR_DELAY_UI);
 
+		// due to some reasons the screen mode did not restore after A2 mode when calling dictionary, so do it this way
+		if (mOnyxSwitchToA2)
+			BackgroundThread.instance().postGUI(() -> {
+				if (getReaderView() != null) {
+					getReaderView().toggleScreenUpdateModeMode(true);
+					getReaderView().toggleScreenUpdateModeMode(false);
+				}
+			}, 1000);
+
 		int iGeo = settings().getInt(Settings.PROP_APP_GEO, 0);
 		if (iGeo > 1) {
 			geoLastData.gpsStart();
@@ -2344,6 +2353,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					((MainDB) db).iMaxGroupSizeGenres = Integer.valueOf(value);
 				});
 			}
+			if (key.equals(PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_TAGS)) {
+				waitForCRDBService(() -> {
+					BaseDB db = Services.getHistory().getMainDB(getDB());
+					((MainDB) db).iMaxGroupSizeTags = Integer.valueOf(value);
+				});
+			}
 			if (key.equals(PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_DATES)) {
 				waitForCRDBService(() -> {
 					BaseDB db = Services.getHistory().getMainDB(getDB());
@@ -2371,7 +2386,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		BOOK_READING_STATE_TO_READ = "["+getString(R.string.book_state_toread)+"]";
 		BOOK_READING_STATE_READING = "["+getString(R.string.book_state_reading)+"]";
 		BOOK_READING_STATE_FINISHED = "["+getString(R.string.book_state_finished)+"]";
-		MainDB.NO_VALUE = getString(R.string.no_value);
+		//MainDB.NO_VALUE = getString(R.string.no_value);
 		READ_ALOUD = getString(R.string.read_aloud);
 
 		// Show/Hide soft navbar after OptionDialog is closed.
@@ -2461,6 +2476,14 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				if (mHomeFrame.needRefreshOnlineCatalogs) refreshOPDSRootDirectory(false);
 				setLastLocationRoot();
 				mCurrentFrame.invalidate();
+			}
+			if ((mCurrentFrame == mReaderFrame) && (mPreviousFrame == mBrowserFrame)) {
+				// post draw update
+				BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+					// Strange bug on Onyx Poke 3/4 - page does not refreshes after browser
+					mReaderFrame.contentView.toggleScreenUpdateModeMode(true);
+					mReaderFrame.contentView.toggleScreenUpdateModeMode(false);
+				}, 500));
 			}
 			if (mCurrentFrame == mBrowserFrame) {
 				// update recent books directory
@@ -2845,7 +2868,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 
 	public void findInDictionary(String s, boolean fullScreen, View view) {
-
 		findInDictionary(s, fullScreen, view, null);
 	}
 
@@ -4096,11 +4118,15 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 
 	public void showBookInfo(BookInfo setBI, final int actionType, final FileInfo currDir,  final FileInfo origEntry) {
-		final ArrayList<BookInfoEntry> itemsAll = new ArrayList<BookInfoEntry>();
-		final ArrayList<BookInfoEntry> itemsSys = new ArrayList<BookInfoEntry>();
-		final ArrayList<BookInfoEntry> itemsFile = new ArrayList<BookInfoEntry>();
-		final ArrayList<BookInfoEntry> itemsPos = new ArrayList<BookInfoEntry>();
-		final ArrayList<BookInfoEntry> itemsBook = new ArrayList<BookInfoEntry>();
+		final ArrayList<BookInfoEntry> itemsAll = new ArrayList<>();
+		final ArrayList<BookInfoEntry> itemsSys = new ArrayList<>();
+		final ArrayList<BookInfoEntry> itemsFile = new ArrayList<>();
+		final ArrayList<BookInfoEntry> itemsPos = new ArrayList<>();
+		final ArrayList<BookInfoEntry> itemsBook = new ArrayList<>();
+		boolean readingSameBook = false;
+		if (getReaderView()!=null)
+			if (getReaderView().getBookInfo() != null)
+				readingSameBook = setBI.equals(getReaderView().getBookInfo());
 		itemsSys.add(new BookInfoEntry("section","section.system","section"));
 		itemsSys.add(new BookInfoEntry("system.version","KnownReader " + getVersion(),"text"));
 		if (getReaderView()!=null)
@@ -4158,9 +4184,10 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					sFormat = fi.format.name();
 			itemsFile.add(new BookInfoEntry("file.format", sFormat,"text"));
 			if (!StrUtils.isEmptyStr(fi.opdsLink)) {
-				itemsBook.add(new BookInfoEntry("file.opds_link",fi.opdsLink,"text"));
+				itemsFile.add(new BookInfoEntry("file.opds_link",fi.opdsLink,"text"));
 			}
 		}
+		boolean finalReadingSameBook = readingSameBook;
 		execute(new Task() {
 			Bookmark bm;
 			@Override
@@ -4168,7 +4195,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				if (getReaderView()!=null)
 					if (getReaderView().getDoc()!=null)
 						bm =  getReaderView().getDoc().getCurrentPageBookmark();
-				if (bm != null) {
+				if ((bm != null) && (finalReadingSameBook)) {
 					PositionProperties prop = getReaderView().getDoc().getPositionProps(bm.getStartPos(), true);
 					itemsPos.add(new BookInfoEntry("section","section.position","section"));
 					if (prop.pageMode != 0) {
@@ -4215,7 +4242,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					}
 				}
 				if (!StrUtils.isEmptyStr(fi.getBookdate())) itemsBook.add(new BookInfoEntry("book.date",fi.getBookdate(),"text"));
-				itemsBook.add(new BookInfoEntry("book.date",fi.getBookdate(),"text"));
 				itemsBook.add(new BookInfoEntry("book.status", Utils.formatReadingState(CoolReader.this, fi),"text"));
 				if (!StrUtils.isEmptyStr(fi.language)) {
 					itemsBook.add(new BookInfoEntry("book.language",fi.language,"text"));

@@ -68,6 +68,7 @@ public class TurengTranslate {
 				if (llc == null) {
 					String sTitle = "";
 					DicStruct dsl = new DicStruct();
+					dsl.srcText = s;
 					Lemma lemma = null;
 					Document docJsoup = Jsoup.parse(urlBuilder.build().url(), 180000); // three minutes
 					Elements resTables = docJsoup.select("table#englishResultsTable");

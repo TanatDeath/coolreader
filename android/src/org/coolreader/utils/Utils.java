@@ -1138,12 +1138,24 @@ public class Utils {
 			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 	}
 
+	public static void setDashedView(View v) {
+		if (v == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			v.setBackgroundResource(R.drawable.button_bg_dashed_border);
+	}
+
 	public static void setSolidButton(Button btn) {
 		if (btn == null) return;
 		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
 			btn.setBackgroundResource(R.drawable.button_bg_solid_border);
 		else
 			btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+	}
+
+	public static void setSolidView(View v) {
+		if (v == null) return;
+		if (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0)
+			v.setBackgroundResource(R.drawable.button_bg_solid_border);
 	}
 
 	public static void setSolidViewEink(View v) {

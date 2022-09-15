@@ -778,7 +778,7 @@ public class CloudSync {
                     iCreated++;
                 }
             }
-            rv.highlightBookmarks();
+            rv.highlightBookmarks(true);
             if (!bQuiet) cr.showToast(cr.getString(R.string.cloud_ok) + ": "+cr.getString(R.string.bookmarks_created)+" - " + iCreated);
         }
     }

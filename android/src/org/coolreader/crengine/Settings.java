@@ -295,6 +295,7 @@ public interface Settings {
 	String PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_AUTHOR = "app.browser.max.group.size.author";
 	String PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_SERIES = "app.browser.max.group.size.series";
 	String PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_GENRES = "app.browser.max.group.size.genres";
+	String PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_TAGS = "app.browser.max.group.size.tags";
 	String PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_DATES = "app.browser.max.group.size.dates";
 	String PROP_APP_FILE_BROWSER_TAP_ACTION = "app.browser.tap.action";
 	String PROP_APP_FILE_BROWSER_LONGTAP_ACTION = "app.browser.longtap.action";
@@ -302,6 +303,7 @@ public interface Settings {
 	String PROP_APP_FILE_BROWSER_SEC_GROUP_AUTHOR = "app.browser.sec.group.author";
 	String PROP_APP_FILE_BROWSER_SEC_GROUP_SERIES = "app.browser.sec.group.series";
 	String PROP_APP_FILE_BROWSER_SEC_GROUP_GENRES = "app.browser.sec.group.genres";
+	String PROP_APP_FILE_BROWSER_SEC_GROUP_TAGS = "app.browser.sec.group.tags";
 	String PROP_APP_FILE_BROWSER_SEC_GROUP_SEARCH = "app.browser.sec.group.search";
 	String PROP_APP_FILE_BROWSER_SEC_GROUP_DATES = "app.browser.sec.group.dates";
 	String PROP_APP_FILE_BROWSER_SEC_GROUP_RATING = "app.browser.sec.group.rating";
@@ -387,6 +389,7 @@ public interface Settings {
 	String PROP_APP_EINK_ONYX_EXTRA_DELAY_FULL_REFRESH   ="app.eink.onyx.extra.delay.full.refresh";
 	String PROP_APP_EINK_ONYX_FULL_SCREEN_UPDATE_METHOD   ="app.eink.onyx.full.screen.update.method";
 	String PROP_APP_EINK_ONYX_DONT_UPDATE_LIBRARY   ="app.eink.onyx.dont.update.library";
+	String PROP_APP_EINK_ONYX_SWITCH_TO_A2   ="app.eink.onyx.switch.to.a2";
 
 	// available options for PROP_APP_SELECTION_ACTION setting
 	int SELECTION_ACTION_SAME_AS_COMMON = -1;

@@ -19,20 +19,24 @@ import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
 import org.coolreader.cloud.CloudSync;
 
+import org.coolreader.cloud.litres.LitresJsons;
 import org.coolreader.crengine.BackgroundTextureInfo;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.BookInfoDialog;
+import org.coolreader.crengine.BookTag;
 import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.BookmarkEditDialog;
+import org.coolreader.crengine.CalibreCatalogEditDialog;
 import org.coolreader.crengine.CoverpageManager;
 import org.coolreader.crengine.CustomLog;
 import org.coolreader.crengine.DelayedExecutor;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.DeviceOrientation;
 import org.coolreader.crengine.ExternalDocCameDialog;
+import org.coolreader.crengine.TagsEditDialog;
 import org.coolreader.dic.DictsDlg;
 import org.coolreader.crengine.DocProperties;
 import org.coolreader.crengine.DocView;
@@ -574,6 +578,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private int nextUpdateId = 0;
 
 	public boolean selectionStarted = false;
+	public boolean needSwitchMode = false;
 
 	void updateSelection(int startX, int startY, int endX, int endY, final boolean isUpdateEnd) {
 		if (isUpdateEnd) {
@@ -942,12 +947,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private long lastTimeKey = 0L;
 
 	public void toggleScreenUpdateModeMode(boolean force) {
-		if ((force) || (selectionModeActive) || (inspectorModeActive) || (SelectionToolbarDlg.isVisibleNow))
-			mEinkScreen.setupController(EinkScreen.EinkUpdateMode.FastA2, 999, surface, true);
+		if (!mActivity.mOnyxSwitchToA2) return;
+		if ((force) || (selectionModeActive) || (inspectorModeActive) || (SelectionToolbarDlg.isVisibleNow)) {
+			mEinkScreen.setupController(EinkScreen.EinkUpdateMode.FastA2, 999, surface, true, true);
+		}
 		else {
 			updMode = EinkScreen.EinkUpdateMode.byCode(mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_MODE, EinkScreen.EinkUpdateMode.Normal.code));
 			updInterval = mActivity.settings().getInt(PROP_APP_SCREEN_UPDATE_INTERVAL, 10);
-			mEinkScreen.setupController(updMode, updInterval, surface, false);
+			mEinkScreen.setupController(updMode, updInterval, surface, false, true);
 		}
 	}
 
@@ -991,7 +998,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		drawPage();
 		if (mActivity.getmReaderFrame() != null)
 			BackgroundThread.instance().postGUI(() -> {
-				mActivity.getmReaderFrame().updateCRToolbar(((CoolReader) mActivity));
+				mActivity.getmReaderFrame().updateCRToolbar(mActivity);
 			}, 300);
 	}
 
@@ -1070,7 +1077,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				BackgroundThread.ensureGUI();
 				drawPage();
 				if (!forUserDic)
-					FindNextDlg.showDialog(fromPage, mActivity, view, pattern, caseInsensitive, false );
+					FindNextDlg.showDialog(fromPage, mActivity, view, pattern, caseInsensitive, false);
 			}
 			public void fail(Exception e) {
 				if (!forUserDic) {
@@ -1105,10 +1112,17 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	private boolean flgHighlightBookmarks = false;
 	public boolean flgHighlightUserDic = true;
+
 	public void clearSelection()
 	{
+		clearSelection(true, true);
+	}
+
+	public void clearSelection(boolean doToggleScreen, boolean doRedrawPage)
+	{
 		BackgroundThread.ensureGUI();
-		toggleScreenUpdateModeMode(false);
+		if (doToggleScreen)
+			toggleScreenUpdateModeMode(false);
 		if (mBookInfo == null || !isBookLoaded())
 			return;
 		mEngine.post(new Task() {
@@ -1118,12 +1132,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			}
 			public void done() {
 				if (surface.isShown())
-					drawPage(true);
+					if (doRedrawPage) drawPage(true);
 			}
 		});
 	}
 
-	public void highlightBookmarks() {
+	public void highlightBookmarks(boolean doRedraw) {
 		BackgroundThread.ensureGUI();
 		if (mBookInfo == null || !isBookLoaded())
 			return;
@@ -1138,7 +1152,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			}
 			public void done() {
 				if (surface.isShown())
-					drawPage(true);
+					if (doRedraw)
+						drawPage(true);
 			}
 		});
 	}
@@ -1180,7 +1195,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (removed.getId() != null) {
 				mActivity.getDB().deleteBookmark(removed);
 			}
-			highlightBookmarks();
+			highlightBookmarks(true);
 		}
 		return removed;
 	}
@@ -1189,14 +1204,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		Bookmark bm = mBookInfo.updateBookmark(bookmark);
 		if (bm != null) {
 			scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
-			highlightBookmarks();
+			highlightBookmarks(true);
 		}
 		return bm;
 	}
 
 	public void addBookmark(final Bookmark bookmark) {
 		mBookInfo.addBookmark(bookmark);
-		highlightBookmarks();
+		highlightBookmarks(true);
 		scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
 	}
 
@@ -1230,7 +1245,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						s = mActivity.getString(R.string.toast_shortcut_bookmark_is_set);
 						s.replace("$1", String.valueOf(shortcut));
 					}
-					if (!isQuick) highlightBookmarks();
+					if (!isQuick) highlightBookmarks(true);
 					mActivity.showToast(s);
 					scheduleSaveCurrentPositionBookmark(getDefSavePositionInterval());
 				}
@@ -1963,27 +1978,32 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					toggleDocumentStyles();
 				break;
 			case DCMD_EXPERIMENTAL_FEATURE:
-				Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-				mActivity.sendBroadcast(intent);
-				BackgroundThread.instance().postGUI(() -> {
-					// Go home
+				TagsEditDialog dlg1 = new TagsEditDialog(mActivity, null, true, null);
+				dlg1.show();
+
+				if (0==1) {
+					Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+					mActivity.sendBroadcast(intent);
+					BackgroundThread.instance().postGUI(() -> {
+						// Go home
 //					mActivity.startActivity(
 //							new Intent(Intent.ACTION_MAIN)
 //									.addCategory(Intent.CATEGORY_HOME)
 //									.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 //									.setComponent(new ComponentName("com.onyx", "com.onyx.StartupActivity"))
 //					);
-					// Go back
+						// Go back
 //					mActivity.sendBroadcast(
 //							new Intent("onyx.android.intent.send.key.event").putExtra("key_code", 4)
 //					);
-					// recent
-					//mActivity.sendBroadcast(new Intent("toggle_recent_screen"));
-					//refresh screen
-					//mActivity.sendBroadcast(new Intent("onyx.android.intent.action.REFRESH_SCREEN"));
-					//screenshot
-					mActivity.sendBroadcast(new Intent("onyx.android.intent.screenshot"));
-				}, 100);
+						// recent
+						//mActivity.sendBroadcast(new Intent("toggle_recent_screen"));
+						//refresh screen
+						//mActivity.sendBroadcast(new Intent("onyx.android.intent.action.REFRESH_SCREEN"));
+						//screenshot
+						mActivity.sendBroadcast(new Intent("onyx.android.intent.screenshot"));
+					}, 100);
+				}
 				break;
 			case DCMD_SHOW_HOME_SCREEN:
 				mActivity.showHomeScreen();
@@ -2645,6 +2665,32 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			case DCMD_EINK_ONYX_SCREENSHOT:
 				mActivity.sendBroadcast(new Intent("onyx.android.intent.screenshot"));
 				break;
+			case DCMD_ADD_BOOK_TAGS:
+				FileInfo fiTED = mActivity.getReaderView().getBookInfo().getFileInfo();
+				TagsEditDialog dlgTagsEditDialog = new TagsEditDialog(mActivity, fiTED, true, new TagsEditDialog.TagsEditDialogCloseCallback() {
+					@Override
+					public void onOk() {
+						mActivity.waitForCRDBService(() ->
+							mActivity.getDB().loadTags(fiTED, tags -> {
+								String stags = "";
+								for (BookTag bookTag : tags) {
+									if (bookTag.isSelected)
+										stags = stags + '|' + bookTag.name;
+								}
+								if (!StrUtils.isEmptyStr(stags))
+									fiTED.setTags(stags.substring(1));
+								else
+									fiTED.setTags("");
+							}));
+					}
+
+					@Override
+					public void onCancel() {
+
+					}
+				});
+				dlgTagsEditDialog.show();
+				break;
 			default:
 				// do nothing
 				break;
@@ -3149,12 +3195,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					|| PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_AUTHOR.equals(key)
 					|| PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_SERIES.equals(key)
 					|| PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_GENRES.equals(key)
+					|| PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_TAGS.equals(key)
 					|| PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_DATES.equals(key)
 
 					|| PROP_APP_FILE_BROWSER_SEC_GROUP_COMMON.equals(key)
 					|| PROP_APP_FILE_BROWSER_SEC_GROUP_AUTHOR.equals(key)
 					|| PROP_APP_FILE_BROWSER_SEC_GROUP_SERIES.equals(key)
 					|| PROP_APP_FILE_BROWSER_SEC_GROUP_GENRES.equals(key)
+					|| PROP_APP_FILE_BROWSER_SEC_GROUP_TAGS.equals(key)
 					|| PROP_APP_FILE_BROWSER_SEC_GROUP_RATING.equals(key)
 					|| PROP_APP_FILE_BROWSER_SEC_GROUP_STATE.equals(key)
 					|| PROP_APP_FILE_BROWSER_SEC_GROUP_DATES.equals(key)
@@ -3292,6 +3340,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			mActivity.showReader();
 			if (null != doneHandler)
 				doneHandler.run();
+			lastCachedBitmap = null;
 			drawPage();
 			return false;
 		}
@@ -4841,10 +4890,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	{
 		drawPage(null, false);
 	}
+
 	private void drawPage(boolean isPartially)
 	{
 		drawPage(null, isPartially);
 	}
+
 	void drawPage(Runnable doneHandler, boolean isPartially)
 	{
 		if (!mInitialized)
@@ -4883,7 +4934,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		if (-1 == savedEinkUpdateInterval) {
 			savedEinkUpdateInterval = mEinkScreen.getUpdateInterval();
 			// current e-ink screen update mode without full refresh
-			mEinkScreen.setupController(mEinkScreen.getUpdateMode(), 0, surface, false);
+			mEinkScreen.setupController(mEinkScreen.getUpdateMode(), 0, surface, false, false);
 		}
 		einkModeClients.add(id);
 	}
@@ -4892,7 +4943,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		einkModeClients.remove(id);
 		if (einkModeClients.isEmpty()) {
 			// restore e-ink full screen refresh period
-			mEinkScreen.setupController(mEinkScreen.getUpdateMode(), savedEinkUpdateInterval, surface, false);
+			mEinkScreen.setupController(mEinkScreen.getUpdateMode(), savedEinkUpdateInterval, surface, false, false);
 			savedEinkUpdateInterval = -1;
 		}
 	}
@@ -5318,13 +5369,13 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}
 	}
 
-	void restorePositionBackground(String pos) {
+	void restorePositionBackground(String pos, boolean doRedraw) {
 		BackgroundThread.ensureBackground();
 		if (pos != null) {
 			BackgroundThread.ensureBackground();
 			doc.goToPosition(pos, false);
 			preparePageImage(0);
-			drawPage();
+			if (doRedraw) drawPage();
 			updateCurrentPositionStatus();
 			checkOpenBookStyles(false, true);
 			if (doc.getCurPage()>2) {

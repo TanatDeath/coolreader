@@ -85,9 +85,9 @@ extern const int gDOMVersionCurrent = DOM_VERSION_CURRENT;
 
 /// change in case of incompatible changes in swap/cache file format to avoid using incompatible swap file
 // increment to force complete reload/reparsing of old file
-#define CACHE_FILE_FORMAT_VERSION "3.12.84"
+#define CACHE_FILE_FORMAT_VERSION "3.12.85"
 /// increment following value to force re-formatting of old book after load
-#define FORMATTING_VERSION_ID 0x002B
+#define FORMATTING_VERSION_ID 0x002E
 
 #ifndef DOC_DATA_COMPRESSION_LEVEL
 /// data compression level (0=no compression, 1=fast compressions, 3=normal compression)
@@ -7417,7 +7417,13 @@ void ldomNode::initNodeRendMethod()
                         // We'll also not start a wrap with it.
                     }
                 }
-                if ( last_to_wrap >= 0 && (eoc || (elemId != el_rt && elemId != el_rtc && elemId != el_rp && elemId != -2) ) ) {
+                // A non-empty text node (elemId==-1) would trigger a wrap of what's before. If it happens
+                // to be the last child, keep it included in the last wrap to not have some dangling text
+                // (some publishers include 〘 and 〙 around a <rt> so that, when ruby is not supported,
+                // these are displayed inline and wrap the annotation; we'd rather have them not shown by
+                // having them wrapped and swallowed/hidden among table-like elements).
+                if ( last_to_wrap >= 0 && (eoc || (elemId != el_rt && elemId != el_rtc && elemId != el_rp &&
+                                                   elemId != -2 && !(elemId==-1 && i==len-1)) ) ) {
                     if ( first_to_wrap < 0 )
                         first_to_wrap = 0;
                     ldomNode * rbox1 = boxWrapChildren(first_to_wrap, last_to_wrap, el_rubyBox);
@@ -7443,6 +7449,9 @@ void ldomNode::initNodeRendMethod()
                 if ( elemId == -1 ) { // isText(), non empty
                     if ( first_to_wrap < 0 ) {
                         first_to_wrap = i;
+                    }
+                    if ( i == len-1) { // last child: include it in the wrap (see above)
+                        last_to_wrap = i;
                     }
                 }
                 else if ( elemId == -2 ) { // isText(), empty

@@ -40,15 +40,15 @@ public class OnyxapiTranslate {
 					if (mDcb == null) {
 						boolean isEmpty = dsl.getCount() == 0;
 						if (!isEmpty) {
-							if ((dsl.getCount() == 1) && (dsl.lemmas.size() == 1))
+							if (dsl.lemmas.size() == 1)
 								if (StrUtils.isEmptyStr(dsl.lemmas.get(0).lemmaText))
 									isEmpty = true;
 						}
 						if (isEmpty) {
-							cr.showDicToast(mKeyword, sTitle, DicToastView.IS_ONYXAPI, "Offline dic", mCurDict, mFullScreen);
+							cr.showDicToast(mKeyword, sTitle, DicToastView.IS_ONYXAPI, "OnyxAPI dic", mCurDict, mFullScreen);
 						} else {
 							Dictionaries.saveToDicSearchHistory(cr, mKeyword, dsl.getFirstTranslation(), mCurDict, dsl);
-							cr.showDicToastExt(mKeyword, sTitle, DicToastView.IS_ONYXAPI, "Offline dic",
+							cr.showDicToastExt(mKeyword, sTitle, DicToastView.IS_ONYXAPI, "OnyxAPI dic",
 									mCurDict, dsl, mFullScreen);
 						}
 					} else {

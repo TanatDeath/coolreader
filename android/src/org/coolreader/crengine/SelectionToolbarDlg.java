@@ -196,6 +196,7 @@ public class SelectionToolbarDlg {
 		restoreReaderMode();
 		isVisibleNow = false;
 		mReaderView.toggleScreenUpdateModeMode(false);
+		mActivity.updateUserDicWords();
 		mWindow.dismiss();
 	}
 
@@ -955,7 +956,10 @@ public class SelectionToolbarDlg {
 			restoreReaderMode();
 			isVisibleNow = false;
 			mReaderView.toggleScreenUpdateModeMode(false);
-			mReaderView.clearSelection();
+			if (mActivity.getmReaderFrame() != null)
+				mActivity.updateUserDicWords();
+			else
+				mReaderView.clearSelection();
 		});
 
 		mWindow.setBackgroundDrawable(new BitmapDrawable());

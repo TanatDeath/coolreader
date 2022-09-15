@@ -132,6 +132,7 @@ public class DicArticleDlg extends BaseDialog {
 				mDicStruct.lemmas.add(l);
 			mDicStruct.elementsL = toast.dicStruct.elementsL;
 			mDicStruct.elementsR = toast.dicStruct.elementsR;
+			mDicStruct.suggs = toast.dicStruct.suggs;
 		}
 
 		mBody = mDialogView.findViewById(R.id.article_list);

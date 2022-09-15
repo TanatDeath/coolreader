@@ -34,7 +34,9 @@ my %ic_actions_list=(
         'icons8_circle.svg' => 'icons8_circle.png',
         'icons8_square.svg' => 'icons8_square.png',
         'icons8_screenshot.svg' => 'icons8_screenshot.png',
-        'icons8_slider.svg' => 'icons8_slider.png'
+        'icons8_slider.svg' => 'icons8_slider.png',
+        'icons8_tag.svg' => 'icons8_tag.png',
+        'icons8_save.svg' => 'icons8_save.png'
 );
 
 my %ic_menu_list=(

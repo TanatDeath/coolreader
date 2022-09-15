@@ -417,6 +417,7 @@
     <string name="mi_book_browser_max_group_size_author">Максимальный размер группы - авторы</string>
     <string name="mi_book_browser_max_group_size_series">Максимальный размер группы - серии</string>
     <string name="mi_book_browser_max_group_size_genres">Максимальный размер группы - жанры</string>
+    <string name="mi_book_browser_max_group_size_tags">Максимальный размер группы - метки</string>
     <string name="mi_book_browser_max_group_size_dates">Максимальный размер группы - даты</string>
     <string name="mi_book_browser_max_group_size_add_info_sec">Если число элементов будет больше - они будут группироваться в подпапки. Если 0 - будет использоваться \'общая\' настройка</string>
     <string name="options_page_animation_slide_2_pages">Сдвиг (обе страницы)</string>
@@ -503,6 +504,7 @@
     <string name="options_controls_bonce_protection_333">333 мс (3 Гц)</string>
     <string name="mi_bookmark_send">Отправить</string>
     <string name="folder_name_books_by_genre">Жанры</string>
+    <string name="folder_name_books_by_tag">Метки</string>
     <string name="folder_name_books_by_author">Авторы</string>
     <string name="same_as_common">Совпадает с общей настройкой</string>
     <string name="folder_name_books_by_date">По дате</string>
@@ -1265,7 +1267,7 @@
     <string name="cloud_sync_variant2">Через файловую систему</string>
     <string name="cloud_sync_variant3">Через Яндекс.Диск</string>
     <string name="cloud_sync_variant1_v">Облачная синхронизация отключена</string>
-    <string name="cloud_sync_variant2_v">Синхронизация будет производиться через локальную файловую систему - необходимо настроить стороннюю утилиту для синхронизации папки cr3e/cloudsync между устройствами</string>
+    <string name="cloud_sync_variant2_v">Синхронизация будет производиться через локальную файловую систему - необходимо настроить стороннюю утилиту для синхронизации папки KnownReader/cloudsync (cr3e/cloudsync) между устройствами</string>
     <string name="cloud_sync_variant3_v">Синхронизация будет производиться через Яндекс.Диск (используется папка KnownReader)</string>
     <string name="switch_profile_note">Переключение профилей доступно только при открытой книге</string>
     <string name="settings_info">Глобальные настройки выделены курсивом (остальные - зависят от выбранного профиля)</string>
@@ -1370,6 +1372,7 @@
     <string name="sec_group_author">Автор</string>
     <string name="sec_group_series">Серии</string>
     <string name="sec_group_genres">Жанры</string>
+    <string name="sec_group_tags">Метки</string>
     <string name="sec_group_rating">Рейтинг</string>
     <string name="sec_group_state">Статус</string>
     <string name="sec_group_dates">Даты</string>
@@ -1396,6 +1399,7 @@
     <string name="context_menu_author_folder">Авторы</string>
     <string name="context_menu_series_folder">Серии</string>
     <string name="context_menu_genres_folder">Жанры</string>
+    <string name="context_menu_tags_folder">Метки</string>
     <string name="context_menu_bookdate_folder">Дата книги</string>
     <string name="context_menu_docdate_folder">Дата документа</string>
     <string name="context_menu_publyear_folder">Год публикации</string>
@@ -1583,7 +1587,7 @@
     <string name="library_maint_remove_non_fav_add_info">Сами файлы НЕ будут удалены с вашего устройства, будет очищена только информация о них во внутренней базе данных KnownReader. Вы можете всегда пересканировать библиотеку впоследствии (Уточнение: но закладки (если создавались в книгах) по удаляемым элементам будут удалены навсегда).</string>
     <string name="library_maint_done_need_restart">Операция выполнена. Рекомендуется перезапустить приложение</string>
     <string name="library_maint_show_statistics">Показать статистику</string>
-    <string name="library_maint_may_need_bk">Перед операциями с базой данных, будет не лишним создать резервную копию папки cr3e (в корне внутреннего хранилища) - так вы сможете откатить изменения, если что то пойдет не так</string>
+    <string name="library_maint_may_need_bk">Перед операциями с базой данных, будет не лишним создать резервную копию папки KnownReader (cr3e) (в корне внутреннего хранилища) - так вы сможете откатить изменения, если что то пойдет не так</string>
     <string name="new_books">Новинки</string>
     <string name="popular_books">Популярные</string>
     <string name="network_op">Загрузка данных...</string>
@@ -1662,7 +1666,7 @@
     <string name="calibre_series">Серии (calibre)</string>
     <string name="calibre_rating">По рейтингу (calibre)</string>
     <string name="calibre_publish_date">Дата публикации (calibre)</string>
-    <string name="calibre_tags">Тэги (calibre)</string>
+    <string name="calibre_tags">Метки (calibre)</string>
     <string name="books_l">книг:</string>
     <string name="folders_l">папок:</string>
     <string name="hyph_rend_options">Переносы, рендеринг, форматирование (html, epub, txt), мультиязычность</string>
@@ -1944,6 +1948,7 @@
     <string name="eink_full_update_method3">Метод 3 (GCC)</string>
     <string name="eink_full_update_method4">Метод 4 (EPDController)</string>
     <string name="eink_full_update_method5">Метод 5 (DU_QUALITY)</string>
+    <string name="eink_full_update_method6">Метод 6 (GC)</string>
     <string name="exp_feature">Экспериментальная функция</string>
     <string name="exp_feature_short">Экспериментальное</string>
     <string name="exp_feature_add_info">Эта функция - то, что в настоящий момент разрабатывается. Если вы решили ее использовать - вы точно знаете что делать</string>
@@ -1962,6 +1967,7 @@
     <string name="root_directory">Корневая папка</string>
     <string name="saf_otg_explanation">Сейчас откроется системный диалог файловой системы Android (ограничения безопасности). Выберите USB устройство из списка (слева). Продолжить?</string>
     <string name="open">Открыть</string>
+    <string name="follow">Перейти</string>
     <string name="read_calendar_dlg">Календарь чтения</string>
     <string name="book_styles">Стили</string>
     <string name="book_info">О книге</string>
@@ -1978,6 +1984,7 @@
     <string name="show_group_books_by_author">Группировка - автор</string>
     <string name="show_group_books_by_series">Группировка - серии</string>
     <string name="show_group_books_by_genre">Группировка - жанры</string>
+    <string name="show_group_books_by_tag">Группировка - метки</string>
     <string name="show_group_books_by_bookdate">Группировка - дата книги</string>
     <string name="show_group_books_by_docdate">Группировка - дата документа</string>
     <string name="show_group_books_by_publyear">Группировка - год публикации</string>
@@ -1988,10 +1995,25 @@
     <string name="no_value">[Нет значения]</string>
     <string name="dont_update_onyx_library">Не обновлять данные (читаемая книга, процент) в библиотеке Onyx</string>
     <string name="dont_update_onyx_library_add_info">KR не будет пытаться обновить информацию о книге в системной библиотеке Onyx</string>
+    <string name="switch_to_a2">Переключаться в режим A2 в режиме выделения</string>
+    <string name="switch_to_a2_add_info">Позволяет избежать лишних перерисовок экрана в режиме выделения (только для Onyx)</string>
     <string name="action_eink_onyx_back">Назад (система)</string>
     <string name="action_eink_onyx_home">Домой (система)</string>
     <string name="action_eink_onyx_recent">Недавние приложения</string>
     <string name="action_eink_onyx_repaint_screen">Перерисовка экрана</string>
     <string name="action_eink_onyx_screenshot">Скриншот</string>
+    <string name="tags_edit_dialog">Диалог редактирования меток</string>
+    <string name="dlg_button_add_tag">Добавить метку</string>
+    <string name="dlg_button_tag_comment">Чтобы добавить тэг(и) к книге - выберите их (ниже) и нажмите Ок (кнопка-галочка сверху справа)</string>
+    <string name="dlg_button_rename_tag">Переименовать метку</string>
+    <string name="dlg_button_delete_tag">Удалить метку</string>
+    <string name="save">Сохранить</string>
+    <string name="rename_tag">Переименовать метку? Метка также будет переименована у всех книг, помеченных ей</string>
+    <string name="delete_tag">Удалить метку? Метка также будет удалена у всех книг, помеченных ей</string>
+    <string name="add_book_tags">Добавить метки к книге</string>
+    <string name="cannot_add_book_tags">Не удается добавить метки к книге</string>
+    <string name="edit_tags">Редактировать метки...</string>
+    <string name="action_in_progress">Действие в процессе выполнения...</string>
+    <string name="action_finished">Действие завершено</string>
 </resources>
 

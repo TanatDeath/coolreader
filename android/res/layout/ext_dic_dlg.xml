@@ -58,6 +58,15 @@
 				android:scrollbarAlwaysDrawVerticalTrack="true"
 				android:text="" />
 	</LinearLayout>
+	<LinearLayout
+			android:id="@+id/upper_row_ll_recent"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center_vertical|left"
+			android:minHeight="?android:attr/listPreferredItemHeightSmall"
+			android:maxHeight="?android:attr/listPreferredItemHeightSmall"
+			android:orientation="horizontal">
+	</LinearLayout>
 	<RelativeLayout
 			android:id="@+id/tl_term_row"
 			android:layout_width="match_parent"

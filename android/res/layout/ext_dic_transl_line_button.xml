@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/page_item_body"
+	android:orientation="horizontal"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:baselineAligned="false"
+	android:layout_marginTop="3dip"
+	android:layout_marginBottom="3dip"
+	android:layout_marginLeft="2dip"
+	android:layout_marginRight="2dip"
+	>
+
+	<RelativeLayout
+			android:layout_height="wrap_content"
+			android:layout_width="match_parent">
+
+	<TextView android:id="@+id/ext_dic_transl_line"
+				style="@style/TextAppearance.Small"
+				android:text=""
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:singleLine="false"
+				android:ellipsize="end"
+				android:textColor="?attr/colorIcon"
+				android:textAppearance="?android:attr/textAppearanceMedium"
+				android:textStyle=""
+				android:maxLines="5"
+				android:layout_marginLeft="15dp"
+				android:layout_gravity="left" />
+		<Button
+				android:id="@+id/dic_follow"
+				style="@style/TextAppearance.Small"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_margin="2dip"
+				android:singleLine="true"
+				android:layout_alignParentRight="true"
+				android:layout_alignParentTop="true"
+				android:textColor="?attr/colorIcon"
+				android:text="@string/follow"
+				android:background="@null"
+				android:focusable="false"
+				android:focusableInTouchMode="false"
+				/>
+
+	</RelativeLayout>
+</LinearLayout>

@@ -379,6 +379,7 @@
         <item name="attr_icons8_happy">@drawable/icons8_happy</item>
         <item name="attr_icons8_minus">@drawable/icons8_minus</item>
         <item name="attr_icons8_save_ell">@drawable/icons8_save_ell</item>
+        <item name="attr_icons8_save">@drawable/icons8_save</item>
         <item name="attr_icons8_autoflip_page">@drawable/icons8_autoflip_page</item>
         <item name="attr_icons8_autoflip_page_show_speed">@drawable/icons8_autoflip_page_show_speed</item>
         <item name="attr_icons8_ok_from_clipboard">@drawable/icons8_ok_from_clipboard</item>
@@ -454,6 +455,7 @@
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
+        <item name="attr_icons8_tag">@drawable/icons8_tag</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
         <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
         <item name="attr_icons8_night_vision">@drawable/icons8_night_vision</item>
@@ -824,6 +826,7 @@
         <item name="attr_icons8_happy">@drawable/icons8_happy</item>
         <item name="attr_icons8_minus">@drawable/icons8_minus</item>
         <item name="attr_icons8_save_ell">@drawable/icons8_save_ell</item>
+        <item name="attr_icons8_save">@drawable/icons8_save</item>
         <item name="attr_icons8_autoflip_page">@drawable/icons8_autoflip_page</item>
         <item name="attr_icons8_autoflip_page_show_speed">@drawable/icons8_autoflip_page_show_speed</item>
         <item name="attr_icons8_ok_from_clipboard">@drawable/icons8_ok_from_clipboard</item>
@@ -899,6 +902,7 @@
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
+        <item name="attr_icons8_tag">@drawable/icons8_tag</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
         <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
         <item name="attr_icons8_night_vision">@drawable/icons8_night_vision</item>
@@ -1251,6 +1255,7 @@
         <item name="attr_icons8_happy">@drawable/icons8_happy</item>
         <item name="attr_icons8_minus">@drawable/icons8_minus</item>
         <item name="attr_icons8_save_ell">@drawable/icons8_save_ell</item>
+        <item name="attr_icons8_save">@drawable/icons8_save</item>
         <item name="attr_icons8_autoflip_page">@drawable/icons8_autoflip_page</item>
         <item name="attr_icons8_autoflip_page_show_speed">@drawable/icons8_autoflip_page_show_speed</item>
         <item name="attr_icons8_ok_from_clipboard">@drawable/icons8_ok_from_clipboard</item>
@@ -1326,6 +1331,7 @@
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
+        <item name="attr_icons8_tag">@drawable/icons8_tag</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
         <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
         <item name="attr_icons8_night_vision">@drawable/icons8_night_vision</item>
@@ -1612,6 +1618,7 @@
         <item name="attr_icons8_happy">@drawable/icons8_happy</item>
         <item name="attr_icons8_minus">@drawable/icons8_minus</item>
         <item name="attr_icons8_save_ell">@drawable/icons8_save_ell</item>
+        <item name="attr_icons8_save">@drawable/icons8_save</item>
         <item name="attr_icons8_autoflip_page">@drawable/icons8_autoflip_page</item>
         <item name="attr_icons8_autoflip_page_show_speed">@drawable/icons8_autoflip_page_show_speed</item>
         <item name="attr_icons8_ok_from_clipboard">@drawable/icons8_ok_from_clipboard</item>
@@ -1687,6 +1694,7 @@
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
+        <item name="attr_icons8_tag">@drawable/icons8_tag</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
         <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
         <item name="attr_icons8_night_vision">@drawable/icons8_night_vision</item>
@@ -1991,6 +1999,7 @@
         <item name="attr_icons8_happy">@drawable/icons8_happy</item>
         <item name="attr_icons8_minus">@drawable/icons8_minus</item>
         <item name="attr_icons8_save_ell">@drawable/icons8_save_ell</item>
+        <item name="attr_icons8_save">@drawable/icons8_save</item>
         <item name="attr_icons8_autoflip_page">@drawable/icons8_autoflip_page</item>
         <item name="attr_icons8_autoflip_page_show_speed">@drawable/icons8_autoflip_page_show_speed</item>
         <item name="attr_icons8_ok_from_clipboard">@drawable/icons8_ok_from_clipboard</item>
@@ -2066,6 +2075,7 @@
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
+        <item name="attr_icons8_tag">@drawable/icons8_tag</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
         <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
         <item name="attr_icons8_night_vision">@drawable/icons8_night_vision</item>
@@ -2437,6 +2447,7 @@
         <item name="attr_icons8_happy">@drawable/icons8_happy</item>
         <item name="attr_icons8_minus">@drawable/icons8_minus</item>
         <item name="attr_icons8_save_ell">@drawable/icons8_save_ell</item>
+        <item name="attr_icons8_save">@drawable/icons8_save</item>
         <item name="attr_icons8_autoflip_page">@drawable/icons8_autoflip_page</item>
         <item name="attr_icons8_autoflip_page_show_speed">@drawable/icons8_autoflip_page_show_speed</item>
         <item name="attr_icons8_ok_from_clipboard">@drawable/icons8_ok_from_clipboard</item>
@@ -2508,6 +2519,7 @@
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
+        <item name="attr_icons8_tag">@drawable/icons8_tag</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
         <item name="attr_icons8_rounded_corners_margin2">@drawable/icons8_rounded_corners_margin2</item>
         <item name="attr_icons8_night_vision">@drawable/icons8_night_vision</item>

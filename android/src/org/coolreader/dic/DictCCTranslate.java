@@ -55,6 +55,7 @@ public class DictCCTranslate {
 				if (llc == null) {
 					String sTitle = "";
 					DicStruct dsl = new DicStruct();
+					dsl.srcText = s;
 					Lemma lemma = null;
 					Document docJsoup = Jsoup.parse(urlBuilder.build().url(), 180000); // three minutes
 					if (StrUtils.getNonEmptyStr(docJsoup.text(), true).contains("language pair is not supported")) {

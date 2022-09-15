@@ -30,7 +30,7 @@ public class ReaderViewLayout extends ViewGroup implements Settings {
 		public static final Logger log = L.create("rvl");
 
 		private CoolReader activity;
-		private ReaderView contentView;
+		public ReaderView contentView;
 		private StatusBar statusView;
 		public UserDicPanel userDicView;
 		private CRToolBar toolbarView;

@@ -439,6 +439,7 @@
     <string name="mi_book_browser_max_group_size_author">Maximum group size - authors</string>
     <string name="mi_book_browser_max_group_size_series">Maximum group size - series</string>
     <string name="mi_book_browser_max_group_size_genres">Maximum group size - genres</string>
+    <string name="mi_book_browser_max_group_size_tags">Maximum group size - tags</string>
     <string name="mi_book_browser_max_group_size_dates">Maximum group size - dates</string>
     <string name="mi_book_browser_max_group_size_add_info_sec">If the number is greater - items will be grouped into subfolders. If 0 - \'common\' setting value will be used</string>
     <string name="options_page_animation_slide_2_pages">Slide (2 pages)</string>
@@ -527,6 +528,7 @@
     <string name="same_as_common">Same as common</string>
     <string name="folder_name_books_by_author">Authors</string>
     <string name="folder_name_books_by_genre">Genres</string>
+    <string name="folder_name_books_by_tag">Tags</string>
     <string name="folder_name_books_by_date">By date</string>
     <string name="folder_name_books_by_rating">By Rating</string>
     <string name="folder_name_books_by_state">By state</string>
@@ -1292,7 +1294,7 @@
     <string name="cloud_sync_variant2">Via filesystem</string>
     <string name="cloud_sync_variant3">Via Yandex.Disk</string>
     <string name="cloud_sync_variant1_v">Cloud syncronization is disabled</string>
-    <string name="cloud_sync_variant2_v">Syncronization will be done via local filesystem - you need to use external tool to sync cr3e/cloudsync folder across devices</string>
+    <string name="cloud_sync_variant2_v">Syncronization will be done via local filesystem - you need to use external tool to sync KnownReader/cloudsync (cr3e/cloudsync) folder across devices</string>
     <string name="cloud_sync_variant3_v">Syncronization will be done via Yandex.Disk (folder KnownReader is used)</string>
     <string name="switch_profile_note">Profile switching is enabled only when book is open</string>
     <string name="settings_info">Global settings are italic (other - depends on profile)</string>
@@ -1404,6 +1406,7 @@
     <string name="sec_group_author">Author</string>
     <string name="sec_group_series">Series</string>
     <string name="sec_group_genres">Genres</string>
+    <string name="sec_group_tags">Tags</string>
     <string name="sec_group_rating">Rating</string>
     <string name="sec_group_state">State</string>
     <string name="sec_group_dates">Dates</string>
@@ -1430,6 +1433,7 @@
     <string name="context_menu_author_folder">Authors folder</string>
     <string name="context_menu_series_folder">Series folder</string>
     <string name="context_menu_genres_folder">Genres folder</string>
+    <string name="context_menu_tags_folder">Tags folder</string>
     <string name="context_menu_bookdate_folder">Bookdate folder</string>
     <string name="context_menu_docdate_folder">Docdate folder</string>
     <string name="context_menu_publyear_folder">Publication year folder</string>
@@ -1625,7 +1629,7 @@
     <string name="library_maint_remove_non_fav_add_info">Real files will NOT be deleted from your device, there will be removed only information in the internal KnownReader database. You can easily rescan library later (NB: bookmarks of these items will also be removed).</string>
     <string name="library_maint_done_need_restart">Operation performed. It is recommended to restart app</string>
     <string name="library_maint_show_statistics">Show statistics</string>
-    <string name="library_maint_may_need_bk">It can be useful to make backup of cr3e folder (in the Internal storage) before manipulations with database - this way you could rollback database to previous state</string>
+    <string name="library_maint_may_need_bk">It can be useful to make backup of KnownReader (cr3e) folder (in the Internal storage) before manipulations with database - this way you could rollback database to previous state</string>
     <string name="new_books">New books</string>
     <string name="popular_books">Popular books</string>
     <string name="network_op">Data is loading...</string>
@@ -1984,6 +1988,7 @@
     <string name="eink_full_update_method3">Method 3 (GCC)</string>
     <string name="eink_full_update_method4">Method 4 (EPDController)</string>
     <string name="eink_full_update_method5">Method 5 (DU_QUALITY)</string>
+    <string name="eink_full_update_method6">Method 6 (GC)</string>
     <string name="exp_feature">Experimental feature</string>
     <string name="exp_feature_short">Experimental</string>
     <string name="exp_feature_add_info">This feature is being developed right now - use it only if you are active tester</string>
@@ -2002,6 +2007,7 @@
     <string name="root_directory">Root directory</string>
     <string name="saf_otg_explanation">You\'ll now go to Android\'s filesystem for security reasons. Please select the USB device from the list on the left. Proceed?</string>
     <string name="open">Open</string>
+    <string name="follow">Follow</string>
     <string name="read_calendar_dlg">Reading calendar</string>
     <string name="book_styles">Styles</string>
     <string name="book_info">Info</string>
@@ -2018,6 +2024,7 @@
     <string name="show_group_books_by_author">Group by authors</string>
     <string name="show_group_books_by_series">Group by series</string>
     <string name="show_group_books_by_genre">Group by genres</string>
+    <string name="show_group_books_by_tag">Group by tags</string>
     <string name="show_group_books_by_bookdate">Group by book date</string>
     <string name="show_group_books_by_docdate">Group by doc date</string>
     <string name="show_group_books_by_publyear">Group by publication year</string>
@@ -2028,9 +2035,24 @@
     <string name="no_value">[No value]</string>
     <string name="dont_update_onyx_library">Do not update data (reading book, percent) in the Onyx library</string>
     <string name="dont_update_onyx_library_add_info">KR will not attempt to update book info in Onyx system library</string>
+    <string name="switch_to_a2">Switch to A2 mode in selection mode</string>
+    <string name="switch_to_a2_add_info">Allow to avoid screen repaint when you select text (Onyx only)</string>
     <string name="action_eink_onyx_back">Back (system)</string>
     <string name="action_eink_onyx_home">Home (system)</string>
     <string name="action_eink_onyx_recent">Recent apps</string>
     <string name="action_eink_onyx_repaint_screen">Screen repaint</string>
     <string name="action_eink_onyx_screenshot">Screenshot</string>
+    <string name="tags_edit_dialog">Tags edit dialog</string>
+    <string name="dlg_button_add_tag">Add tag</string>
+    <string name="dlg_button_tag_comment">In order to add tag(s) to the book - select tags (below) and press Ok (top-right check button)</string>
+    <string name="dlg_button_rename_tag">Rename tag</string>
+    <string name="dlg_button_delete_tag">Delete tag</string>
+    <string name="save">Save</string>
+    <string name="rename_tag">Rename tag? This tag will be also renamed in all books tagged by it</string>
+    <string name="delete_tag">Delete tag? This tag will be also removed from all books tagged by it</string>
+    <string name="add_book_tags">Add tags to book</string>
+    <string name="cannot_add_book_tags">Cannot add tags to book</string>
+    <string name="edit_tags">Edit tags...</string>
+    <string name="action_in_progress">Action in progress...</string>
+    <string name="action_finished">Action finished</string>
 </resources>

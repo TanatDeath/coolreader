@@ -3103,6 +3103,16 @@ public:
                                 // src text
                                 *((lChar32 *) (m_srcs[wstart]->t.text + m_charindex[wstart])) = U' ';
                             }
+                            else if (m_srcs[wstart]->flags & LTEXT_SRC_IS_OBJECT && m_srcs[wstart]->o.objflags & LTEXT_OBJECT_IS_FLOAT) {
+                                // But not if what's on this line is a float (the code below don't expect floats)
+                                // Keep the empty line with the strut height.
+                                continue;
+                                // Note: this check and "continue" could be moved around there, with different
+                                // results. Didn't manage to get resulsts as Firefox in edgy constructs with
+                                // only <br/> and floats (Firefox may have a blank line, while we may give the
+                                // block a 0-height). A bit non-obvious how this should be handled (and possibly
+                                // also above when "nothing but floats")...
+                            }
                         }
                         else { // Last or single para with no word
                             // A line has already been added: just make
@@ -4207,7 +4217,7 @@ public:
                 if ( !grabbedExceedingSpace &&
                         m_pbuffer->min_space_condensing_percent != 100 &&
                         i < m_length-1 &&
-                        ( m_flags[i] & LCHAR_IS_SPACE ) &&
+                        ( m_flags[i] & LCHAR_IS_SPACE ) && !( m_flags[i] & LCHAR_LOCKED_SPACING ) &&
                         !(m_flags[i+1] & LCHAR_IS_SPACE) ) {
                     // Each space not followed by a space is candidate for space condensing
                     int dw = getMaxCondensedSpaceTruncation(i);

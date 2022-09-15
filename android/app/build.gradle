@@ -11,8 +11,8 @@ android {
         multiDexEnabled true
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
-        versionCode 202207051
-        versionName "2022.07.05.1"
+        versionCode 202209091
+        versionName "2022.09.09.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -322,7 +322,7 @@ dependencies {
     // directory chooser
     implementation 'com.github.guardian:Option:-SNAPSHOT'
     implementation 'net.rdrei.android.dirchooser:library:3.2@aar'
-    implementation 'org.jsoup:jsoup:1.14.3'
+    implementation 'org.jsoup:jsoup:1.15.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.annotation:annotation:1.0.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
@@ -341,5 +341,5 @@ dependencies {
     //implementation 'com.onyx.android.sdk:onyxsdk-device:1.1.8'
     implementation 'com.onyx.android.sdk:onyxsdk-device:1.2.9'
     onyxImplementation 'com.onyx.android.sdk:onyxsdk-readerutils:0.0.10'
-    onyxImplementation 'com.onyx.android.sdk:onyxsdk-base:1.6.21'
+    onyxImplementation 'com.onyx.android.sdk:onyxsdk-base:1.6.24'
 }

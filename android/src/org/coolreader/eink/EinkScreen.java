@@ -32,7 +32,7 @@ public interface EinkScreen {
 		public final int code;
 	}
 
-	void setupController(EinkUpdateMode mode, int updateInterval, View view, boolean noRegal);
+	void setupController(EinkUpdateMode mode, int updateInterval, View view, boolean noRegal, boolean noResetCount);
 
 	void setNeedBypass(int needBypass);
 

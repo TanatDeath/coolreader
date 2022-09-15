@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+			xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_marginRight="?android:attr/scrollbarSize"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -403,6 +404,20 @@
 		    </LinearLayout>
 	        	        
    	    </LinearLayout>
+
+		<org.coolreader.layouts.FlowLayout
+				xmlns:android="http://schemas.android.com/apk/res/android"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/tagsFlowList"
+				android:layout_margin="5dip"
+				android:paddingLeft="3dip"
+				android:paddingRight="3dip"
+				android:orientation="vertical"
+				app:horizontalSpacing="5dip"
+				app:verticalSpacing="5dip"
+				/>
+
 		<TableLayout
 			android:id="@+id/table"
 			style="@style/TextAppearance.Small"

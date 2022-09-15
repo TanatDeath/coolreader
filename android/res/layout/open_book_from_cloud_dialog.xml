@@ -70,7 +70,7 @@
                         android:src="?attr/cr3_browser_find_drawable"
                         android:tag="tint"
                         android:focusable="true"
-                        android:focusableInTouchMode="true"
+                        android:focusableInTouchMode="false"
                         android:background="@null"
                         android:contentDescription="@string/lbl_find"/>
             </TableRow>

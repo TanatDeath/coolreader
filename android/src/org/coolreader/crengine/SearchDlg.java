@@ -315,13 +315,13 @@ public class SearchDlg extends BaseDialog {
 		BackgroundThread.instance().postGUI(() -> buttonPressed(null), 200);
 		mBtnCaseSentitive.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
 		mBtnSearchReverse.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
-
-		mActivity.getDB().loadSearchHistory(this.mBookInfo, searches -> {
-			mSearches = searches;
-			ViewGroup body = mDialogView.findViewById(R.id.history_list);
-			mList = new SearchList(mActivity, false);
-			body.addView(mList);
-		});
+		mActivity.waitForCRDBService(() ->
+				mActivity.getDB().loadSearchHistory(this.mBookInfo, searches -> {
+				mSearches = searches;
+				ViewGroup body = mDialogView.findViewById(R.id.history_list);
+				mList = new SearchList(mActivity, false);
+				body.addView(mList);
+			}));
 		mCoolReader.tintViewIcons(mDialogView);
 		BackgroundThread.instance().postGUI(() -> mEditView.requestFocus(), 200);
 		//setView(mDialogView);

@@ -4,6 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.coolreader.R;
 import org.coolreader.cloud.CloudAction;
 import org.coolreader.cloud.litres.LitresConfig;
 import org.coolreader.cloud.litres.LitresSearchParams;
+import org.coolreader.layouts.FlowLayout;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.dic.TranslationDirectionDialog;
 import org.coolreader.utils.FileUtils;
@@ -26,6 +28,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.ClipboardManager;
@@ -92,6 +95,7 @@ public class BookInfoDialog extends BaseDialog {
 	ImageButton btnBookDownload;
 	String annot2 = "";
 	ImageButton btnFindAuthors;
+	final FlowLayout mViewTags;
 	boolean bSetAddMarks;
 	TextView tvWC;
 	TextView tvSC;
@@ -100,6 +104,7 @@ public class BookInfoDialog extends BaseDialog {
 	ScrollView mainView;
 	boolean isEInk = false;
 	HashMap<Integer, Integer> themeColors;
+	ArrayList<BookTag> mBookTagsList;
 
 	private static int DM_FRAGMENT = 1;
 	private static int DM_FULL = 2;
@@ -296,7 +301,6 @@ public class BookInfoDialog extends BaseDialog {
 				btnOptionAddInfo.setImageDrawable(
 						mActivity.getResources().getDrawable(Utils.resolveResourceIdByAttr(mActivity,
 								R.attr.attr_icons8_option_info, R.drawable.icons8_ask_question)));
-				final View view1 = view;
 				final String sFind1 = sFind;
 				if (btnOptionAddInfo != null)
 					btnOptionAddInfo.setOnClickListener(v -> {
@@ -306,8 +310,8 @@ public class BookInfoDialog extends BaseDialog {
 					});
 			}
 		}
-		TextView nameView = (TextView)tableRow.findViewById(R.id.name);
-		TextView valueView = (TextView)tableRow.findViewById(R.id.value);
+		TextView nameView = tableRow.findViewById(R.id.name);
+		TextView valueView = tableRow.findViewById(R.id.value);
 		nameView.setText(name);
 		valueView.setText(value);
 		if (item.infoTitle.equals("book.status")) {
@@ -340,7 +344,7 @@ public class BookInfoDialog extends BaseDialog {
 		if (name.equals(mActivity.getString(R.string.book_info_book_symcount))) tvSC = valueView;
 		if (name.equals(mActivity.getString(R.string.book_info_book_wordcount))) tvWC = valueView;
 		if (name.equals(mActivity.getString(R.string.book_info_stats_minutes_left))) tvML = valueView;
-		ReaderView rv = ((CoolReader) mCoolReader).getReaderView();
+		ReaderView rv = mCoolReader.getReaderView();
 		if (
 			(name.equals(mActivity.getString(R.string.book_info_book_symcount))) &&
 		   (value.equals("0")) && (rv != null)
@@ -368,11 +372,11 @@ public class BookInfoDialog extends BaseDialog {
 					countButton.setEllipsize(TextUtils.TruncateAt.END);
 					final ViewGroup vg = (ViewGroup) valueView.getParent();
 					vg.addView(countButton);
-					countButton.setOnClickListener((View.OnClickListener) v -> {
+					countButton.setOnClickListener(v -> {
 						int iPageCnt = 0;
 						int iSymCnt = 0;
 						int iWordCnt = 0;
-						ReaderView rv1 = ((CoolReader) mCoolReader).getReaderView();
+						ReaderView rv1 = mCoolReader.getReaderView();
 						if ((rv1 != null) && (mBookInfo!=null)) {
 							if (rv1.getArrAllPages() != null)
 								iPageCnt = rv1.getArrAllPages().size();
@@ -660,6 +664,75 @@ public class BookInfoDialog extends BaseDialog {
 		});
 	}
 
+	private void refreshBookTags() {
+		mViewTags.removeAllViews();
+		if (mBookInfo != null) {
+			mActivity.waitForCRDBService(() ->
+					mActivity.getDB().loadTags(mBookInfo.getFileInfo(), tags -> {
+						String stags = "";
+						mBookTagsList = tags;
+						for (BookTag bookTag : mBookTagsList) {
+							if (bookTag.isSelected) {
+								addTagButton(bookTag, false);
+								stags = stags + '|' + bookTag.name;
+							}
+						}
+						addTagButton(null, true);
+						if (!StrUtils.isEmptyStr(stags))
+							mBookInfo.getFileInfo().setTags(stags.substring(1));
+						else
+							mBookInfo.getFileInfo().setTags("");
+					}));
+		}
+	}
+
+	private void addTagButton(BookTag bookTag, boolean isEditButton) {
+		int colorIcon = themeColors.get(R.attr.colorIcon);
+		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+		//LinearLayout dicButton = new LinearLayout(mActivity);
+		View buttonView = mInflater.inflate(R.layout.tag_flow_item, null);
+		LinearLayout dicButton = buttonView.findViewById(R.id.tag_flow_item_body);
+		String txt = mActivity.getString(R.string.edit_tags);
+		if (!isEditButton) txt = bookTag.name;
+		TextView tvText = buttonView.findViewById(R.id.tag_flow_item_text);
+		tvText.setText(txt);
+		if (!isEditButton)
+			dicButton.setBackgroundColor(CoverpageManager.randomColor((bookTag.name).hashCode()));
+		else {
+			Utils.setDashedView(dicButton);
+			tvText.setTypeface(null, Typeface.BOLD);
+		}
+		dicButton.setPadding(5, 5, 5, 5);
+		if (isEditButton) {
+			dicButton.setOnClickListener(v -> {
+				FileInfo fiTED = mBookInfo.getFileInfo();
+				TagsEditDialog dlgTagsEditDialog = new TagsEditDialog(mActivity, fiTED, true,
+					new TagsEditDialog.TagsEditDialogCloseCallback() {
+						@Override
+						public void onOk() {
+							refreshBookTags();
+						}
+
+						@Override
+						public void onCancel() {
+
+						}
+					});
+				dlgTagsEditDialog.show();
+			});
+		}
+		ImageView btnDel = buttonView.findViewById(R.id.tag_flow_value_del);
+		Utils.hideView(btnDel);
+		TextView tv = new TextView(mActivity);
+		tv.setText(" ");
+		tv.setPadding(5, 0, 0, 0);
+		tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
+		tv.setTextColor(mActivity.getTextColor(colorIcon));
+		mActivity.tintViewIcons(dicButton);
+		mViewTags.addView(dicButton);
+		mViewTags.addView(tv);
+	}
+
 	public BookInfoDialog(final BaseActivity activity, Collection<BookInfoEntry> items, BookInfo bi, final String annt,
 						  int actionType, FileInfo fiOPDS, FileBrowser fb, FileInfo currDir)
 	{
@@ -691,7 +764,7 @@ public class BookInfoDialog extends BaseDialog {
 				if (mBookInfo.getFileInfo().isCalibrePrefix()) isCalibreBook = true;
 		mFileBrowser = fb;
 		mCurrDir = currDir;
-		FileInfo file = null;
+		FileInfo file;
 		if (mBookInfo!=null)
 			file = mBookInfo.getFileInfo();
 		else file = fiOPDS;
@@ -877,6 +950,8 @@ public class BookInfoDialog extends BaseDialog {
 				mFileBrowser.showFindBookDialog(false, mAuthors, mFileInfoSearchDir);
 			dismiss();
 		});
+		mViewTags = mainView.findViewById(R.id.tagsFlowList);
+		refreshBookTags();
 		int w = mWindowSize * 4 / 10;
 		int h = w * 4 / 3;
 		image.setMinimumHeight(h);

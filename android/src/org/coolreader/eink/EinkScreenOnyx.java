@@ -112,7 +112,7 @@ public class EinkScreenOnyx implements EinkScreen {
 
 
 @Override
-	public void setupController(EinkUpdateMode mode, int updateInterval, View view, boolean noRegal) {
+	public void setupController(EinkUpdateMode mode, int updateInterval, View view, boolean noRegal, boolean noResetCount) {
 		curDev = com.onyx.android.sdk.device.Device.currentDevice();
 		switch (curDev.getSystemRefreshMode()) {
 			case NORMAL:
@@ -142,8 +142,10 @@ public class EinkScreenOnyx implements EinkScreen {
 //			return;
 		log.d("EinkScreenOnyx.setupController(): mode=" + mode);
 		onyxD_enableScreenUpdate(view, true);
-		mRefreshNumber = 0;
-		mDeepRefreshNumber = 0;
+		if (!noResetCount) {
+			mRefreshNumber = 0;
+			mDeepRefreshNumber = 0;
+		}
 		switch (com.onyx.android.sdk.device.Device.currentDeviceIndex()) {
 			case Rk32xx:
 			case Rk33xx:
@@ -237,7 +239,7 @@ public class EinkScreenOnyx implements EinkScreen {
 			if (!refreshed) onyxRepaintEveryThing(view, false, false);
 			return;
 		}
-		if (mUpdateInterval > 0) {
+		if ((mUpdateInterval > 0) && (mUpdateInterval != 999)) {
 			mRefreshNumber++;
 			if (mRefreshNumber >= mUpdateInterval) {
 				mRefreshNumber = 0;
@@ -420,7 +422,6 @@ public class EinkScreenOnyx implements EinkScreen {
 					curDev.setViewDefaultUpdateMode(view,
 							needDeep? UpdateMode.DEEP_GC: UpdateMode.GC);
 					curDev.enableRegal(mRegal);
-					//EpdController.repaintEveryThing();
 					break;
 				} else
 					if (mScreenFullUpdateMethod == 3) {
@@ -432,45 +433,57 @@ public class EinkScreenOnyx implements EinkScreen {
 							curDev.invalidate(view,
 									needDeep? UpdateMode.DEEP_GC: UpdateMode.GCC);
 							curDev.invalidate(view, UpdateMode.DU_QUALITY);
-//							EpdController.repaintEveryThing(mNeedDeepGC? UpdateMode.DEEP_GC: UpdateMode.GC);
 							curDev.enableRegal(mRegal);
 						}
 						break;
 					} else
-						if (mScreenFullUpdateMethod == 5) {
+						if (mScreenFullUpdateMethod == 6) {
 							if (null != view) {
 								curDev.enableRegal(false);
 								if (mNeedCallByPass) onyxD_byPass(1);
 								curDev.setViewDefaultUpdateMode(view,
-										needDeep? UpdateMode.DEEP_GC: UpdateMode.DU_QUALITY);
+										needDeep? UpdateMode.DEEP_GC: UpdateMode.GC);
 								curDev.invalidate(view,
-										needDeep? UpdateMode.DEEP_GC: UpdateMode.DU_QUALITY);
+										needDeep? UpdateMode.DEEP_GC: UpdateMode.GC);
+								curDev.invalidate(view, UpdateMode.DU_QUALITY);
 								curDev.enableRegal(mRegal);
 							}
 							break;
 						} else
-							if (mScreenFullUpdateMethod == 4) {
+							if (mScreenFullUpdateMethod == 5) {
 								if (null != view) {
 									curDev.enableRegal(false);
 									if (mNeedCallByPass) onyxD_byPass(1);
-									curDev.setViewDefaultUpdateMode(view, UpdateMode.GU);
-									EpdController.repaintEveryThing(needDeep? UpdateMode.DEEP_GC: UpdateMode.GC);
+									curDev.setViewDefaultUpdateMode(view,
+											needDeep? UpdateMode.DEEP_GC: UpdateMode.DU_QUALITY);
+									curDev.invalidate(view,
+											needDeep? UpdateMode.DEEP_GC: UpdateMode.DU_QUALITY);
 									curDev.enableRegal(mRegal);
 								}
 								break;
-							} else {
+							} else
+								if (mScreenFullUpdateMethod == 4) {
 									if (null != view) {
 										curDev.enableRegal(false);
-										if (invalidate)
-											if (mNeedCallByPass) onyxD_byPass(1);
-										curDev.setViewDefaultUpdateMode(view,
-												needDeep? UpdateMode.DEEP_GC: UpdateMode.GC);
-										if (invalidate)
-											view.postInvalidate();
+										if (mNeedCallByPass) onyxD_byPass(1);
+										curDev.setViewDefaultUpdateMode(view, UpdateMode.GU);
+										EpdController.repaintEveryThing(needDeep? UpdateMode.DEEP_GC: UpdateMode.GC);
 										curDev.enableRegal(mRegal);
 									}
 									break;
-								}
+								} else {
+										if (null != view) {
+											curDev.enableRegal(false);
+											if (invalidate)
+												if (mNeedCallByPass) onyxD_byPass(1);
+											curDev.setViewDefaultUpdateMode(view,
+													needDeep? UpdateMode.DEEP_GC: UpdateMode.GC);
+											if (invalidate)
+												view.postInvalidate();
+											curDev.enableRegal(mRegal);
+										}
+										break;
+									}
 			default:
 				if (null != view) {
 					curDev.setViewDefaultUpdateMode(view,

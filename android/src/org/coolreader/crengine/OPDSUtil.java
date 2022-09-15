@@ -651,7 +651,7 @@ xml:base="http://lib.ololo.cc/opds/">
 			}
 		}
 		
-		private File generateFileName( File outDir, String fileName, String type, boolean isZip ) {
+		private File generateFileName(File outDir, String fileName, String type, boolean isZip) {
 			DocumentFormat fmt = type!=null ? DocumentFormat.byMimeType(type) : null;
 			//DocumentFormat fmtext = fileName!=null ? DocumentFormat.byExtension(fileName) : null;
 			if ( fileName==null )

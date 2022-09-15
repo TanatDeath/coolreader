@@ -33,6 +33,10 @@ public class DrawPageTask extends Task {
 		bi = mReaderView.preparePageImage(0);
 		if (bi != null) {
 			if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
+				if (mReaderView.needSwitchMode) {
+					mReaderView.toggleScreenUpdateModeMode(false);
+					mReaderView.needSwitchMode = false;
+				}
 				boolean needDraw = true;
 				if (!isPartially)
 					if (mReaderView.lastCachedBitmap != null)

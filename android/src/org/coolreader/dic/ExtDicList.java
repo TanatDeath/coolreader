@@ -15,11 +15,13 @@ import android.widget.TextView;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseListView;
 import org.coolreader.dic.struct.DicStruct;
 import org.coolreader.dic.struct.DictEntry;
 import org.coolreader.dic.struct.ExampleLine;
 import org.coolreader.dic.struct.LinePair;
+import org.coolreader.dic.struct.SuggestionLine;
 import org.coolreader.dic.struct.TranslLine;
 import org.coolreader.userdic.UserDicEditDialog;
 import org.coolreader.utils.StrUtils;
@@ -42,13 +44,17 @@ public class ExtDicList extends BaseListView {
 
 		private boolean mArticleMode;
 		private DicStruct dicStruct;
+		private CoolReader mCoolReader;
+		private ExtDicList mDicList;
 
-		public ExtDicAdapter(DicToastView.Toast toast, DicStruct ds, boolean articleMode) {
+		public ExtDicAdapter(CoolReader coolReader, ExtDicList dicList, DicToastView.Toast toast, DicStruct ds, boolean articleMode) {
 			mInflater = (LayoutInflater) toast.anchor.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			dicStruct = toast.dicStruct;
 			if (ds != null) dicStruct = ds;
+			mCoolReader = coolReader;
 			curToast = toast;
 			mArticleMode = articleMode;
+			mDicList = dicList;
 		}
 
 		LayoutInflater mInflater;
@@ -144,13 +150,36 @@ public class ExtDicList extends BaseListView {
 
 			if (o instanceof TranslLine) {
 				TranslLine tl = (TranslLine) o;
-				int res = R.layout.ext_dic_transl_line;
+				int res;
+				if (tl.canSwitchTo)
+					res = R.layout.ext_dic_transl_line_button;
+				else
+					res = R.layout.ext_dic_transl_line;
 				view = mInflater.inflate(res, null);
 				TextView labelView = view.findViewById(R.id.ext_dic_transl_line);
 				String text = StrUtils.getNonEmptyStr(tl.transText, true);
 				if (!StrUtils.isEmptyStr(tl.transType))
 					text = text + "; " + tl.transType.trim();
 				labelView.setText(text);
+				if (tl.canSwitchTo) {
+					res = R.layout.ext_dic_transl_line_button;
+					Button btnFollow = view.findViewById(R.id.dic_follow);
+					btnFollow.setPadding(10, 4, 10, 4);
+					String finalText = text;
+					btnFollow.setOnClickListener(v -> {
+						if ((mDicList.mHandler != null) && (mDicList.mHandleDismiss != null))
+							mDicList.mHandler.postDelayed(
+									mDicList.mHandleDismiss, 100);
+						BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
+							.postBackground(() -> BackgroundThread.instance()
+								.postGUI(() ->
+									Dictionaries.reversoTranslate.reversoTranslateAsLast(mCoolReader, finalText,
+										tl.transLink))), 300);
+						//m.findInDictionary(selection.text, false, null);
+					});
+					Utils.setSolidButton(btnFollow);
+					if (DicToastView.isEInk) Utils.setSolidButtonEink(btnFollow);
+				}
 				// plotn - something wrong with html visitor in dsl4j
 //				labelView.setOnClickListener(v -> {
 //					DicArticleDlg dad = new DicArticleDlg(DicToastView.mActivity, curToast, mColorIconL, position, tl);
@@ -174,6 +203,34 @@ public class ExtDicList extends BaseListView {
 					Utils.setHighLightedText(labelView, curToast.sFindText, mColorIconL);
 				return view;
 			}
+
+			if (o instanceof SuggestionLine) {
+				SuggestionLine sl = (SuggestionLine) o;
+				int res = R.layout.ext_dic_sugg_line;
+				view = mInflater.inflate(res, null);
+				TextView labelView = view.findViewById(R.id.ext_sugg_line);
+				String text = StrUtils.getNonEmptyStr(sl.suggText, true);
+				labelView.setText(text);
+				if (mArticleMode) labelView.setMaxLines(999);
+				Button btnFollow = view.findViewById(R.id.dic_follow);
+				btnFollow.setPadding(10, 4, 10, 4);
+				btnFollow.setOnClickListener(v -> {
+					if ((mDicList.mHandler != null) && (mDicList.mHandleDismiss != null))
+						mDicList.mHandler.postDelayed(
+								mDicList.mHandleDismiss, 100);
+					BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
+						.postBackground(() -> BackgroundThread.instance()
+							.postGUI(() ->
+								Dictionaries.reversoTranslate.reversoTranslateAsLast(mCoolReader, text,
+									sl.suggLink))), 300);
+				});
+				Utils.setSolidButton(btnFollow);
+				if (DicToastView.isEInk) Utils.setSolidButtonEink(btnFollow);
+				if (!StrUtils.isEmptyStr(curToast.sFindText))
+					Utils.setHighLightedText(labelView, curToast.sFindText, mColorIconL);
+				return view;
+			}
+
 			if (o instanceof LinePair) {
 				LinePair lp = (LinePair) o;
 				int res = R.layout.ext_dic_res_pair;
@@ -210,7 +267,7 @@ public class ExtDicList extends BaseListView {
 			else return curToast.wikiArticles.wikiArticleList.size() == 0;
 		}
 
-		private ArrayList<DataSetObserver> observers = new ArrayList<DataSetObserver>();
+		private ArrayList<DataSetObserver> observers = new ArrayList<>();
 
 		public void registerDataSetObserver(DataSetObserver observer) {
 			observers.add(observer);
@@ -237,7 +294,7 @@ public class ExtDicList extends BaseListView {
 		this.mFullMode = articleMode;
 		setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		setLongClickable(true);
-		setAdapter(new ExtDicAdapter(t, ds, articleMode));
+		setAdapter(new ExtDicAdapter(mCoolReader, this, t, ds, articleMode));
 		setOnItemLongClickListener((arg0, arg1, position, arg3) -> {
 			//openContextMenu(DictList.this);
 			return true;

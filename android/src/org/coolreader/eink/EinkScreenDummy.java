@@ -12,7 +12,7 @@ public class EinkScreenDummy implements EinkScreen {
 	private boolean mSelectionActive = false;
 
 	@Override
-	public void setupController(EinkUpdateMode mode, int updateInterval, View view, boolean noRegal) {
+	public void setupController(EinkUpdateMode mode, int updateInterval, View view, boolean noRegal, boolean noResetCount) {
 	}
 
 	@Override

@@ -51,7 +51,7 @@ void LVGifFrame::Draw(LVImageDecoderCallback *callback)
     int y = 0;
     for ( int i=0; i<h; i++ ) {
         for ( int j=0; j<w; j++ ) {
-            line[j] = pColorTable[background_color];
+            line[j] = pColorTable ? pColorTable[background_color] : GIF_DEFAULT_PALETTE_COLOR_VALUE(background_color);
         }
         if ( i >= m_top  && i < m_top+m_cy ) {
             unsigned char * p_line = m_buffer + (i-m_top)*m_cx;
@@ -60,7 +60,7 @@ void LVGifFrame::Draw(LVImageDecoderCallback *callback)
                 if (b!=background_color) {
                     if (defined_transparent && b==transparent_color)
                         line[x + m_left] = 0xFF000000;
-                    else line[x + m_left] = pColorTable[b];
+                    else line[x + m_left] = pColorTable ? pColorTable[b] : GIF_DEFAULT_PALETTE_COLOR_VALUE(b);
                 }
                 else if (defined_transparent && b==transparent_color)  {
                     line[x + m_left] = 0xFF000000;

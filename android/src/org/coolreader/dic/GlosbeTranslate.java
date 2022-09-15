@@ -68,6 +68,7 @@ public class GlosbeTranslate {
 					Document doc = Jsoup.parse(url, 5000);
 
 					DicStruct dsl = new DicStruct();
+					dsl.srcText = s;
 
 					Elements phraseTs = doc.select("div.phrase__translation");
 

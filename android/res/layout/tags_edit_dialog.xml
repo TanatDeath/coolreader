@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            <TextView
+                    android:id="@+id/lbl_tag_action"
+                    style="@style/TextAppearance.Small"
+                    android:textColor="?attr/colorIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="3"
+                    android:singleLine="false"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center_vertical"
+                    android:text="@string/dlg_button_add_tag" />
+            <ImageButton
+                    android:id="@+id/tags_dlg_clear_action"
+                    android:src="?attr/attr_icons8_cancel_small"
+                    android:tag="tint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dip"
+                    android:layout_marginBottom="5dip"
+                    android:layout_marginLeft="5dip"
+                    android:layout_marginRight="5dip"
+                    android:focusable="true"
+                    android:focusableInTouchMode="false"
+                    android:background="@null"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center_vertical"
+                    />
+        </LinearLayout>
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/lay_tag_edit"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                >
+
+            <EditText
+                    android:id="@+id/tag_text"
+                    style="@style/TextAppearance.Widget.EditText"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:singleLine="false"
+                    android:layout_weight="1"
+                    android:text="" />
+
+            <ImageButton
+                    android:id="@+id/tags_dlg_add_tag"
+                    android:src="?attr/attr_icons8_save"
+                    android:tag="tint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dip"
+                    android:layout_marginBottom="5dip"
+                    android:layout_marginLeft="5dip"
+                    android:layout_marginRight="5dip"
+                    android:focusable="true"
+                    android:focusableInTouchMode="false"
+                    android:background="@null"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center_vertical"
+                    android:contentDescription="@string/save"
+                    />
+        </LinearLayout>
+
+        <TextView
+                android:id="@+id/lbl_tag_comment"
+                style="@style/TextAppearance.Small"
+                android:textColor="?attr/colorIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="3"
+                android:singleLine="false"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:text="@string/dlg_button_tag_comment" />
+
+        <org.coolreader.layouts.FlowLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tagsFlowList"
+                android:layout_margin="5dip"
+                android:paddingLeft="3dip"
+                android:paddingRight="3dip"
+                android:orientation="vertical"
+                app:horizontalSpacing="5dip"
+                app:verticalSpacing="5dip"
+                />
+
+    </LinearLayout>
+</ScrollView>

@@ -186,7 +186,7 @@ public class CRDBService extends BaseService {
 		}
     }
     
-    private void clearCaches() {
+    public void clearCaches() {
 		mainDB.clearCaches();
 		coverDB.clearCaches();
     }
@@ -220,6 +220,10 @@ public class CRDBService extends BaseService {
 
 	public interface SearchHistoryLoadingCallback {
 		void onSearchHistoryLoaded(ArrayList<String> searches);
+	}
+
+	public interface TagsLoadingCallback {
+		void onTagsLoaded(ArrayList<BookTag> tags);
 	}
 
 	public interface UserDicLoadingCallback {
@@ -1027,6 +1031,71 @@ public class CRDBService extends BaseService {
 		});
 	}
 
+	// tags access code
+
+	public void saveTag(final String tag, final String oldTag, final ObjectCallback callback, final Handler handler) {
+		execTask(new Task("saveTag") {
+			@Override
+			public void work() {
+				Long tagId = mainDB.getTagId(tag, tag, oldTag);
+				sendTask(handler, () -> callback.onObjectLoaded(tagId));
+			}
+		});
+	}
+
+	public void deleteTag(final String tag, final ObjectCallback callback, final Handler handler) {
+		execTask(new Task("deleteTag") {
+			@Override
+			public void work() {
+				Long tagId = mainDB.deleteTag(tag);
+				sendTask(handler, () -> callback.onObjectLoaded(tagId));
+			}
+		});
+	}
+
+	public void loadTags(final FileInfo fi, final TagsLoadingCallback callback, final Handler handler) {
+		execTask(new Task("loadTags") {
+			@Override
+			public void work() {
+				mainDB.loadTagsListF(fi);
+				ArrayList<BookTag> bookTagsList = mainDB.loadTagsListF(fi);
+				sendTask(handler, () -> callback.onTagsLoaded(bookTagsList));
+			}
+		});
+	}
+
+	public void loadTagsList(FileInfo parent, final ItemGroupsLoadingCallback callback, final Handler handler) {
+		final FileInfo p = new FileInfo(parent);
+		execTask(new Task("loadTagsList") {
+			@Override
+			public void work() {
+				mainDB.loadTagsList(p);
+				sendTask(handler, () -> callback.onItemGroupsLoaded(p));
+			}
+		});
+	}
+
+	public void findTagBooks(final long tagId, final FileInfoLoadingCallback callback, final Handler handler) {
+		execTask(new Task("findTagBooks") {
+			@Override
+			public void work() {
+				final ArrayList<FileInfo> list = new ArrayList<>();
+				mainDB.findTagBooks(list, tagId);
+				sendTask(handler, () -> callback.onFileInfoListLoaded(list, FileInfo.TAG_GROUP_PREFIX));
+			}
+		});
+	}
+
+	public void addTagsToBook(List<BookTag> bookTags, FileInfo fi, final ObjectCallback callback, final Handler handler) {
+		execTask(new Task("loadTags") {
+			@Override
+			public void work() {
+				Boolean b = mainDB.addTagsToBook(bookTags, fi);
+				sendTask(handler, () -> callback.onObjectLoaded(b));
+			}
+		});
+	}
+
 	/**
      * Class for clients to access.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with
@@ -1343,6 +1412,32 @@ public class CRDBService extends BaseService {
 
 		public void updateCalendarEntry(final Long book_fk,  final Long read_date, final Long time_spent_sec) {
 			getService().updateCalendarEntry(book_fk,  read_date, time_spent_sec);
+		}
+
+		// Tags access code
+
+		public void saveTag(String tag, String oldTag, final ObjectCallback callback) {
+			getService().saveTag(tag, oldTag, callback, new Handler());
+		}
+
+		public void deleteTag(String tag, final ObjectCallback callback) {
+			getService().deleteTag(tag, callback, new Handler());
+		}
+
+		public void loadTags(FileInfo fi, TagsLoadingCallback callback) {
+			getService().loadTags(fi, callback, new Handler());
+		}
+
+		public void addTagsToBook(List<BookTag> bookTags, FileInfo fi, final ObjectCallback callback) {
+			getService().addTagsToBook(bookTags, fi, callback, new Handler());
+		}
+
+		public void loadTagsList(FileInfo parent, final ItemGroupsLoadingCallback callback) {
+			getService().loadTagsList(parent, callback, new Handler());
+		}
+
+		public void loadTagBooks(long genreId, FileInfoLoadingCallback callback) {
+			getService().findTagBooks(genreId, callback, new Handler());
 		}
 
 	}

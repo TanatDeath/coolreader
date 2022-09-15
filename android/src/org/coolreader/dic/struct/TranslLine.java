@@ -10,6 +10,7 @@ public class TranslLine {
 	public String transTextHTML = "";
 	public String transType = "";
 	public String transLink = "";
+	public boolean canSwitchTo = false;
 
 	public List<ExampleLine> exampleLines = new ArrayList<>();
 

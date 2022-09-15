@@ -26,7 +26,7 @@ public class EinkScreenNook implements EinkScreen {
 	private boolean mSelectionActive = false;
 
 	@Override
-	public void setupController(EinkUpdateMode mode, int updateInterval, View view, boolean noRegal) {
+	public void setupController(EinkUpdateMode mode, int updateInterval, View view, boolean noRegal, boolean noResetCount) {
 		mUpdateInterval = updateInterval;
 		if (mUpdateMode.equals(mode))
 			return;
@@ -196,7 +196,7 @@ public class EinkScreenNook implements EinkScreen {
 						mRefreshNumber = -1;
 				}
 			} else {
-				setupController(mUpdateMode, mUpdateInterval, view, false);
+				setupController(mUpdateMode, mUpdateInterval, view, false, false);
 			}
 		}
 	}

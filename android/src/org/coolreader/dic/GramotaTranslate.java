@@ -53,6 +53,7 @@ public class GramotaTranslate {
 					Document doc = Jsoup.parse(url, 5000);
 
 					DicStruct dsl = new DicStruct();
+					dsl.srcText = s;
 
 					Elements form = doc.select("form#checkWord");
 					Element par = null;

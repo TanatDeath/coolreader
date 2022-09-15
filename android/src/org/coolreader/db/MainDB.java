@@ -11,6 +11,7 @@ import android.util.Log;
 import org.coolreader.CoolReader;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BookInfo;
+import org.coolreader.crengine.BookTag;
 import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.DicSearchHistoryEntry;
 import org.coolreader.crengine.DocumentFormat;
@@ -43,13 +44,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import io.github.eb4j.dsl.DslDictionary;
 import io.github.eb4j.dsl.DslResult;
-import io.github.eb4j.dsl.visitor.HtmlDslVisitor;
-import io.github.eb4j.dsl.visitor.PlainDslVisitor;
 
 public class MainDB extends BaseDB {
 	public static final Logger log = L.create("mdb");
@@ -57,16 +55,18 @@ public class MainDB extends BaseDB {
 
 	public static String currentLanguage = "EN"; // for genres - sets from BaseActivity
 
-	public static String NO_VALUE = "[No value]";
+	//public static String NO_VALUE = "[No value]";
+	public static String NO_VALUE = "----------";
 
 	public static int iMaxGroupSize = 8;
 	public static int iMaxGroupSizeAuthor = 0;
 	public static int iMaxGroupSizeSeries = 0;
 	public static int iMaxGroupSizeGenres = 0;
+	public static int iMaxGroupSizeTags = 0;
 	public static int iMaxGroupSizeDates = 0;
 
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 58;
+	public static final int DB_VERSION = 60;
 
 	@Override
 	protected boolean upgradeSchema() {
@@ -101,6 +101,15 @@ public class MainDB extends BaseDB {
 					")");
 			execSQL("CREATE INDEX IF NOT EXISTS " +
 					"author_name_index ON author (name) ");
+			execSQL("CREATE TABLE IF NOT EXISTS tags (" +
+					"id INTEGER PRIMARY KEY AUTOINCREMENT," +
+					"name VARCHAR NOT NULL COLLATE NOCASE," +
+					"title VARCHAR NOT NULL COLLATE NOCASE," +
+					"book_cnt INTEGER, " +
+					"book_cnt_hier INTEGER " +
+					")");
+			execSQL("CREATE UNIQUE INDEX IF NOT EXISTS " +
+					"tags_name_index ON tags (name) ");
 			execSQL("CREATE TABLE IF NOT EXISTS genre (" +
 					"id INTEGER PRIMARY KEY AUTOINCREMENT," +
 					"code VARCHAR NOT NULL COLLATE NOCASE, " +
@@ -201,6 +210,13 @@ public class MainDB extends BaseDB {
 					")");
 			execSQL("CREATE UNIQUE INDEX IF NOT EXISTS " +
 					"author_book_index ON book_author (author_fk, book_fk) ");
+			execSQL("CREATE TABLE IF NOT EXISTS book_tag (" +
+					"book_fk INTEGER NOT NULL REFERENCES book (id)," +
+					"tag_fk INTEGER NOT NULL REFERENCES tags (id)," +
+					"PRIMARY KEY (book_fk, tag_fk)" +
+					")");
+			execSQL("CREATE UNIQUE INDEX IF NOT EXISTS " +
+					"tag_book_index ON book_tag (book_fk, tag_fk) ");
 			execSQL("CREATE TABLE IF NOT EXISTS book_genre (" +
 					"book_fk INTEGER NOT NULL REFERENCES book (id)," +
 					"genre_fk INTEGER NOT NULL REFERENCES genre (id)," +
@@ -593,7 +609,7 @@ public class MainDB extends BaseDB {
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN description TEXT DEFAULT NULL");
 			}
 			if (currentVersion < 51) {
-				execSQL("CREATE TABLE IF NOT EXISTS calibre_catalog (" +
+				execSQL("CREATE TABLE IF NOT EXISTS calcaibre_catalog (" +
 						"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
 						"name VARCHAR NOT NULL COLLATE NOCASE, " +
 						"cat_type INTEGER DEFAULT 0," + // 0 = local, 1 = yandex, 2 = .. unimplemented yet
@@ -757,7 +773,30 @@ public class MainDB extends BaseDB {
 					Log.e("cr3db", "exception while updating user_dic' dic_word", e);
 				}
 			}
-
+			if (currentVersion < 59) {
+				execSQL("CREATE TABLE IF NOT EXISTS tags (" +
+						"id INTEGER PRIMARY KEY AUTOINCREMENT," +
+						"name VARCHAR NOT NULL COLLATE NOCASE," +
+						"title VARCHAR NOT NULL COLLATE NOCASE," +
+						"book_cnt INTEGER, " +
+						"book_cnt_hier INTEGER " +
+						")");
+				execSQL("CREATE UNIQUE INDEX IF NOT EXISTS " +
+						"tags_name_index ON tags (name) ");
+				execSQL("CREATE TABLE IF NOT EXISTS book_tag (" +
+						"book_fk INTEGER NOT NULL REFERENCES book (id)," +
+						"tag_fk INTEGER NOT NULL REFERENCES tags (id)," +
+						"PRIMARY KEY (book_fk, tag_fk)" +
+						")");
+				execSQL("CREATE UNIQUE INDEX IF NOT EXISTS " +
+						"tag_book_index ON book_tag (author_fk, tag_fk) ");
+			}
+			if (currentVersion < 60) {
+				execSQL("DROP INDEX IF EXISTS " +
+						"tags_name_index");
+				execSQL("CREATE UNIQUE INDEX IF NOT EXISTS " +
+						"tags_name_index ON tags (name) ");
+			}
 			//==============================================================
 			// add more updates above this line
 
@@ -784,7 +823,8 @@ public class MainDB extends BaseDB {
 				+ longQuery("SELECT count(*) FROM dic_search_history") + " dic_search_historys, "
 				+ longQuery("SELECT count(*) FROM folder") + " folders, "
 				+ longQuery("SELECT count(*) FROM author_aliases_eq") + " author_aliases_eq, "
-				+ longQuery("SELECT count(*) FROM author_aliases") + " author_aliases "
+				+ longQuery("SELECT count(*) FROM author_aliases") + " author_aliases, "
+				+ longQuery("SELECT count(*) FROM tags") + " tags "
 		);
 	}
 
@@ -858,6 +898,7 @@ public class MainDB extends BaseDB {
 		folderCache.clear();
 		fileInfoCache.clear();
 		genreCache.clear();
+		tagCache.clear();
 	}
 
 	public void flush() {
@@ -889,6 +930,11 @@ public class MainDB extends BaseDB {
 		if (genreSelectStmt != null) {
 			genreSelectStmt.close();
 			genreSelectStmt = null;
+		}
+
+		if (tagSelectStmt != null) {
+			tagSelectStmt.close();
+			tagSelectStmt = null;
 		}
 	}
 
@@ -1785,6 +1831,14 @@ public class MainDB extends BaseDB {
 		}
 	}
 
+	public static class ItemGroupTagsExtractor extends ItemGroupExtractor {
+		@Override
+		public String getComparisionField(FileInfo item) {
+			if (StrUtils.isEmptyStr(item.getTags())) return NO_VALUE;
+			return item.getTags();
+		}
+	}
+
 	public static class ItemGroupBookDateNExtractor extends ItemGroupExtractor {
 		@Override
 		public String getComparisionField(FileInfo item) {
@@ -1882,6 +1936,7 @@ public class MainDB extends BaseDB {
 		if (extractor instanceof ItemGroupAuthorExtractor) iMaxItemsCount = iMaxGroupSizeAuthor;
 		if (extractor instanceof ItemGroupSeriesExtractor) iMaxItemsCount = iMaxGroupSizeSeries;
 		if (extractor instanceof ItemGroupGenresExtractor) iMaxItemsCount = iMaxGroupSizeGenres;
+		if (extractor instanceof ItemGroupTagsExtractor) iMaxItemsCount = iMaxGroupSizeTags;
 		if (extractor instanceof ItemGroupBookDateNExtractor) iMaxItemsCount = iMaxGroupSizeDates;
 		if (extractor instanceof ItemGroupDocDateNExtractor) iMaxItemsCount = iMaxGroupSizeDates;
 		if (extractor instanceof ItemGroupFileCreateTimeExtractor) iMaxItemsCount = iMaxGroupSizeDates;
@@ -2004,7 +2059,7 @@ public class MainDB extends BaseDB {
 	}
 
 	private void addGroupedItems(FileInfo parent,
-								 ArrayList<FileInfo> items, int start, int end, String groupPrefixTag, int level, final ItemGroupExtractor extractor) {
+			 ArrayList<FileInfo> items, int start, int end, String groupPrefixTag, int level, final ItemGroupExtractor extractor) {
 		boolean bNoGroups = true;
 		if (((parent.pathname.startsWith(FileInfo.TITLE_TAG_LEVEL)) && (level < 5))
 				|| parent.pathname.startsWith(FileInfo.TITLE_TAG)) bNoGroups = true;
@@ -2013,6 +2068,7 @@ public class MainDB extends BaseDB {
 		if (groupPrefixTag.equals(FileInfo.PUBL_YEAR_GROUP_PREFIX)) bNoGroups = true;
 		if (groupPrefixTag.equals(FileInfo.FILE_DATE_GROUP_PREFIX)) bNoGroups = true;
 		if (groupPrefixTag.equals(FileInfo.GENRE_GROUP_PREFIX)) bNoGroups = true;
+		if (groupPrefixTag.equals(FileInfo.TAG_GROUP_PREFIX)) bNoGroups = true;
 		if (level > 30) bNoGroups = true; // to prevent infinite loop when list is bad
 
 		int itemCount = end - start;
@@ -2315,8 +2371,8 @@ public class MainDB extends BaseDB {
 						"nullif(coalesce(genre.code,''),''))) ";
 		//String sql = "SELECT genre.id, "+gname+" name, count(*) as book_count FROM genre "+
 		//		" LEFT JOIN  genre_transl on genre_transl.code = genre.code and genre_transl.lang = '"+lang+"' " +
-		//		" INNER JOIN book on book.id = book_genre.book_fk and (not (book.pathname like '@%')) "+
-		//		" INNER JOIN book_genre ON book_genre.genre_fk = genre.id GROUP BY "+gname+", genre.id ORDER BY "+gname;
+		//		" JOIN book on book.id = book_genre.book_fk and (not (book.pathname like '@%')) "+
+		//		" JOIN book_genre ON book_genre.genre_fk = genre.id GROUP BY "+gname+", genre.id ORDER BY "+gname;
 		String sql = "SELECT genre.id, " + gname + " name, book_cnt as book_count FROM genre " +
 				" LEFT JOIN genre_transl on genre_transl.code = genre.code and genre_transl.lang = '" + lang + "' " +
 				" ORDER BY " + gname;
@@ -2340,6 +2396,180 @@ public class MainDB extends BaseDB {
 		return found;
 	}
 
+	public void loadTagsListStats() {
+		// gather missed stats
+		try (Cursor rs = mDB.rawQuery(
+				"select t.id, count(*) as cnt " +
+						"from tags t " +
+						"join book_tag bt on bt.tag_fk = t.id " +
+						"join book b on b.id = bt.book_fk and (not (b.pathname like '@%')) " +
+						"where t.book_cnt is null " +
+						"group by t.id", null)) {
+			if (rs.moveToFirst()) {
+				// read DB
+				do {
+					execSQLIgnoreErrors("update tags set book_cnt = " + rs.getLong(1) + " where id = " + rs.getLong(0));
+				} while (rs.moveToNext());
+			}
+			if (rs != null) rs.close();
+		} catch (Exception e) {
+			Log.e("cr3db", "exception while loading list of tags", e);
+		}
+		// gather hier stats
+		try (Cursor rs = mDB.rawQuery(
+				"select t.id, sum(t.book_cnt) as cnt_hier " +
+						"from tags t " +
+						"left join tags t2 on substr(t2.name,1,length(t.name)) = t.name " +
+						"group by t.id", null)) {
+			if (rs.moveToFirst()) {
+				// read DB
+				do {
+					String hierSQL = "update tags set book_cnt_hier = " + rs.getLong(1) +
+							" where id = " + rs.getLong(0) +
+							" and ((book_cnt_hier is null) or (coalesce(book_cnt_hier, 0) != " +
+							rs.getLong(1) +"))";
+					//Log.i("cr3db", "hierSQL: " + hierSQL);
+					execSQLIgnoreErrors(hierSQL);
+				} while (rs.moveToNext());
+			}
+			if (rs != null) rs.close();
+		} catch (Exception e) {
+			Log.e("cr3db", "exception while loading list of tags", e);
+		}
+		//\
+	}
+
+	public ArrayList<BookTag> loadTagsListF(FileInfo fi) {
+		Log.i("cr3db", "loadTagsListF()");
+		loadTagsListStats();
+		ArrayList<BookTag> bookTagList = new ArrayList<>();
+		beginReading();
+		long id = 0L;
+		if (fi != null)
+			if (fi.id != null)
+				if (fi.id > 0) id = fi.id;
+		String sql = "";
+		if (id == 0L)
+			sql = "SELECT tags.id, tags.name, tags.title, tags.book_cnt, tags.book_cnt_hier as book_count, 0 as is_selected FROM tags " +
+				  " ORDER BY tags.book_cnt desc";
+		else
+			sql = "SELECT tags.id, tags.name, tags.title, tags.book_cnt, tags.book_cnt_hier as book_count, " +
+				  "case when book_tag.tag_fk is null then 0 else 1 end FROM tags " +
+				  " left join book_tag on tags.id = book_tag.tag_fk and book_tag.book_fk = " + id +
+				  " ORDER BY tags.book_cnt desc";
+		try (Cursor rs = mDB.rawQuery(sql, null)) {
+			if (rs.moveToFirst()) {
+				// read DB
+				do {
+					long fid = rs.getLong(0);
+					String name = rs.getString(1);
+					String title = rs.getString(2);
+					Long cnt = rs.getLong(3);
+					Long cntHier = rs.getLong(4);
+					int isSelected = rs.getInt(5);
+					BookTag bookTag = new BookTag(name, title);
+					bookTag.setId(fid);
+					bookTag.bookCnt = cnt;
+					bookTag.bookCntHier = cntHier;
+					bookTag.isSelected = isSelected == 1;
+					bookTagList.add(bookTag);
+				} while (rs.moveToNext());
+			}
+		} catch (Exception e) {
+			Log.e("cr3db", "exception while loading list of authors", e);
+		}
+		endReading();
+		return bookTagList;
+	}
+
+	public Boolean addTagsToBook(List<BookTag> bookTags, FileInfo fi) {
+		if (fi == null) return false;
+		if (fi.id <= 0) return false;
+		String tagsSelectStatement = "";
+		int cnt = 0;
+		// clear stats
+		try (Cursor rs = mDB.rawQuery(
+				"select t.id " +
+						"from tags t " +
+						"join book_tag bt on bt.tag_fk = t.id " +
+						"where bt.book_fk = " + fi.id, null)) {
+			if (rs.moveToFirst()) {
+				// read DB
+				do {
+					execSQLIgnoreErrors("update tags set book_cnt = NULL, book_cnt_hier = NULL where id = " + rs.getLong(0));
+				} while (rs.moveToNext());
+			}
+			if (rs != null) rs.close();
+		} catch (Exception e) {
+			Log.e("cr3db", "exception while addTagsToBook", e);
+		}
+		//
+		String updStmt = "INSERT INTO book_tag (book_fk, tag_fk) values (?, ?)";
+		log.i("tagUpdateStmt: " + updStmt);
+		SQLiteStatement tagUpdateStmt = mDB.compileStatement(updStmt);
+		for (BookTag bt: bookTags) {
+			if (bt.isSelected) {
+				tagUpdateStmt.bindLong(1, fi.id);
+				tagUpdateStmt.bindLong(2, bt.getId());
+				try {
+					tagUpdateStmt.executeUpdateDelete();
+				} catch (Exception e) {
+					//do nothing
+				}
+				cnt++;
+				if (tagsSelectStatement.equals(""))
+					tagsSelectStatement = "SELECT " + fi.id + " as BOOK_ID, " +
+							bt.getId() + " as TAG_ID ";
+				else
+					tagsSelectStatement = tagsSelectStatement +
+							"UNION ALL SELECT " + fi.id + " as BOOK_ID, " +
+							bt.getId() + " as TAG_ID ";
+			}
+		}
+		if (cnt > 0) {
+			tagsSelectStatement = "(" + tagsSelectStatement + ")";
+			String delStmt = "DELETE FROM book_tag WHERE book_fk = " + fi.id +
+					" AND tag_fk NOT IN (SELECT TAG_ID FROM " + tagsSelectStatement + ")";
+			log.i("tagDeleteStmt: " + delStmt);
+			SQLiteStatement tagDeleteStmt = mDB.compileStatement(delStmt);
+			tagDeleteStmt.executeUpdateDelete();
+		} else {
+			String delStmt = "DELETE FROM book_tag WHERE book_fk = " + fi.id;
+			log.i("tagDeleteStmt: " + delStmt);
+			SQLiteStatement tagDeleteStmt = mDB.compileStatement(delStmt);
+			tagDeleteStmt.executeUpdateDelete();
+		}
+		loadTagsListStats();
+		return true;
+	}
+
+	public boolean loadTagsList(FileInfo parent) {
+		Log.i("cr3db", "loadTagsList()");
+		beginReading();
+		parent.clear();
+		loadTagsListStats();
+		ArrayList<FileInfo> list = new ArrayList<FileInfo>();
+		String sql = "SELECT tags.id, tags.name, tags.book_cnt, tags.book_cnt_hier as book_count FROM tags " +
+				" ORDER BY tags.name";
+		boolean found = loadItemList(list, sql, FileInfo.TAG_PREFIX, true);
+		//
+		sortItems(list, new ItemGroupFilenameExtractor(), true);
+		// remove duplicate titles
+		for (int i = list.size() - 1; i > 0; i--) {
+			String title = list.get(i).getFilename();
+			if (title == null) {
+				list.remove(i);
+				continue;
+			}
+			String prevTitle = list.get(i - 1).getFilename();
+			if (title.equals(prevTitle))
+				list.remove(i);
+		}
+		addGroupedItems2(parent, "", list, FileInfo.TAG_GROUP_PREFIX, new ItemGroupFilenameExtractor(), 1);
+		endReading();
+		return found;
+	}
+
 	public long getLongValue(String sql) {
 		return getLongValue(sql, mDB);
 	}
@@ -2358,8 +2588,6 @@ public class MainDB extends BaseDB {
 		}
 		return res;
 	}
-
-	;
 
 	public boolean loadSeriesList(FileInfo parent, String filterAuthor) {
 		Log.i("cr3db", "loadSeriesList()");
@@ -2551,7 +2779,7 @@ public class MainDB extends BaseDB {
 
 	public boolean loadTitleList(FileInfo parent) {
 		Log.i("cr3db", "loadTitleList()");
-		execSQLIgnoreErrors("UPDATE book SET title=filename WHERE title is null"); //ASDF - сделать по нормальному
+		execSQLIgnoreErrors("UPDATE book SET title=filename WHERE title is null"); //TODO - сделать по нормальному
 		// gather missed stats
 		try (Cursor rs = mDB.rawQuery(
 				"select bts.stat_level, bts.text_value, count(*) as cnt " +
@@ -2610,6 +2838,7 @@ public class MainDB extends BaseDB {
 			for (FileInfo fi : list) {
 				fi.pathname = FileInfo.TITLE_TAG_LEVEL + ":" + (lev + 1);
 				fi.setFilename(fi.getFilename() + "...");
+				fi.title = fi.getFilename();
 			}
 			// Non grouped filenames
 			String sCond = "";
@@ -2721,7 +2950,7 @@ public class MainDB extends BaseDB {
 		String authors = "-1";
 		for (Long l : listAuthors) authors = authors + ", " + l;
 		authors = " (" + authors + ") ";
-		String sql = READ_FILEINFO_SQL + " INNER JOIN book_author ON book_author.book_fk = b.id " +
+		String sql = READ_FILEINFO_SQL + " JOIN book_author ON book_author.book_fk = b.id " +
 				" WHERE (not (b.pathname like '@%')) and book_author.author_fk in " + authors + " ORDER BY b.title_upper";
 		return findBooks(sql, list);
 	}
@@ -2750,8 +2979,27 @@ public class MainDB extends BaseDB {
 	public boolean findGenreBooks(ArrayList<FileInfo> list, long genreId) {
 		if (!isOpened())
 			return false;
-		String sql = READ_FILEINFO_SQL + " INNER JOIN book_genre ON book_genre.book_fk = b.id " +
+		String sql = READ_FILEINFO_SQL + " JOIN book_genre ON book_genre.book_fk = b.id " +
 				" WHERE (not (b.pathname like '@%')) and book_genre.genre_fk = " + genreId + " ORDER BY b.title_upper";
+		return findBooks(sql, list);
+	}
+
+	public boolean findTagBooks(ArrayList<FileInfo> list, long tagId) {
+		if (!isOpened())
+			return false;
+		// get name by id
+		String tagName = "not_found";
+		try (Cursor rs = mDB.rawQuery(
+				"select t.name from tags t where id = " + tagId, null)) {
+			if (rs.moveToFirst()) tagName = rs.getString(0);
+			if (rs != null) rs.close();
+		} catch (Exception e) {
+			Log.e("cr3db", "exception while findTagBooks", e);
+		}
+		//\
+		String sql = READ_FILEINFO_SQL + " JOIN book_tag ON book_tag.book_fk = b.id " +
+				" JOIN tags on tags.id = book_tag.tag_fk " +
+				" WHERE (not (b.pathname like '@%')) and tags.name like " + quoteSqlString(tagName + "%") + " ORDER BY b.title_upper";
 		return findBooks(sql, list);
 	}
 
@@ -2767,7 +3015,7 @@ public class MainDB extends BaseDB {
 			}
 		}
 		if (series == 0L) return false;
-		String sql = READ_FILEINFO_SQL + " INNER JOIN series ON series.id = b.series_fk or series.id = b.publseries_fk " +
+		String sql = READ_FILEINFO_SQL + " JOIN series ON series.id = b.series_fk or series.id = b.publseries_fk " +
 				" WHERE (not (b.pathname like '@%')) and series.id = " + series + " ORDER BY b.series_number, b.title_upper";
 		return findBooks(sql, list);
 	}
@@ -2823,7 +3071,7 @@ public class MainDB extends BaseDB {
 	}
 
 	private Map<String, String> getGenres() {
-		HashMap<String, String> res = new HashMap<String, String>();
+		HashMap<String, String> res = new HashMap<>();
 		String lang = currentLanguage;
 		if (!StrUtils.isEmptyStr(lang)) lang = lang.substring(0, 2).toUpperCase();
 		String sql = "SELECT genre.id, genre.code, genre.name, genre_transl.name tr_name FROM genre " +
@@ -3113,6 +3361,121 @@ public class MainDB extends BaseDB {
 		}
 	}
 
+	//=======================================================================================
+	// Tag access code
+	//=======================================================================================
+
+	private SQLiteStatement tagStmtIns;
+	private SQLiteStatement tagStmtUpd;
+	private SQLiteStatement tagSelectStmt;
+	private SQLiteStatement tagDeleteStmt;
+	private SQLiteStatement tagBooksDeleteStmt;
+	private HashMap<String, Long> tagCache = new HashMap<String, Long>();
+
+	public Long getTagId(String tagName, String tagTitle, String oldTag) {
+		if (tagName == null || tagName.trim().length() == 0)
+			return null;
+		Long id = tagCache.get(tagName.trim());
+		if ((id != null) && (StrUtils.isEmptyStr(oldTag))) return id;
+		if ((id != null) && (!StrUtils.isEmptyStr(oldTag))) tagCache.remove(tagName.trim());
+		if (tagSelectStmt == null)
+			tagSelectStmt = mDB.compileStatement("SELECT id FROM tags WHERE name=?");
+		try {
+			tagSelectStmt.bindString(1, tagName.trim());
+			return tagSelectStmt.simpleQueryForLong();
+		} catch (Exception e) {
+			// not found
+		}
+		if (StrUtils.isEmptyStr(oldTag)) {
+			if (tagStmtIns == null)
+				tagStmtIns = mDB.compileStatement("INSERT INTO tags (id, name, title) VALUES (NULL,?,?)");
+			tagStmtIns.bindString(1, tagName.trim());
+			tagStmtIns.bindString(2, tagTitle.trim());
+			id = tagStmtIns.executeInsert();
+			tagCache.put(tagName.trim(), id);
+			return id;
+		} else {
+			if (tagStmtUpd == null)
+				tagStmtUpd = mDB.compileStatement("UPDATE tags set name = ?, title = ? WHERE name = ?");
+			tagStmtUpd.bindString(1, tagName.trim());
+			tagStmtUpd.bindString(2, tagTitle.trim());
+			tagStmtUpd.bindString(3, oldTag.trim());
+			tagStmtUpd.executeUpdateDelete();
+			if (tagSelectStmt == null)
+				tagSelectStmt = mDB.compileStatement("SELECT id FROM tags WHERE name=?");
+			try {
+				tagSelectStmt.bindString(1, tagName.trim());
+				long found_id = tagSelectStmt.simpleQueryForLong();
+				tagCache.put(tagName.trim(), found_id);
+				return found_id;
+			} catch (Exception e) {
+				// not found
+			}
+			return -1L;
+		}
+	}
+
+	public Long deleteTag(String tagName) {
+		if (tagName == null || tagName.trim().length() == 0)
+			return null;
+		Long id = tagCache.get(tagName.trim());
+		if (id == null) {
+			if (tagSelectStmt == null)
+				tagSelectStmt = mDB.compileStatement("SELECT id FROM tags WHERE name=?");
+			try {
+				tagSelectStmt.bindString(1, tagName.trim());
+				id = tagSelectStmt.simpleQueryForLong();
+			} catch (Exception e) {
+				// not found
+			}
+		} else
+			tagCache.remove(tagName.trim());
+		if (tagBooksDeleteStmt == null)
+			tagBooksDeleteStmt = mDB.compileStatement("DELETE FROM book_tag WHERE tag_fk=?");
+		tagBooksDeleteStmt.bindLong(1, id);
+		tagBooksDeleteStmt.executeUpdateDelete();
+		if (tagDeleteStmt == null)
+			tagDeleteStmt = mDB.compileStatement("DELETE FROM tags WHERE name=?");
+		tagDeleteStmt.bindString(1, tagName.trim());
+		tagDeleteStmt.executeUpdateDelete();
+		return id;
+	}
+
+	private Long[] getTagIds(String tagNames, String tagTitles) {
+		if (tagNames == null || tagNames.trim().length() == 0)
+			return null;
+		String[] names = tagNames.split("\\|");
+		String[] titles = tagTitles.split("\\|");
+		if (names == null || names.length == 0)
+			return null;
+		ArrayList<Long> ids = new ArrayList<>(names.length);
+		for (int i = 0; i < names.length; i++) {
+			String name = names[i];
+			String title = "";
+			if (titles.length > i) title = titles[i];
+			if (!StrUtils.isEmptyStr(name)) {
+				Long id = getTagId(name.trim(), title.trim(), "");
+				if (id != null)
+					ids.add(id);
+			}
+		}
+		if (ids.size() > 0)
+			return ids.toArray(new Long[ids.size()]);
+		return null;
+	}
+
+	public void saveBookTags(Long bookId, Long[] tags) {
+		if (tags == null || tags.length == 0)
+			return;
+		String insertQuery = "INSERT OR IGNORE INTO book_tag (book_fk, tag_fk) VALUES ";
+		for (Long id : tags) {
+			String sql = insertQuery + "(" + bookId + "," + id + ")";
+			mDB.execSQL(sql);
+		}
+	}
+
+	//\=======================================================================================
+
 	private static boolean eq(String s1, String s2) {
 		if (s1 != null)
 			return s1.equals(s2);
@@ -3392,7 +3755,8 @@ public class MainDB extends BaseDB {
 
 	private void clearBookStats(FileInfo fileInfo,
 								boolean authorsChanged, boolean genresChanged, boolean seriesChanged, boolean titleChanged, boolean folderChanged,
-								boolean bookDateNChanged, boolean docDateNChanged, boolean publYearNChanged, boolean fileCreateTimeChanged) {
+								boolean bookDateNChanged, boolean docDateNChanged, boolean publYearNChanged, boolean fileCreateTimeChanged,
+								boolean tagsChanged) {
 		if (authorsChanged) {
 			Long[] authorIds = getAuthorIds(fileInfo.getAuthors(), fileInfo.getAuthorExt());
 			if (authorIds != null)
@@ -3405,6 +3769,13 @@ public class MainDB extends BaseDB {
 			if (genreIds != null)
 				for (Long genreId : genreIds) {
 					execSQL("UPDATE genre set book_cnt = null WHERE id = " + genreId);
+				}
+		}
+		if (tagsChanged) {
+			Long[] tagsIds = getTagIds(fileInfo.getTags(), fileInfo.getTags()); // TODO: Later implement tag name
+			if (tagsIds != null)
+				for (Long tagId : tagsIds) {
+					execSQL("UPDATE tags set book_cnt = null, book_cnt_hier = null WHERE id = " + tagId);
 				}
 		}
 		if (seriesChanged) {
@@ -3470,6 +3841,7 @@ public class MainDB extends BaseDB {
 	private boolean save(FileInfo fileInfo) {
 		boolean authorsChanged = true;
 		boolean genresChanged = true;
+		boolean tagsChanged = true;
 		boolean seriesChanged = true;
 		boolean titleChanged = true;
 		boolean folderChanged = true;
@@ -3493,6 +3865,7 @@ public class MainDB extends BaseDB {
 				}
 				authorsChanged = !eq(fileInfo.getAuthors(), oldValue.getAuthors());
 				genresChanged = !eq(fileInfo.getGenres(), oldValue.getGenres());
+				tagsChanged = !eq(fileInfo.getTags(), oldValue.getTags());
 				//genresChanged = !eq(fileInfo.genres, oldValue.genres); //CR implementation
 				seriesChanged = (!eq(fileInfo.series, oldValue.series)) ||
 						(!eq(fileInfo.publseries, oldValue.publseries));
@@ -3517,6 +3890,7 @@ public class MainDB extends BaseDB {
 				fileInfo.id = h.insert();
 				authorsChanged = true;
 				genresChanged = true;
+				tagsChanged = true;
 				seriesChanged = true;
 				titleChanged = true;
 				folderChanged = true;
@@ -3527,7 +3901,7 @@ public class MainDB extends BaseDB {
 			}
 
 			clearBookStats(fileInfo, authorsChanged, genresChanged, seriesChanged, titleChanged, folderChanged,
-					bookDateNChanged, docDateNChanged, publYearNChanged, fileCreateTimeChanged);
+					bookDateNChanged, docDateNChanged, publYearNChanged, fileCreateTimeChanged, tagsChanged);
 
 			fileInfoCache.put(fileInfo);
 			if (fileInfo.id != null) {
@@ -3846,23 +4220,25 @@ public class MainDB extends BaseDB {
 	private static final String READ_FILEINFO_FIELDS =
 			"b.id AS id, pathname, " +
 					"f.name as path, " +
-					"filename, arcname, title, " +
+					"b.filename, b.arcname, b.title, " +
 					"(SELECT GROUP_CONCAT(a.name,'|') FROM author a JOIN book_author ba ON a.id=ba.author_fk WHERE ba.book_fk=b.id) as authors, " +
 					//CR implementation
 					//"(SELECT GROUP_CONCAT(g.code,'|') FROM genre g JOIN book_genre bg ON g.id=bg.genre_fk WHERE bg.book_fk=b.id) as genres, " +
 					"s.name as series_name, " +
-					"series_number, " +
-					"format, filesize, arcsize, " +
-					"create_time, last_access_time, flags, language, lang_from, lang_to, " +
-					"saved_with_ver, genre, annotation, srclang, bookdate, translator, docauthor, " +
-					"docprogram, docdate, docsrcurl, docsrcocr, docversion, publname, publisher, " +
-					"publcity,  publyear, publisbn, " +
+					"b.series_number, " +
+					"b.format, b.filesize, b.arcsize, " +
+					"b.create_time, b.last_access_time, b.flags, b.language, b.lang_from, b.lang_to, " +
+					"b.saved_with_ver, b.genre, b.annotation, b.srclang, b.bookdate, b.translator, b.docauthor, " +
+					"b.docprogram, b.docdate, b.docsrcurl, b.docsrcocr, b.docversion, b.publname, b.publisher, " +
+					"b.publcity,  b.publyear, b.publisbn, " +
 					"sp.name as publseries_name, " +
-					"publseries_number, file_create_time, sym_count, word_count, book_date_n, doc_date_n, publ_year_n, opds_link,  " +
+					"b.publseries_number, b.file_create_time, b.sym_count, b.word_count, b.book_date_n, b.doc_date_n, b.publ_year_n, b.opds_link,  " +
 					//KR implementation
 					"(SELECT GROUP_CONCAT(g.code,'|') FROM genre g JOIN book_genre bg ON g.id=bg.genre_fk WHERE bg.book_fk=b.id) as genre_list, " +
 					"crc32, domVersion, rendFlags, description, name_crc32, title_upper, " +
-					"(SELECT GROUP_CONCAT(a2.name_lfm,'|') FROM author a2 JOIN book_author ba2 ON a2.id=ba2.author_fk WHERE ba2.book_fk=b.id) as authors_lfm ";
+					"(SELECT GROUP_CONCAT(a2.name_lfm,'|') FROM author a2 JOIN book_author ba2 ON a2.id=ba2.author_fk WHERE ba2.book_fk=b.id) as authors_lfm, " +
+					"(SELECT GROUP_CONCAT(t.name,'|') FROM tags t JOIN book_tag bt ON t.id=bt.tag_fk WHERE bt.book_fk=b.id) as tag_list "
+			;
 
 	private static final String READ_FILEINFO_SQL =
 			"SELECT " +
@@ -3889,14 +4265,14 @@ public class MainDB extends BaseDB {
 					"  (SELECT  GROUP_CONCAT(i.val,', ') FROM identifiers i WHERE i.book=b.id and i.type = 'uri') as docsrcurl, " +
 					"  null as docsrcocr, null as docversion, null as publname, null as publisher, " +
 					"  null as publcity, b.pubdate as publyear, " +
-					"	coalesce((SELECT  GROUP_CONCAT(i.val,', ') FROM identifiers i WHERE i.book=b.id and i.type = 'isbn'), b.isbn) as publisbn, " +
+					"  coalesce((SELECT  GROUP_CONCAT(i.val,', ') FROM identifiers i WHERE i.book=b.id and i.type = 'isbn'), b.isbn) as publisbn, " +
 					"  (SELECT GROUP_CONCAT(s.name,'|') FROM books_series_link bsl JOIN series s ON s.id=bsl.series WHERE bsl.book=b.id) as publseries_name, " +
 					"  0 as publseries_number, b.timestamp as file_create_time, 0 as sym_count, 0 as word_count, " +
 					"  null as book_date_n, null as doc_date_n, null as publ_year_n, null as opds_link, " +
 					"  (SELECT GROUP_CONCAT(t.name,'|') FROM books_tags_link btl JOIN tags t on t.id = btl.tag WHERE btl.book=b.id) as genre_list, " +
 					"  null as crc32, null as domVersion, null as rendFlags, " +
 					"  (SELECT GROUP_CONCAT(c.text,'|') FROM comments c WHERE c.book=b.id) as description, " +
-					"  null as name_crc32, null as title_upper, '' as authors_lfm " +
+					"  null as name_crc32, null as title_upper, '' as authors_lfm, '' as tag_list " +
 					"	from books b " +
 					"	join data d on d.book = b.id ";
 
@@ -3959,6 +4335,7 @@ public class MainDB extends BaseDB {
 		fileInfo.name_crc32 = rs.getString(i++);
 		String titleUpper = rs.getString(i++);
 		fileInfo.setAuthorsLFM(rs.getString(i++));
+		fileInfo.tag_list = rs.getString(i++);
 		fileInfo.isArchive = fileInfo.arcname != null;
 	}
 
@@ -4222,7 +4599,7 @@ public class MainDB extends BaseDB {
 //					"  WHERE bg.genre_fk=g.id " +
 //					") as book_count " +
 //					"FROM genre g " +
-//					"INNER JOIN genre_hier gh ON gh.genre_fk = g.id " +
+//					"JOIN genre_hier gh ON gh.genre_fk = g.id " +
 //					"WHERE gh.group_fk=" + genreRecord.getId();
 //			Log.d("cr3db", "sql: " + sql );
 //			try (Cursor rs = mDB.rawQuery(sql, null)) {
@@ -4495,6 +4872,7 @@ public class MainDB extends BaseDB {
 		execSQLIgnoreErrors("DELETE FROM bookmark WHERE book_fk=" + bookId);
 		execSQLIgnoreErrors("DELETE FROM book_author WHERE book_fk=" + bookId);
 		execSQLIgnoreErrors("DELETE FROM book_genre WHERE book_fk=" + bookId);
+		execSQLIgnoreErrors("DELETE FROM book_tag WHERE book_fk=" + bookId);
 		execSQLIgnoreErrors("DELETE FROM book WHERE id=" + bookId);
 		return bookId;
 	}
@@ -4599,6 +4977,7 @@ public class MainDB extends BaseDB {
 		execSQLIgnoreErrors("update book_titles_stats set book_cnt = null");
 		execSQLIgnoreErrors("update author set book_cnt = null");
 		execSQLIgnoreErrors("update genre set book_cnt = null");
+		execSQLIgnoreErrors("update tags set book_cnt = null, book_cnt_hier = null");
 		execSQLIgnoreErrors("update series set book_cnt = null");
 	}
 
@@ -4608,7 +4987,10 @@ public class MainDB extends BaseDB {
 		execSQLIgnoreErrors("delete from author where id not in (select author_fk from book_author)");
 		execSQLIgnoreErrors("delete from book_genre where book_fk not in (select id from book)");
 		execSQLIgnoreErrors("delete from book_genre where genre_fk not in (select id from genre)");
+		execSQLIgnoreErrors("delete from book_tag where book_fk not in (select id from book)");
+		execSQLIgnoreErrors("delete from book_tag where tag_fk not in (select id from tags)");
 		execSQLIgnoreErrors("delete from genre where id not in (select genre_fk from book_genre)");
+		execSQLIgnoreErrors("delete from tags where id not in (select tag_fk from book_tag)");
 		execSQLIgnoreErrors("delete from series where id not in (select series_fk from book) " +
 				" and id not in (select publseries_fk from book)");
 	}
@@ -4635,10 +5017,12 @@ public class MainDB extends BaseDB {
 		sqlS = sqlS + " or (pathname like " + quoteSqlString("@%") + "))";
 		execSQLIgnoreErrors("delete from book_author where book_fk in (" + sqlS + ")");
 		execSQLIgnoreErrors("delete from book_genre where book_fk in (" + sqlS + ")");
+		execSQLIgnoreErrors("delete from book_tag where book_fk in (" + sqlS + ")");
 		execSQLIgnoreErrors("delete from bookmark where book_fk in (" + sqlS + ")");
 		execSQLIgnoreErrors("delete from search_history where book_fk in (" + sqlS + ")");
 		execSQLIgnoreErrors("delete from author where id not in (select author_fk from book_author)");
 		execSQLIgnoreErrors("delete from genre where id not in (select genre_fk from book_genre)");
+		execSQLIgnoreErrors("delete from tags where id not in (select tag_fk from book_tag)");
 		execSQLIgnoreErrors("delete from series where id not in (select series_fk from book) and id not in (select publseries_fk from book)");
 		execSQLIgnoreErrors("delete from folder where id not in (select folder_fk from book)");
 		execSQLIgnoreErrors(sqlD);
@@ -4694,10 +5078,12 @@ public class MainDB extends BaseDB {
 		String sqlS = "select id from book where (pathname like '@%') ";
 		execSQLIgnoreErrors("delete from book_author where book_fk in (" + sqlS + ")");
 		execSQLIgnoreErrors("delete from book_genre where book_fk in (" + sqlS + ")");
+		execSQLIgnoreErrors("delete from book_tag where book_fk in (" + sqlS + ")");
 		execSQLIgnoreErrors("delete from bookmark where book_fk in (" + sqlS + ")");
 		execSQLIgnoreErrors("delete from search_history where book_fk in (" + sqlS + ")");
 		execSQLIgnoreErrors("delete from author where id not in (select author_fk from book_author)");
 		execSQLIgnoreErrors("delete from genre where id not in (select genre_fk from book_genre)");
+		execSQLIgnoreErrors("delete from tags where id not in (select tag_fk from book_tag)");
 		execSQLIgnoreErrors("delete from series where id not in (select series_fk from book) and id not in (select publseries_fk from book)");
 		execSQLIgnoreErrors("delete from folder where id not in (select folder_fk from book)");
 		execSQLIgnoreErrors(sqlD);
@@ -4732,6 +5118,12 @@ public class MainDB extends BaseDB {
 			if (rs.moveToFirst()) wasRec = rs.getLong(0);
 		}
 		ls.genresCnt = wasRec;
+		wasRec = 0L;
+		sql = "SELECT count(*) as cnt FROM tags";
+		try (Cursor rs = mDB.rawQuery(sql, null)) {
+			if (rs.moveToFirst()) wasRec = rs.getLong(0);
+		}
+		ls.tagCnt = wasRec;
 		wasRec = 0L;
 		sql = "SELECT count(*) as cnt FROM series";
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
@@ -4955,6 +5347,7 @@ public class MainDB extends BaseDB {
 	public DicStruct findInOfflineDictDic(String searchStr, String langFrom, String langTo,
 										  boolean extended) {
 		DicStruct dsl = new DicStruct();
+		dsl.srcText = searchStr;
 		ArrayList<String> tDirs1 = Engine.getDataDirsExt(Engine.DataDirType.OfflineDicsDirs, true);
 		if (tDirs1.size()>0) {
 			File f = new File(tDirs1.get(0) + "/dic_conf.json");

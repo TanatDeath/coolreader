@@ -145,6 +145,7 @@ public class LingueeTranslate {
 					Document doc = Jsoup.parse(url, 5000);
 
 					DicStruct dsl = new DicStruct();
+					dsl.srcText = s;
 
 					Elements line_lemma_descs = doc.select("h2.line.lemma_desc");
 					for (Element line_lemma_desc : line_lemma_descs) {

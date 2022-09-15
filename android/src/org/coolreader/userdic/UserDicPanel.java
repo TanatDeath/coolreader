@@ -39,7 +39,9 @@ public class UserDicPanel extends LinearLayout implements Settings {
 		private LinearLayout content;
 		private TextView lblWordFound;
 		private TextView lblStar;
-		private ArrayList<TextView> arrLblWords = new ArrayList<TextView>();
+		private ArrayList<TextView> arrLblWords = new ArrayList<>();
+
+	public static String wordsJoinedLast = "###";
 
 	public ArrayList<UserDicEntry> getArrUdeWords() {
 		return arrUdeWords;
@@ -484,6 +486,14 @@ public class UserDicPanel extends LinearLayout implements Settings {
 				ude.setDic_word_translate("#~#~" + mCoolReader.getString(R.string.book_styles));
 				this.arrUdeWords.add(0, ude);
 			}
+			String wordsJoined = "";
+			for (UserDicEntry ude:arrUdeWords) {
+				wordsJoined = wordsJoined + "#~!#~" + ude.getDic_word();
+			}
+			boolean bEqUdes = wordsJoinedLast.equals(wordsJoined);
+			boolean bUdesEmpty = StrUtils.getNonEmptyStr(wordsJoined, true).equals("") &&
+					StrUtils.getNonEmptyStr(wordsJoinedLast, true).equals("");
+			wordsJoinedLast = StrUtils.getNonEmptyStr(wordsJoined, false);
 			updateViews();
 			int showUD = mCoolReader.settings().getInt(Settings.PROP_APP_SHOW_USER_DIC_PANEL, 0);
 			if ((!arrUdeWords.isEmpty()) && (showUD > 0)) {
@@ -495,22 +505,27 @@ public class UserDicPanel extends LinearLayout implements Settings {
 					if (mCoolReader.getmReaderView().flgHighlightUserDic) {
 						try {
 							mCoolReader.getmReaderView().selectionStarted = true;
-							mCoolReader.getmReaderView().toggleScreenUpdateModeMode(false);
-							mCoolReader.getmReaderView().clearSelection();
+							mCoolReader.getmReaderView().toggleScreenUpdateModeMode(true);
+							mCoolReader.getmReaderView().clearSelection(false, false);
 							mCoolReader.getmReaderView().findText(mCoolReader.getmReaderView().getCurrentPositionBookmark(),
 									"{{curPage}}" + wrds, false, true, true);
 						} finally {
-							mCoolReader.getmReaderView().selectionStarted = true;
-							mCoolReader.getmReaderView().toggleScreenUpdateModeMode(false);
+							mCoolReader.getmReaderView().selectionStarted = false;
+							mCoolReader.getmReaderView().needSwitchMode = true;
 						}
 					}
 				}
-			} else if (showUD > 0)
-				mCoolReader.getmReaderView().clearSelection();
+			} else if (showUD > 0) {
+				if (!bUdesEmpty) {
+					mCoolReader.getmReaderView().selectionStarted = false;
+					mCoolReader.getmReaderView().clearSelection(false, false);
+					//mCoolReader.getmReaderView().needSwitchMode = true;
+				}
+			}
 		}
 
 		private void updateViews() {
-			String sWC = mCoolReader.getString(R.string.wc) +": "+String.valueOf(this.wc);
+			String sWC = mCoolReader.getString(R.string.wc) + ": " + this.wc;
 			if (this.wc == 0) sWC="";
 			String sAll = this.lblWordFound.getText().toString();
 			for (TextView tv: arrLblWords) {

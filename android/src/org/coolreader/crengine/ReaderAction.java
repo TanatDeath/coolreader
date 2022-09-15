@@ -290,6 +290,7 @@ public class ReaderAction {
 	public final static ReaderAction EINK_ONYX_RECENT = new ReaderAction("EINK_ONYX_RECENT", 0, R.string.action_eink_onyx_recent, ReaderCommand.DCMD_EINK_ONYX_RECENT, 1 , 0, EINK_ONYX_HOME, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_square);
 	public final static ReaderAction EINK_ONYX_REPAINT_SCREEN = new ReaderAction("EINK_ONYX_REPAINT_SCREEN", 0, R.string.action_eink_onyx_repaint_screen, ReaderCommand.DCMD_EINK_ONYX_REPAINT_SCREEN, 1 , 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_refresh_screen);
 	public final static ReaderAction EINK_ONYX_SCREENSHOT = new ReaderAction("EINK_ONYX_SCREENSHOT", 0, R.string.action_eink_onyx_screenshot, ReaderCommand.DCMD_EINK_ONYX_SCREENSHOT, 1 , 0, EINK_ONYX_REPAINT_SCREEN, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_screenshot);
+	public final static ReaderAction ADD_BOOK_TAGS = new ReaderAction("ADD_BOOK_TAGS", 0, R.string.add_book_tags, ReaderCommand.DCMD_ADD_BOOK_TAGS, 1 , 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_tag);
 
 	private final static ReaderAction[] AVAILABLE_ACTIONS;
 	public final static HashMap<String, ReaderAction> OPTIONS_ACTIONS = new HashMap<>();
@@ -471,7 +472,8 @@ public class ReaderAction {
 				SAVE_LOGCAT,
 				EXPERIMENAL_FEATURE,
 				BRIGHTNESS_DOWN,
-				BRIGHTNESS_UP
+				BRIGHTNESS_UP,
+				ADD_BOOK_TAGS
 				// calibre will only be available from rootview
 		};
 		if (BuildConfig.GSUITE_AVAILABLE && DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {

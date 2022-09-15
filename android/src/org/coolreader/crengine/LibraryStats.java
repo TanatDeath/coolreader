@@ -5,4 +5,5 @@ public class LibraryStats {
 	public Long seriesCnt = 0L;
 	public Long genresCnt = 0L;
 	public Long entriesCnt = 0L;
+	public Long tagCnt = 0L;
 }

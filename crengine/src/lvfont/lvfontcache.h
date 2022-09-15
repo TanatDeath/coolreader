@@ -79,7 +79,7 @@ public:
             if (doc == -1 || doc == documentId) // skip document fonts
                 hash = hash + _registered_list[i]->getDef()->getHash();
         }
-        return 0;
+        return hash;
     }
 
     virtual void getFaceList(lString32Collection &list) {

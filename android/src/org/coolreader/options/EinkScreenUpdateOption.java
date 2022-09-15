@@ -60,7 +60,7 @@ public class EinkScreenUpdateOption extends SubmenuOption {
 	};
 
 	int[] mEinkFullScreenUpdateMode = new int[] {
-			0, 1, 2, 3, 4, 5
+			0, 1, 2, 3, 4, 5, 6
 	};
 
 	int[] mEinkFullScreenUpdateModeTitles = new int[] {
@@ -69,10 +69,12 @@ public class EinkScreenUpdateOption extends SubmenuOption {
 			R.string.eink_full_update_method2,
 			R.string.eink_full_update_method3,
 			R.string.eink_full_update_method4,
-			R.string.eink_full_update_method5
+			R.string.eink_full_update_method5,
+			R.string.eink_full_update_method6
 	};
 
 	int[] mEinkFullScreenUpdateModeAddInfos = new int[] {
+			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
@@ -229,6 +231,9 @@ public class EinkScreenUpdateOption extends SubmenuOption {
 			if (!intervalAdded) listView.add(optionInterval);
 			optionMode.setEnabled(!mActivity.getEinkScreen().isAppOptimizationEnabled());
 			optionInterval.setEnabled(!mActivity.getEinkScreen().isAppOptimizationEnabled());
+			listView.add(new BoolOption(mOwner, mActivity.getString(R.string.switch_to_a2), Settings.PROP_APP_EINK_ONYX_SWITCH_TO_A2,
+					mActivity.getString(R.string.switch_to_a2_add_info), this.lastFilteredValue, false).setDefaultValue("1").
+					noIcon());
 		}
 		if (DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
 			listView.addExt(new ListOption(mOwner, mActivity.getString(R.string.options_screen_blackpage_interval), Settings.PROP_APP_SCREEN_BLACKPAGE_INTERVAL,
@@ -266,6 +271,8 @@ public class EinkScreenUpdateOption extends SubmenuOption {
 		for (int i: mEinkOnyxExtraDelayFullRefreshTitles) if (i > 0) this.updateFilteredMark(mActivity.getString(i));
 		this.updateFilteredMark(mActivity.getString(R.string.eink_onyx_full_update), Settings.PROP_APP_EINK_ONYX_FULL_SCREEN_UPDATE_METHOD,
 				mActivity.getString(R.string.eink_onyx_full_update_add_info));
+		this.updateFilteredMark(mActivity.getString(R.string.switch_to_a2), Settings.PROP_APP_EINK_ONYX_SWITCH_TO_A2,
+				mActivity.getString(R.string.switch_to_a2_add_info));
 		return this.lastFiltered;
 	}
 

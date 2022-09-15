@@ -222,6 +222,8 @@ public class FilebrowserOption extends SubmenuOption {
 				mActivity.getString(R.string.option_add_info_empty_text));
 		this.updateFilteredMark(mActivity.getString(R.string.sec_group_genres), Settings.PROP_APP_FILE_BROWSER_SEC_GROUP_GENRES,
 				mActivity.getString(R.string.option_add_info_empty_text));
+		this.updateFilteredMark(mActivity.getString(R.string.sec_group_tags), Settings.PROP_APP_FILE_BROWSER_SEC_GROUP_TAGS,
+				mActivity.getString(R.string.option_add_info_empty_text));
 		this.updateFilteredMark(mActivity.getString(R.string.sec_group_rating), Settings.PROP_APP_FILE_BROWSER_SEC_GROUP_RATING,
 				mActivity.getString(R.string.option_add_info_empty_text));
 		this.updateFilteredMark(mActivity.getString(R.string.sec_group_search), Settings.PROP_APP_FILE_BROWSER_SEC_GROUP_SEARCH,

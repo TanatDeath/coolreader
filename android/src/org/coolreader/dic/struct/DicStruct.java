@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DicStruct {
+	public String srcText;
 	public List<Lemma> lemmas = new ArrayList<>();
+	public List<SuggestionLine> suggs = new ArrayList<>();
 	public List<String> elementsL = new ArrayList<>();
 	public List<String> elementsR = new ArrayList<>();
 
@@ -19,6 +21,7 @@ public class DicStruct {
 				cnt += tl.exampleLines.size();
 			}
 		}
+		cnt += suggs.size();
 		cnt += Math.max(elementsL.size(), elementsR.size());
 		return cnt;
 	}
@@ -68,6 +71,10 @@ public class DicStruct {
 				}
 			}
 		}
+		for (SuggestionLine sugg: suggs) {
+			if (num == cnt) return sugg;
+			cnt++;
+		}
 		for (int i = 0; i < Math.max(elementsL.size(), elementsR.size()); i++) {
 			if (num == cnt) {
 				String leftPart = null;
@@ -90,7 +97,6 @@ public class DicStruct {
 			}
 			cnt++;
 		}
-		cnt += Math.max(elementsL.size(), elementsR.size());
 		return cnt;
 	}
 
@@ -151,7 +157,7 @@ public class DicStruct {
 	}
 
 	public String getAsJSON() {
-		return ""; // to develop
+		return ""; //TODO: to develop
 	}
 
 }
