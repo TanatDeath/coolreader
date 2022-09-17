@@ -746,6 +746,20 @@ public class SelectionToolbarDlg {
 			for (final Dictionaries.DictInfo di: mActivity.mDictionaries.getAddDicts()) {
 				diAllDicts.add(di);
 			}
+			List<Dictionaries.DictInfo> dicts = Dictionaries.getDictList(mActivity);
+			for (Dictionaries.DictInfo dict : dicts) {
+				boolean bUseDic = mReaderView.getSettings().getBool(Settings.PROP_DIC_LIST_MULTI+"."+dict.id,false);
+				if (bUseDic) {
+					boolean bWas = false;
+					for (Dictionaries.DictInfo di: diAllDicts) {
+						if (di.id.equals(dict.id)) {
+							bWas = true;
+							break;
+						}
+					}
+					if (!bWas) diAllDicts.add(dict);
+				}
+			}
 			ArrayList<String> added = new ArrayList<>();
 			// add lang pos
 			String sFrom = mReaderView.mBookInfo.getFileInfo().lang_from;

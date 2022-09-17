@@ -191,7 +191,7 @@ public class Dictionaries {
 	public DictInfo currentDictionary8;
 	public DictInfo currentDictionary9;
 	public DictInfo currentDictionary10;
-	public List<DictInfo> diRecent = new ArrayList<DictInfo>();
+	public List<DictInfo> diRecent = new ArrayList<>();
 
 	public List<DictInfo> getAddDicts() {
 		List<DictInfo> diAddDicts = new ArrayList<DictInfo>();

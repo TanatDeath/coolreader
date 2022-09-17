@@ -21,11 +21,9 @@ import org.coolreader.utils.Utils;
 
 public class SkippedResOption extends SubmenuOption {
 
-	private ListView listView;
-
 	final Context mContext;
 
-	public SkippedResOption(Context context, OptionOwner owner, String label, String addInfo, String filter ) {
+	public SkippedResOption(Context context, OptionOwner owner, String label, String addInfo, String filter) {
 		super(owner, label, Settings.PROP_SKIPPED_RES, addInfo,filter);
 		mContext = context;
 	}
@@ -35,9 +33,9 @@ public class SkippedResOption extends SubmenuOption {
 			return;
 		BaseDialog dlg = new BaseDialog("SkippedResDialog", mActivity, label, false, false);
 		View view = mInflater.inflate(R.layout.searchable_listview, null);
-		LinearLayout viewList = (LinearLayout)view.findViewById(R.id.lv_list);
-		final EditText tvSearchText = (EditText)view.findViewById(R.id.search_text);
-		ImageButton ibSearch = (ImageButton)view.findViewById(R.id.btn_search);
+		LinearLayout viewList = view.findViewById(R.id.lv_list);
+		final EditText tvSearchText = view.findViewById(R.id.search_text);
+		ImageButton ibSearch = view.findViewById(R.id.btn_search);
 		final OptionsListView listView = new OptionsListView(mContext, this);
 		tvSearchText.addTextChangedListener(new TextWatcher() {
 			@Override
@@ -61,8 +59,8 @@ public class SkippedResOption extends SubmenuOption {
 		tvSearchText.setHintTextColor(colorIcon128);
 		if (isEInk) Utils.setSolidEditEink(tvSearchText);
 
-		((CoolReader)mActivity).readResizeHistory();
-		for (ResizeHistory rh: ((CoolReader)mActivity).getResizeHist()) {
+		(mActivity).readResizeHistory();
+		for (ResizeHistory rh: mActivity.getResizeHist()) {
 			String sProp = rh.X+"."+rh.Y;
 			String sText = rh.X+" x "+rh.Y+" ("+ Utils.formatDate2(mActivity, rh.lastSet)+" "+
 					Utils.formatTime(mActivity, rh.lastSet)+")";
@@ -76,12 +74,11 @@ public class SkippedResOption extends SubmenuOption {
 		});
 		dlg.setView(view);
 		ibSearch.requestFocus();
-		//dlg.setView(listView);
 		dlg.show();
 	}
 
 	public boolean updateFilterEnd() {
-		for (ResizeHistory rh: ((CoolReader)mActivity).getResizeHist()) {
+		for (ResizeHistory rh: mActivity.getResizeHist()) {
 			String sProp = rh.X+"."+rh.Y;
 			String sText = rh.X+" x "+rh.Y+" ("+Utils.formatDate2(mActivity, rh.lastSet)+" "+
 					Utils.formatTime(mActivity, rh.lastSet)+")";

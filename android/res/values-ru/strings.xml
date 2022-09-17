@@ -1250,6 +1250,10 @@
     <string name="dictionary_settings">Словари</string>
     <string name="filebrowser_settings">Файловый браузер и библиотека</string>
     <string name="rare_settings">Экспериментальные / редкие параметры</string>
+    <string name="add_dics_settings">Дополнительные словари</string>
+    <string name="user_dic_settings">Личный словарь и история переводов</string>
+    <string name="dic_online_services_settings">Онлайн службы</string>
+    <string name="dics_on_panel_settings">Словари на быстрой панели</string>
     <string name="page_flipping_settings">Листание и автолистание</string>
     <string name="tts_settings">Text-to-Speech</string>
     <string name="backlight_settings">Яркость экрана и кнопок</string>
@@ -1541,7 +1545,8 @@
     <string name="user_dic_panel0">Отключена</string>
     <string name="user_dic_panel1">Без прокрутки</string>
     <string name="user_dic_panel2">С прокруткой</string>
-    <string name="dict_dont_save_if_more">Не сохранять в историю переводов в словаре, если слов больше чем (0 = сохранять всегда)</string>
+    <string name="dict_dont_save_if_more">Лимит слов при сохранении в историю переводов</string>
+    <string name="dict_dont_save_if_more_add_info">Не сохранять в историю переводов в словаре, если слов больше чем (0 = сохранять всегда)</string>
     <string name="litres_empty_login_or_passw">Логин или пароль для Литрес не заданы - укажите их в облачных настройках</string>
     <string name="search_books">Поиск книг</string>
     <string name="litres_profile">Текущий баланс</string>

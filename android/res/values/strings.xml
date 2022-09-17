@@ -1277,6 +1277,10 @@
     <string name="dictionary_settings">Dictionaries</string>
     <string name="filebrowser_settings">File browser and library</string>
     <string name="rare_settings">Rare and experimental</string>
+    <string name="add_dics_settings">Additional dictionaries</string>
+    <string name="user_dic_settings">User dictionary and translate history</string>
+    <string name="dic_online_services_settings">Online services</string>
+    <string name="dics_on_panel_settings">Dictionaries on quick panel</string>
     <string name="page_flipping_settings">Page flipping and autoflipping</string>
     <string name="tts_settings">Text-to-speech</string>
     <string name="backlight_settings">Screen and keys backlight</string>
@@ -1581,7 +1585,8 @@
     <string name="user_dic_panel0">Disabled</string>
     <string name="user_dic_panel1">Without scroll</string>
     <string name="user_dic_panel2">With scroll</string>
-    <string name="dict_dont_save_if_more">Do not save to dictionary search history if more than words (0 = save anyway)</string>
+    <string name="dict_dont_save_if_more">Translation history saving word limit</string>
+    <string name="dict_dont_save_if_more_add_info">Do not save to dictionary translation history if (selected) more than words (0 = save anyway)</string>
     <string name="litres_empty_login_or_passw">Litres login or password is not specified - set it up in cloud settings</string>
     <string name="search_books">Search books</string>
     <string name="litres_profile">Current balance</string>

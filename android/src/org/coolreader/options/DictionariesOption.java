@@ -1,5 +1,7 @@
 package org.coolreader.options;
 
+import android.content.Context;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -20,34 +22,6 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class DictionariesOption extends SubmenuOption {
-
-	int[] mUserDicPanelKind = new int[] {
-			0, 1, 2
-	};
-
-	int[] mUserDicPanelKindTitles = new int[] {
-			R.string.user_dic_panel0, R.string.user_dic_panel1, R.string.user_dic_panel2
-	};
-
-	int[] mUserDicPanelKindAddInfos = new int[] {
-			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
-	};
-
-	int[] mUserDicContent = new int[] {
-			0, 1
-	};
-
-	int[] mUserDicContentTitles = new int[] {
-			R.string.user_dic_content_0, R.string.user_dic_content_1
-	};
-
-	int[] mUserDicContentInfos = new int[] {
-			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
-	};
-
-	int[] mWordsDontSaveIfMore = new int[] {
-			0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20
-	};
 
 	final BaseActivity mActivity;
 	final CoolReader mCoolReader;
@@ -125,30 +99,31 @@ public class DictionariesOption extends SubmenuOption {
 		listView.add(new DicListOption(mOwner, mActivity.getString(R.string.options_app_dictionary2), Settings.PROP_APP_DICTIONARY_2,
 				mActivity.getString(R.string.options_app_dictionary2_add_info), this.lastFilteredValue).
 				setIconIdByAttr(R.attr.attr_icons8_google_translate_2, R.drawable.icons8_google_translate_2));
-		listView.add(new DicListOption(mOwner, mActivity.getString(R.string.options_app_dictionary)+" 3", Settings.PROP_APP_DICTIONARY_3,
-				mActivity.getString(R.string.options_app_dictionary3_add_info), this.lastFilteredValue).
-				setIconIdByAttr(R.attr.attr_icons8_google_translate_2, R.drawable.icons8_google_translate_2));
-		listView.add(new DicListOption(mOwner, mActivity.getString(R.string.options_app_dictionary)+" 4", Settings.PROP_APP_DICTIONARY_4,
-				mActivity.getString(R.string.options_app_dictionary3_add_info), this.lastFilteredValue).
-				setIconIdByAttr(R.attr.attr_icons8_google_translate_2, R.drawable.icons8_google_translate_2));
-		listView.add(new DicListOption(mOwner, mActivity.getString(R.string.options_app_dictionary)+" 5", Settings.PROP_APP_DICTIONARY_5,
-				mActivity.getString(R.string.options_app_dictionary3_add_info), this.lastFilteredValue).
-				setIconIdByAttr(R.attr.attr_icons8_google_translate_2, R.drawable.icons8_google_translate_2));
-		listView.add(new DicListOption(mOwner, mActivity.getString(R.string.options_app_dictionary)+" 6", Settings.PROP_APP_DICTIONARY_6,
-				mActivity.getString(R.string.options_app_dictionary3_add_info), this.lastFilteredValue).
-				setIconIdByAttr(R.attr.attr_icons8_google_translate_2, R.drawable.icons8_google_translate_2));
-		listView.add(new DicListOption(mOwner, mActivity.getString(R.string.options_app_dictionary)+" 7", Settings.PROP_APP_DICTIONARY_7,
-				mActivity.getString(R.string.options_app_dictionary3_add_info), this.lastFilteredValue).
-				setIconIdByAttr(R.attr.attr_icons8_google_translate_2, R.drawable.icons8_google_translate_2));
-		listView.add(new DicListOption(mOwner, mActivity.getString(R.string.options_app_dictionary)+" 8", Settings.PROP_APP_DICTIONARY_8,
-				mActivity.getString(R.string.options_app_dictionary3_add_info), this.lastFilteredValue).
-				setIconIdByAttr(R.attr.attr_icons8_google_translate_2, R.drawable.icons8_google_translate_2));
-		listView.add(new DicListOption(mOwner, mActivity.getString(R.string.options_app_dictionary)+" 9", Settings.PROP_APP_DICTIONARY_9,
-				mActivity.getString(R.string.options_app_dictionary3_add_info), this.lastFilteredValue).
-				setIconIdByAttr(R.attr.attr_icons8_google_translate_2, R.drawable.icons8_google_translate_2));
-		listView.add(new DicListOption(mOwner, mActivity.getString(R.string.options_app_dictionary)+" 10", Settings.PROP_APP_DICTIONARY_10,
-				mActivity.getString(R.string.options_app_dictionary3_add_info), this.lastFilteredValue).
-				setIconIdByAttr(R.attr.attr_icons8_google_translate_2, R.drawable.icons8_google_translate_2));
+		AddDicsOption adddicso = (AddDicsOption) new AddDicsOption(this.mActivity, mOptionsDialog, mOwner,
+				mActivity.getString(R.string.add_dics_settings),
+				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue)
+				.setIconIdByAttr(R.attr.attr_icons8_google_translate, R.drawable.icons8_google_translate);
+		adddicso.updateFilterEnd();
+		listView.add(adddicso);
+		UserDicOption userdicso = (UserDicOption) new UserDicOption(this.mActivity, mOptionsDialog, mOwner,
+				mActivity.getString(R.string.user_dic_settings),
+				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue)
+				.setIconIdByAttr(R.attr.attr_icons8_user_dic_panel, R.drawable.icons8_user_dic_panel);
+		userdicso.updateFilterEnd();
+		listView.add(userdicso);
+		DicOnlineSevicesOption diconlineo = (DicOnlineSevicesOption) new DicOnlineSevicesOption(this.mActivity, mOptionsDialog, mOwner,
+				mActivity.getString(R.string.dic_online_services_settings),
+				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue)
+				.setIconIdByAttr(R.attr.attr_icons8_web_search, R.drawable.icons8_web_search);
+		diconlineo.updateFilterEnd();
+		listView.add(diconlineo);
+		DicMultiListOption dicmlo = (DicMultiListOption) new DicMultiListOption(mOptionsDialog.getContext(),
+				mOwner,
+				mActivity.getString(R.string.dics_on_panel_settings),
+				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue)
+				.setIconIdByAttr(R.attr.attr_icons8_dic_list, R.drawable.icons8_dic_list);
+		dicmlo.updateFilterEnd();
+		listView.add(dicmlo);
 		listView.add(new ClickOption(mOwner, mActivity.getString(R.string.quick_translation_dirs),
 				Settings.PROP_APP_QUICK_TRANSLATION_DIRS, mActivity.getString(R.string.quick_translation_dirs_info), this.lastFilteredValue,
 				(view, optionLabel, optionValue) -> {
@@ -224,111 +199,6 @@ public class DictionariesOption extends SubmenuOption {
 				}, false).
 				setIconIdByAttr(R.attr.attr_icons8_airplane_mode_on, R.drawable.icons8_airplane_mode_on));
 		listView.add(OptionsDialog.getOption(Settings.PROP_APP_DICT_LONGTAP_CHANGE, this.lastFilteredValue));
-		listView.add(new ListOption(mOwner, mActivity.getString(R.string.options_app_show_user_dic_panel), Settings.PROP_APP_SHOW_USER_DIC_PANEL,
-				mActivity.getString(R.string.options_app_show_user_dic_panel_add_info), this.lastFilteredValue).
-				add(mUserDicPanelKind, mUserDicPanelKindTitles, mUserDicPanelKindAddInfos).
-				setDefaultValue("0").
-				setIconIdByAttr(R.attr.attr_icons8_user_dic_panel,R.drawable.icons8_user_dic_panel));
-		listView.add(new ListOption(mOwner, mActivity.getString(R.string.user_dic_content), Settings.PROP_APP_SHOW_USER_DIC_CONTENT,
-				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
-				add(mUserDicContent, mUserDicContentTitles, mUserDicContentInfos).setDefaultValue("0").noIcon());
-		FlowListOption optFontSize = new FlowListOption(mOwner, mActivity.getString(R.string.options_font_size_user_dic), Settings.PROP_FONT_SIZE_USER_DIC,
-				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue);
-		for (int i = 0; i <= OptionsDialog.mFontSizes.length-1; i++) optFontSize.add(""+OptionsDialog.mFontSizes[i], ""+OptionsDialog.mFontSizes[i],"");
-		optFontSize.setDefaultValue("24").setIconIdByAttr(R.attr.cr3_option_font_size_drawable, R.drawable.cr3_option_font_size);
-		listView.add(optFontSize);
-//			listView.add(new ListOption(mOwner, mActivity.getString(R.string.options_font_size_user_dic), PROP_FONT_SIZE_USER_DIC,
-//					mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(filterFontSizes(mFontSizes)).setDefaultValue("24").
-//					setIconIdByAttr(R.attr.cr3_option_font_size_drawable, R.drawable.cr3_option_font_size));
-		listView.add(new WikiOption(mOwner, mActivity.getString(R.string.options_app_wiki1), Settings.PROP_CLOUD_WIKI1_ADDR,
-				mActivity.getString(R.string.options_app_wiki1_add_info), this.lastFilteredValue).setDefaultValue("https://en.wikipedia.org").
-				setIconIdByAttr(R.attr.attr_icons8_wiki1, R.drawable.icons8_wiki1));
-		listView.add(new WikiOption(mOwner, mActivity.getString(R.string.options_app_wiki2), Settings.PROP_CLOUD_WIKI2_ADDR,
-				mActivity.getString(R.string.options_app_wiki2_add_info), this.lastFilteredValue).setDefaultValue("https://ru.wikipedia.org").
-				setIconIdByAttr(R.attr.attr_icons8_wiki2, R.drawable.icons8_wiki2));
-		listView.add(new ClickOption(mOwner, mActivity.getString(R.string.ynd_translate_settings),
-				Settings.PROP_CLOUD_YND_TRANSLATE_OPTIONS, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue,
-				(view, optionLabel, optionValue) -> {
-					ArrayList<String[]> vl = new ArrayList<>();
-					mCoolReader.readYndCloudSettings();
-					String[] arrS1 = {mActivity.getString(R.string.ynd_oauth), mActivity.getString(R.string.ynd_oauth),
-							StrUtils.getNonEmptyStr(mCoolReader.yndCloudSettings.oauthToken, true)};
-					vl.add(arrS1);
-					String[] arrS2 = {mActivity.getString(R.string.ynd_folder_id), mActivity.getString(R.string.ynd_folder_id),
-							StrUtils.getNonEmptyStr(mCoolReader.yndCloudSettings.folderId, true)};
-					vl.add(arrS2);
-					AskSomeValuesDialog dlgA = new AskSomeValuesDialog(
-							mCoolReader,
-							mActivity.getString(R.string.ynd_cloud_settings),
-							mActivity.getString(R.string.ynd_cloud_settings),
-							vl, results -> {
-						if (results != null) {
-							if (results.size() >= 1)
-								mCoolReader.yndCloudSettings.oauthToken = StrUtils.getNonEmptyStr(results.get(0), true);
-							if (results.size() >= 2)
-								mCoolReader.yndCloudSettings.folderId = StrUtils.getNonEmptyStr(results.get(1), true);
-						}
-						Gson gson = new GsonBuilder().setPrettyPrinting().create();
-						final String prettyJson = gson.toJson(mCoolReader.yndCloudSettings);
-						mCoolReader.saveYndCloudSettings(prettyJson);
-					});
-					dlgA.show();
-				}, true).
-				noIcon());
-		listView.add(new ClickOption(mOwner, mActivity.getString(R.string.lingvo_settings),
-				Settings.PROP_CLOUD_LINGVO_OPTIONS, mActivity.getString(R.string.lingvo_settings_add_info), this.lastFilteredValue,
-				(view, optionLabel, optionValue) -> {
-					ArrayList<String[]> vl = new ArrayList<>();
-					mCoolReader.readLingvoCloudSettings();
-					String[] arrS1 = {mActivity.getString(R.string.lingvo_token), mActivity.getString(R.string.lingvo_token),
-							StrUtils.getNonEmptyStr(mCoolReader.lingvoCloudSettings.lingvoToken, true)};
-					vl.add(arrS1);
-					AskSomeValuesDialog dlgA = new AskSomeValuesDialog(
-							mCoolReader,
-							mActivity.getString(R.string.lingvo_settings),
-							mActivity.getString(R.string.lingvo_settings),
-							vl, results -> {
-						if (results != null) {
-							if (results.size() >= 1)
-								mCoolReader.lingvoCloudSettings.lingvoToken = StrUtils.getNonEmptyStr(results.get(0), true);
-						}
-						Gson gson = new GsonBuilder().setPrettyPrinting().create();
-						final String prettyJson = gson.toJson(mCoolReader.lingvoCloudSettings);
-						mCoolReader.saveLingvoCloudSettings(prettyJson);
-					});
-					dlgA.show();
-				}, true).
-				noIcon());
-		listView.add(new ClickOption(mOwner, mActivity.getString(R.string.deepl_settings),
-				Settings.PROP_CLOUD_DEEPL_OPTIONS, mActivity.getString(R.string.deepl_settings_add_info), this.lastFilteredValue,
-				(view, optionLabel, optionValue) -> {
-					ArrayList<String[]> vl = new ArrayList<>();
-					mCoolReader.readLingvoCloudSettings();
-					String[] arrS1 = {mActivity.getString(R.string.deepl_token), mActivity.getString(R.string.deepl_token),
-							StrUtils.getNonEmptyStr(mCoolReader.deeplCloudSettings.deeplToken, true)};
-					vl.add(arrS1);
-					AskSomeValuesDialog dlgA = new AskSomeValuesDialog(
-							mCoolReader,
-							mActivity.getString(R.string.deepl_settings),
-							mActivity.getString(R.string.deepl_settings),
-							vl, results -> {
-						if (results != null) {
-							if (results.size() >= 1)
-								mCoolReader.deeplCloudSettings.deeplToken = StrUtils.getNonEmptyStr(results.get(0), true);
-						}
-						Gson gson = new GsonBuilder().setPrettyPrinting().create();
-						final String prettyJson = gson.toJson(mCoolReader.deeplCloudSettings);
-						mCoolReader.saveDeeplCloudSettings(prettyJson);
-					});
-					dlgA.show();
-				}, true).
-				noIcon());
-		listView.add(OptionsDialog.getOption(Settings.PROP_CLOUD_WIKI_SAVE_HISTORY, this.lastFilteredValue));
-		listView.add(new ListOption(mOwner, mActivity.getString(R.string.dict_dont_save_if_more),
-				Settings.PROP_APP_DICT_DONT_SAVE_IF_MORE, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
-				add(mWordsDontSaveIfMore).setDefaultValue("0").
-				noIcon());
-		listView.add(OptionsDialog.getOption(Settings.PROP_INSPECTOR_MODE_NO_DIC_HISTORY, this.lastFilteredValue));
 		listView.add(OptionsDialog.getOption(Settings.PROP_APP_DICT_WORD_CORRECTION, this.lastFilteredValue));
 		dlg.setView(listView);
 		dlg.show();
@@ -345,29 +215,8 @@ public class DictionariesOption extends SubmenuOption {
 				mActivity.getString(R.string.options_app_dict_word_correction_add_info));
 		this.updateFilteredMark(mActivity.getString(R.string.options_app_dict_longtap_change), Settings.PROP_APP_DICT_LONGTAP_CHANGE,
 				mActivity.getString(R.string.options_app_dict_longtap_change_add_info));
-		this.updateFilteredMark(mActivity.getString(R.string.options_app_show_user_dic_panel), Settings.PROP_APP_SHOW_USER_DIC_PANEL,
-				mActivity.getString(R.string.options_app_show_user_dic_panel_add_info));
-		this.updateFilteredMark(mActivity.getString(R.string.options_font_size_user_dic), Settings.PROP_FONT_SIZE_USER_DIC,
-				mActivity.getString(R.string.option_add_info_empty_text));
-		this.updateFilteredMark(mActivity.getString(R.string.options_app_wiki1), Settings.PROP_CLOUD_WIKI1_ADDR,
-				mActivity.getString(R.string.options_app_wiki1_add_info));
-		this.updateFilteredMark(mActivity.getString(R.string.options_app_wiki2), Settings.PROP_CLOUD_WIKI2_ADDR,
-				mActivity.getString(R.string.options_app_wiki2_add_info));
-		this.updateFilteredMark(mActivity.getString(R.string.ynd_translate_settings), Settings.PROP_CLOUD_YND_TRANSLATE_OPTIONS,
-				mActivity.getString(R.string.option_add_info_empty_text));
-		this.updateFilteredMark(mActivity.getString(R.string.lingvo_settings), Settings.PROP_CLOUD_LINGVO_OPTIONS,
-				mActivity.getString(R.string.lingvo_settings_add_info));
-		this.updateFilteredMark(mActivity.getString(R.string.deepl_settings), Settings.PROP_CLOUD_DEEPL_OPTIONS,
-				mActivity.getString(R.string.deepl_settings_add_info));
-		this.updateFilteredMark(mActivity.getString(R.string.wiki_save_history), Settings.PROP_CLOUD_WIKI_SAVE_HISTORY,
-				mActivity.getString(R.string.option_add_info_empty_text));
-		this.updateFilteredMark(mActivity.getString(R.string.dict_dont_save_if_more), Settings.PROP_APP_DICT_DONT_SAVE_IF_MORE,
-				mActivity.getString(R.string.option_add_info_empty_text));
-		this.updateFilteredMark(mActivity.getString(R.string.inspector_mode_no_dic_history), Settings.PROP_INSPECTOR_MODE_NO_DIC_HISTORY,
-				mActivity.getString(R.string.option_add_info_empty_text));
 		this.updateFilteredMark(mActivity.getString(R.string.options_app_dict_word_correction), Settings.PROP_APP_DICT_WORD_CORRECTION,
 				mActivity.getString(R.string.option_add_info_empty_text));
-		for (int i: mUserDicPanelKindTitles) this.updateFilteredMark(mActivity.getString(i));
 		return this.lastFiltered;
 	}
 

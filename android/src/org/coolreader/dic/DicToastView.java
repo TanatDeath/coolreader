@@ -427,6 +427,20 @@ public class DicToastView {
         for (final Dictionaries.DictInfo di: mActivity.mDictionaries.getAddDicts()) {
             diAllDicts.add(di);
         }
+        List<Dictionaries.DictInfo> dicts = Dictionaries.getDictList(mActivity);
+        for (Dictionaries.DictInfo dict : dicts) {
+            boolean bUseDic = mActivity.settings().getBool(Settings.PROP_DIC_LIST_MULTI+"."+dict.id,false);
+            if (bUseDic) {
+                boolean bWas = false;
+                for (Dictionaries.DictInfo di: diAllDicts) {
+                    if (di.id.equals(dict.id)) {
+                        bWas = true;
+                        break;
+                    }
+                }
+                if (!bWas) diAllDicts.add(dict);
+            }
+        }
         ArrayList<String> added = new ArrayList<>();
         for (final Dictionaries.DictInfo di: diAllDicts) {
             if (!added.contains(di.id)) {

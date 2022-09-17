@@ -18,7 +18,7 @@ import java.util.List;
 
 public class DicListOption extends ListOption
 {
-	public DicListOption(OptionOwner owner, String label, String prop, String addInfo, String filter )
+	public DicListOption(OptionOwner owner, String label, String prop, String addInfo, String filter)
 	{
 		super(owner, label, prop, addInfo, filter);
 		List<Dictionaries.DictInfo> dicts = Dictionaries.getDictList(mActivity);
@@ -26,7 +26,7 @@ public class DicListOption extends ListOption
 		for (Dictionaries.DictInfo dict : dicts) {
 			boolean installed = mActivity.isPackageInstalled(dict.packageName) || StrUtils.isEmptyStr(dict.packageName);
 			String sAdd = mActivity.getString(R.string.options_app_dictionary_not_installed);
-			String sAdd2 = dict.getAddText((CoolReader) mActivity);
+			String sAdd2 = dict.getAddText(mActivity);
 			if (!StrUtils.isEmptyStr(sAdd2)) sAdd2 = ": " + sAdd2;
 			if (StrUtils.isEmptyStr(dict.packageName)) sAdd = "";
 			if (((dict.internal==1)||(dict.internal==6)) &&
@@ -59,8 +59,8 @@ public class DicListOption extends ListOption
 
 	protected void updateItemContents(final View layout, final OptionsDialog.Three item, final ListView listView, final int position ) {
 		super.updateItemContents(layout, item, listView, position);
-		ImageView img = (ImageView) layout.findViewById(R.id.option_value_icon);
-		TextView tv = (TextView) layout.findViewById(R.id.option_value_text);
+		ImageView img = layout.findViewById(R.id.option_value_icon);
+		TextView tv = layout.findViewById(R.id.option_value_text);
 		List<Dictionaries.DictInfo> dicts = Dictionaries.getDictList(mActivity);
 		for (Dictionaries.DictInfo dict : dicts) {
 			if (item.value.equals(dict.id)) {

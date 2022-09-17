@@ -83,6 +83,7 @@ public interface Settings {
 	String PROP_READING_MENU_BUTTONS    ="viewer.reading.menu.buttons";
     String PROP_SKIPPED_RES             ="viewer.skipped.resolutions";
 	String PROP_APP_RESTORE_SETTINGS    ="app.restore.settings";
+	String PROP_DIC_LIST_MULTI          ="app.dic.list.multi";
 
     String PROP_STATUS_LINE             ="window.status.line";
     String PROP_BOOKMARK_ICONS          ="crengine.bookmarks.icons";
@@ -382,6 +383,7 @@ public interface Settings {
 	String PROP_PAGECOLORS_TITLE = "window.pagecolors.title";
 	String PROP_PAGEMARGINS_TITLE = "window.pagemargins.title";
 	String PROP_PAGE_FLIP_TITLE = "window.page.flip.title";
+	String PROP_ADD_DIC_TITLE = "window.add.dic.title";
 
 	String PROP_APP_EINK_ONYX_NEED_BYPASS = "app.eink.onyx.need.bypass";
 	String PROP_APP_EINK_ONYX_NEED_DEEPGC = "app.eink.onyx.need.deepgc";
