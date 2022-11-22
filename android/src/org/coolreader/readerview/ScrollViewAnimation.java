@@ -85,6 +85,13 @@ public class ScrollViewAnimation extends ViewAnimationBase {
 	public void move(int duration, boolean accelerated) {
 		if (duration > 0  && mReaderView.getPageFlipAnimationSpeedMs() != 0) {
 			int steps = (int)(duration / mReaderView.getAvgAnimationDrawDuration()) + 2;
+			if (mReaderView.pageFlipAnimationMode == ReaderView.PAGE_ANIMATION_NONE)
+				steps = 2;
+			else {
+				Double koef = ((double) mReaderView.pageFlipAnimationSpeed) / 300.0;
+				if (koef > 0)
+					steps = (int) (((double) steps) * koef);
+			}
 			//log.i("STEPS: " + steps);
 			int x0 = pointerCurrPos;
 			int x1 = pointerDestPos;

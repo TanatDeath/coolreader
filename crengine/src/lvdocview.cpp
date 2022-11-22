@@ -4060,7 +4060,7 @@ void LVDocView::setViewMode(LVDocViewMode view_mode, int visiblePageCount) {
 	LVLock lock(getMutex());
 	m_view_mode = view_mode;
 	m_props->setInt(PROP_PAGE_VIEW_MODE, m_view_mode == DVM_PAGES ? 1 : 0);
-    if (visiblePageCount == 1 || visiblePageCount == 2) {
+    if (visiblePageCount == 1 || visiblePageCount == 2 || visiblePageCount == 3 || visiblePageCount == 4) {
 		m_pagesVisible = visiblePageCount;
         m_props->setInt(PROP_LANDSCAPE_PAGES, m_pagesVisible);
     }
@@ -4088,8 +4088,8 @@ void LVDocView::toggleViewMode() {
 
 /// returns current pages visible setting value
 int LVDocView::getPagesVisibleSetting() const {
-    if (m_view_mode == DVM_PAGES && m_pagesVisible == 2)
-        return 2;
+    if (m_view_mode == DVM_PAGES && m_pagesVisible >= 2)
+        return m_pagesVisible;
     return 1;
 }
 
@@ -4098,8 +4098,29 @@ int LVDocView::getVisiblePageCount() const {
         return 1;
     if (m_pagesVisibleOverride > 0)
         return m_pagesVisibleOverride;
-    return (m_dx < m_font_size * MIN_EM_PER_PAGE || m_dx * 5 < m_dy * 6)
+	// plotn - on Samsung Fold 3 with m_font_size = 90 the following if compares
+	// 1780 and 1800, then it returns 1. I think user is able to decide whether he wants 2 pages
+	// mode or not himself
+	//if (m_dx < m_font_size * MIN_EM_PER_PAGE)
+	//	return 1;
+	if (m_pagesVisible == 2) // 2 pages in landscape, 1 in portrait
+    	return (m_dx * 5 < m_dy * 6)
             ? 1 : m_pagesVisible;
+	if (m_pagesVisible == 3) // always 2 pages
+		return 2;
+	if (m_pagesVisible == 4) { // 2 pages in square and landscape mode, 1 in portrait
+		if (m_dx * 5 >= m_dy * 6) return 2; // for a landscape
+		if ((m_dx > 0.0f) && (m_dy > 0.0f)) {
+			double koef = 0.0;
+			if (m_dx > m_dy)
+				koef = (double) m_dy / (double) m_dx;
+			else
+				koef = (double) m_dx / (double) m_dy;
+			if (koef > 0.8f)
+				return 2;
+		}
+	}
+	return 1;
 }
 
 void LVDocView::overrideVisiblePageCount(int n) {
@@ -4119,7 +4140,7 @@ void LVDocView::setVisiblePageCount(int n) {
     //CRLog::trace("setVisiblePageCount(%d) currPages=%d", n, m_pagesVisible);
     clearImageCache();
 	LVLock lock(getMutex());
-    int newCount = (n == 2) ? 2 : 1;
+    int newCount = (n >= 2) ? n : 1;
     if (m_pagesVisible == newCount)
         return;
     m_pagesVisible = newCount;
@@ -7119,7 +7140,7 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
 	props->limitValueMinMax(PROP_FONT_HINTING, 0, 2, 0);
 	props->limitValueMinMax(PROP_FONT_CHAR_SPACE_COMPRESS, 0, 15, 0);
 	props->limitValueMinMax(PROP_FONT_SHAPING, 0, 2, 1);
-	props->limitValueMinMax(PROP_LANDSCAPE_PAGES, 1, 2, 2);
+	props->limitValueMinMax(PROP_LANDSCAPE_PAGES, 1, 4, 2);
 	props->setBoolDef(PROP_PAGE_VIEW_MODE, true);
 	props->setBoolDef(PROP_FOOTNOTES, true);
 	props->setBoolDef(PROP_DISPLAY_INVERSE, false);

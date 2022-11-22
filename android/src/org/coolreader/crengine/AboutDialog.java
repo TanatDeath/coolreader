@@ -132,11 +132,13 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		TextView tv_www1 = mAppTab.findViewById(R.id.www1);
 		TextView tv_www_github1 = mAppTab.findViewById(R.id.www_github1);
 		TextView tv_www_github2 = mAppTab.findViewById(R.id.www_github2);
+		TextView tv_www_github3 = mAppTab.findViewById(R.id.www_github3);
 		if (tv_icons8 != null) tv_icons8.setLinkTextColor(activity.getTextColor(colorIcon));
 		if (tv_email != null) tv_email.setLinkTextColor(activity.getTextColor(colorIcon));
 		if (tv_www1 != null) tv_www1.setLinkTextColor(activity.getTextColor(colorIcon));
 		if (tv_www_github1 != null) tv_www_github1.setLinkTextColor(activity.getTextColor(colorIcon));
 		if (tv_www_github2 != null) tv_www_github2.setLinkTextColor(activity.getTextColor(colorIcon));
+		if (tv_www_github3 != null) tv_www_github3.setLinkTextColor(activity.getTextColor(colorIcon));
 		mActivity.tintViewIcons(mAppTab,false);
 		mDirsTab = inflater.inflate(R.layout.about_dialog_dirs, null);
 
@@ -226,6 +228,19 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		}
 		TextView customcovers_dir = mDirsTab.findViewById(R.id.customcovers_dirs);
 		customcovers_dir.setText(sbuf.toString());
+
+		ArrayList<String> calibrelibrariesDirs = Engine.getDataDirs(Engine.DataDirType.CalibreLibrariesDirs);
+		sbuf = new StringBuilder();
+		it = calibrelibrariesDirs.iterator();
+		while (it.hasNext()) {
+			String s = it.next();
+			sbuf.append(s);
+			if (it.hasNext()) {
+				sbuf.append("\n");
+			}
+		}
+		TextView calibrelibraries_dir = mDirsTab.findViewById(R.id.calibrelibraries_dirs);
+		calibrelibraries_dir.setText(sbuf.toString());
 
 		ArrayList<String> bookmarksDirs = Engine.getDataDirs(Engine.DataDirType.BookmarksDirs);
 		sbuf = new StringBuilder();

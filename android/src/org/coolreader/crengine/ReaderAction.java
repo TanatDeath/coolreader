@@ -291,6 +291,16 @@ public class ReaderAction {
 	public final static ReaderAction EINK_ONYX_REPAINT_SCREEN = new ReaderAction("EINK_ONYX_REPAINT_SCREEN", 0, R.string.action_eink_onyx_repaint_screen, ReaderCommand.DCMD_EINK_ONYX_REPAINT_SCREEN, 1 , 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_refresh_screen);
 	public final static ReaderAction EINK_ONYX_SCREENSHOT = new ReaderAction("EINK_ONYX_SCREENSHOT", 0, R.string.action_eink_onyx_screenshot, ReaderCommand.DCMD_EINK_ONYX_SCREENSHOT, 1 , 0, EINK_ONYX_REPAINT_SCREEN, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_screenshot);
 	public final static ReaderAction ADD_BOOK_TAGS = new ReaderAction("ADD_BOOK_TAGS", 0, R.string.add_book_tags, ReaderCommand.DCMD_ADD_BOOK_TAGS, 1 , 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_tag);
+	public final static ReaderAction COMMAND_GROUP_1 = new ReaderAction("COMMAND_GROUP_1", 0, R.string.command_group_1, ReaderCommand.DCMD_COMMAND_GROUP_1, 1 , 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_1);
+	public final static ReaderAction COMMAND_GROUP_2 = new ReaderAction("COMMAND_GROUP_2", 0, R.string.command_group_2, ReaderCommand.DCMD_COMMAND_GROUP_2, 1 , 0, COMMAND_GROUP_1, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_2);
+	public final static ReaderAction COMMAND_GROUP_3 = new ReaderAction("COMMAND_GROUP_3", 0, R.string.command_group_3, ReaderCommand.DCMD_COMMAND_GROUP_3, 1 , 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_3);
+	public final static ReaderAction COMMAND_GROUP_4 = new ReaderAction("COMMAND_GROUP_4", 0, R.string.command_group_4, ReaderCommand.DCMD_COMMAND_GROUP_4, 1 , 0, COMMAND_GROUP_3, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_4);
+	public final static ReaderAction COMMAND_GROUP_5 = new ReaderAction("COMMAND_GROUP_5", 0, R.string.command_group_5, ReaderCommand.DCMD_COMMAND_GROUP_5, 1 , 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_5);
+	public final static ReaderAction COMMAND_GROUP_6 = new ReaderAction("COMMAND_GROUP_6", 0, R.string.command_group_6, ReaderCommand.DCMD_COMMAND_GROUP_6, 1 , 0, COMMAND_GROUP_5, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_6);
+	public final static ReaderAction COMMAND_GROUP_7 = new ReaderAction("COMMAND_GROUP_7", 0, R.string.command_group_7, ReaderCommand.DCMD_COMMAND_GROUP_7, 1 , 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_7);
+	public final static ReaderAction COMMAND_GROUP_8 = new ReaderAction("COMMAND_GROUP_8", 0, R.string.command_group_8, ReaderCommand.DCMD_COMMAND_GROUP_8, 1 , 0, COMMAND_GROUP_7, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_8);
+	public final static ReaderAction COMMAND_GROUP_9 = new ReaderAction("COMMAND_GROUP_9", 0, R.string.command_group_9, ReaderCommand.DCMD_COMMAND_GROUP_9, 1 , 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_9);
+	public final static ReaderAction COMMAND_GROUP_10 = new ReaderAction("COMMAND_GROUP_10", 0, R.string.command_group_10, ReaderCommand.DCMD_COMMAND_GROUP_10, 1 , 0, COMMAND_GROUP_9, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_10);
 
 	private final static ReaderAction[] AVAILABLE_ACTIONS;
 	public final static HashMap<String, ReaderAction> OPTIONS_ACTIONS = new HashMap<>();
@@ -473,7 +483,17 @@ public class ReaderAction {
 				EXPERIMENAL_FEATURE,
 				BRIGHTNESS_DOWN,
 				BRIGHTNESS_UP,
-				ADD_BOOK_TAGS
+				ADD_BOOK_TAGS,
+				COMMAND_GROUP_1,
+				COMMAND_GROUP_2,
+				COMMAND_GROUP_3,
+				COMMAND_GROUP_4,
+				COMMAND_GROUP_5,
+				COMMAND_GROUP_6,
+				COMMAND_GROUP_7,
+				COMMAND_GROUP_8,
+				COMMAND_GROUP_9,
+				COMMAND_GROUP_10
 				// calibre will only be available from rootview
 		};
 		if (BuildConfig.GSUITE_AVAILABLE && DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {

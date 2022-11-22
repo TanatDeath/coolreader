@@ -106,8 +106,9 @@ public class CRRootView extends ViewGroup {
 		int screenWidth = mActivity.getWindowManager().getDefaultDisplay().getWidth();
 		int h = screenHeight / 4;
 		int w = screenWidth / 4;
-		if (h > w)
+		if (h > w) {
 			h = w;
+		}
     	w = h * 3 / 4;
     	coverWidth = w;
     	coverHeight = h;
@@ -1320,12 +1321,12 @@ public class CRRootView extends ViewGroup {
 			} else if (item == ReaderAction.ADD_CALIBRE_CATALOG_LOCAL) {
 				//mActivity.showToast("Work in progress...");
 				//return false;
-				mActivity.editCalibreCatalog(null);
+				mActivity.addOrEditCalibreCatalog(null, true, "");
 				return true;
 			} else if (item == ReaderAction.ADD_CALIBRE_CATALOG_YD) {
-				//mActivity.showToast("Work in progress...");
+				mActivity.showToast(R.string.create_remote_calibre_msg);
 				//return false;
-				mActivity.editCalibreCatalog(null);
+				//mActivity.addOrEditCalibreCatalog(null, true, "");
 				return true;
 			} else if (item == ReaderAction.SAVE_LOGCAT) {
 				mActivity.createLogcatFile();

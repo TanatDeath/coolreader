@@ -1113,6 +1113,18 @@ public class Utils {
 		}
 	}
 
+	public static String getLastSlashSegment(String filePath) {
+		if (filePath == null) return "";
+		String[] parts = filePath.split("\\/");
+		String res = filePath;
+		if (parts.length > 0)
+			res = parts[parts.length - 1];
+		parts = res.split("\\\\");
+		if (parts.length > 0)
+			res = parts[parts.length - 1];
+		return res;
+	}
+
 	public static String getFileExtension(File file) {
 		return getFileExtension(file.getName());
 	}

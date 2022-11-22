@@ -181,6 +181,7 @@ public class BaseActivity extends Activity implements Settings {
 		float widthInches = (float)dm.widthPixels / (float)densityDpi;
 		float heightInches = (float)dm.heightPixels / (float)densityDpi;
 		diagonalInches = (float) Math.sqrt(widthInches * widthInches + heightInches * heightInches);
+		isSquareScreen = Math.min(widthInches,heightInches) / (Math.max(widthInches,heightInches) + 0.00001F) > 0.8F;
 		log.i("diagonal=" + diagonalInches + "  isSmartphone=" + isSmartphone());
 
 		int sz = dm.widthPixels;
@@ -410,6 +411,10 @@ public class BaseActivity extends Activity implements Settings {
 		return diagonalInches;
 	}
 
+	public boolean getIsSquareScreen() {
+		return isSquareScreen;
+	}
+
 	public String getSettingsFile(int profile) {
 		File file = mSettingsManager.getSettingsFileF(profile);
 		if (file.exists())
@@ -423,6 +428,7 @@ public class BaseActivity extends Activity implements Settings {
 	
 	private int densityDpi = 160;
 	private float diagonalInches = 5;
+	private boolean isSquareScreen = false;
 
 
 
@@ -555,7 +561,17 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.attr_icons8_square,
 						 R.attr.attr_icons8_refresh_screen,
 						 R.attr.attr_icons8_screenshot,
-						 R.attr.attr_icons8_tag
+						 R.attr.attr_icons8_tag,
+						 R.attr.attr_icons8_1,
+						 R.attr.attr_icons8_2,
+						 R.attr.attr_icons8_3,
+						 R.attr.attr_icons8_4,
+						 R.attr.attr_icons8_5,
+						 R.attr.attr_icons8_6,
+						 R.attr.attr_icons8_7,
+						 R.attr.attr_icons8_8,
+						 R.attr.attr_icons8_9,
+						 R.attr.attr_icons8_10
 		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
 		int btnPrevDrawableRes = a.getResourceId(0, 0);
@@ -674,6 +690,17 @@ public class BaseActivity extends Activity implements Settings {
 		int brEinkOnyxRepaintScreen = a.getResourceId(102, 0);
 		int brEinkOnyxScreenshot = a.getResourceId(103, 0);
 		int brTag = a.getResourceId(104, 0);
+
+		int br1 = a.getResourceId(105, 0);
+		int br2 = a.getResourceId(106, 0);
+		int br3 = a.getResourceId(107, 0);
+		int br4 = a.getResourceId(108, 0);
+		int br5 = a.getResourceId(109, 0);
+		int br6 = a.getResourceId(110, 0);
+		int br7 = a.getResourceId(111, 0);
+		int br8 = a.getResourceId(112, 0);
+		int br9 = a.getResourceId(113, 0);
+		int br10 = a.getResourceId(114, 0);
 
 		a.recycle();
 		if (btnPrevDrawableRes != 0) {
@@ -862,6 +889,17 @@ public class BaseActivity extends Activity implements Settings {
 		if (brEinkOnyxScreenshot != 0) ReaderAction.EINK_ONYX_SCREENSHOT.setIconId(brEinkOnyxScreenshot);
 
 		if (brTag != 0) ReaderAction.ADD_BOOK_TAGS.setIconId(brTag);
+
+		if (br1 != 0) ReaderAction.COMMAND_GROUP_1.setIconId(br1);
+		if (br2 != 0) ReaderAction.COMMAND_GROUP_2.setIconId(br2);
+		if (br3 != 0) ReaderAction.COMMAND_GROUP_3.setIconId(br3);
+		if (br4 != 0) ReaderAction.COMMAND_GROUP_4.setIconId(br4);
+		if (br5 != 0) ReaderAction.COMMAND_GROUP_5.setIconId(br5);
+		if (br6 != 0) ReaderAction.COMMAND_GROUP_6.setIconId(br6);
+		if (br7 != 0) ReaderAction.COMMAND_GROUP_7.setIconId(br7);
+		if (br8 != 0) ReaderAction.COMMAND_GROUP_8.setIconId(br8);
+		if (br9 != 0) ReaderAction.COMMAND_GROUP_9.setIconId(br9);
+		if (br10 != 0) ReaderAction.COMMAND_GROUP_10.setIconId(br10);
 	}
 
 	public void setCurrentTheme(InterfaceTheme theme) {
@@ -1254,12 +1292,12 @@ public class BaseActivity extends Activity implements Settings {
 //    }
 
 	public void setScreenBacklightLevel(int value) {
-    	log.i("setScreenBacklightLevel called, value = " + value);
+    	//log.i("setScreenBacklightLevel called, value = " + value);
 		if (value < -1)
 			value = -1;
 		else if (value > DeviceInfo.MAX_SCREEN_BRIGHTNESS_VALUE)
 			value = -1;
-		log.i("setScreenBacklightLevel, updated value = " + value);
+		//log.i("setScreenBacklightLevel, updated value = " + value);
 		screenBacklightBrightness = value;
 		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink()))
 			onUserActivity();
@@ -1268,12 +1306,12 @@ public class BaseActivity extends Activity implements Settings {
 	}
 
 	public void setScreenWarmBacklightLevel(int value) {
-		log.i("setScreenWarmBacklightLevel called, value = " + value);
+		//log.i("setScreenWarmBacklightLevel called, value = " + value);
 		if (value < -1)
 			value = -1;
 		else if (value > DeviceInfo.MAX_SCREEN_BRIGHTNESS_WARM_VALUE)
 			value = -1;
-		log.i("setScreenWarmBacklightLevel, updated value = " + value);
+		//log.i("setScreenWarmBacklightLevel, updated value = " + value);
 		if (null != mEinkScreen) {
 			if (mEinkScreen.setWarmLightValue(this, value))
 				screenWarmBacklightBrightness = value;
@@ -1330,7 +1368,7 @@ public class BaseActivity extends Activity implements Settings {
 	}
 
 	private void updateBacklightBrightness(float b) {
-		log.i("updateBacklightBrightness called, b = " + b);
+		//log.i("updateBacklightBrightness called, b = " + b);
 		Window wnd = getWindow();
 		if (wnd != null) {
 			LayoutParams attrs = wnd.getAttributes();
@@ -3221,7 +3259,7 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_APP_BOUNCE_TAP_INTERVAL, "-1");
 	        props.applyDefault(ReaderView.PROP_APP_BOOK_PROPERTY_SCAN_ENABLED, "1");
 	        props.applyDefault(ReaderView.PROP_APP_KEY_BACKLIGHT_OFF, DeviceInfo.SAMSUNG_BUTTONS_HIGHLIGHT_PATCH ? "0" : "1");
-	        props.applyDefault(ReaderView.PROP_LANDSCAPE_PAGES, DeviceInfo.ONE_COLUMN_IN_LANDSCAPE ? "0" : "1");
+			props.applyDefault(ReaderView.PROP_LANDSCAPE_PAGES, DeviceInfo.ONE_COLUMN_IN_LANDSCAPE ? "0" : "1");
 			//props.applyDefault(ReaderView.PROP_TOOLBAR_APPEARANCE, "0");
 			// autodetect best initial font size based on display resolution
 			int fontSize = 12*activity.densityDpi/72;			// 12pt

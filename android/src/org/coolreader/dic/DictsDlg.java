@@ -57,6 +57,7 @@ public class DictsDlg extends BaseDialog {
 	private Button btnDictType1;
 	private Button btnDictType2;
 	private Button btnDontClose;
+	private ImageView picDontClose;
 	private ImageButton btnDicOptions;
 	private EditText edtLangFrom;
 	private EditText edtLangTo;
@@ -337,6 +338,7 @@ public class DictsDlg extends BaseDialog {
 		btnDictType1 = frame.findViewById(R.id.btn_dic_type_1);
 		btnDictType2 = frame.findViewById(R.id.btn_dic_type_2);
 		btnDontClose = frame.findViewById(R.id.btn_dont_hide);
+		picDontClose = frame.findViewById(R.id.pic_dont_hide);
 		btnDicOptions = frame.findViewById(R.id.dic_options);
 		btnDicOptions.setBackground(null);
 		edtLangFrom = frame.findViewById(R.id.lang_from);
@@ -404,6 +406,10 @@ public class DictsDlg extends BaseDialog {
 		Drawable imgC1 = imgC.getConstantState().newDrawable().mutate();
 		btnDontClose.setCompoundDrawablesWithIntrinsicBounds(imgC1, null, null, null);
 		btnDontClose.setOnClickListener(v -> {
+			bDontClose = !bDontClose;
+			paintDictTypeButtons();
+		});
+		picDontClose.setOnClickListener(v -> {
 			bDontClose = !bDontClose;
 			paintDictTypeButtons();
 		});

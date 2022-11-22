@@ -140,6 +140,11 @@
     <string name="options_page_landscape_pages">Landscape columns</string>
     <string name="options_page_landscape_pages_one">One column</string>
     <string name="options_page_landscape_pages_two">Two columns</string>
+    <string name="options_page_2pages_mode">Text column count</string>
+    <string name="options_page_2pages_one">One column</string>
+    <string name="options_page_2pages_two_in_landscape">Two columns in landscape mode</string>
+    <string name="options_page_2pages_two">Always two columns</string>
+    <string name="options_page_2pages_two_in_landscape_and_square">Two columns in landscape mode and for square screen</string>
     <string name="options_ignore_document_margins">Ignore document margins</string>
     <string name="options_page_margin_left">Left margin</string>
     <string name="options_page_margin_right">Right margin</string>
@@ -427,6 +432,7 @@
     <string name="dlg_about_offlinedicts_dirs">Offline dictionaries directories:</string>
     <string name="dlg_about_customcovers_dirs">Custom book covers directories:</string>
     <string name="dlg_about_bookmarks_dirs">Saved bookmarks directories:</string>
+    <string name="dlg_about_calibrelibraries_dirs">Calibre libraries directories:</string>
     <string name="dlg_about_download_dirs">Download directories:</string>
     <string name="dlg_about_cloudsync_dirs">Cloud sync directories:</string>
     <string name="dlg_about_icons_dirs">Icons directories:</string>
@@ -982,7 +988,7 @@
     <string name="options_app_show_user_dic_panel">User dictionary panel</string>
     <string name="options_app_show_user_dic_panel_add_info">User dictionary is a small panel under book page that shows up to 10 words (that were saved before with its translations), containing on the current page</string>
     <string name="dlg_bookmark_info">Use | for unnessary ending, ~ for split variants of the word</string>
-    <string name="options_reader_toolbar_buttons">Reader toolbar and menu buttons</string>
+    <string name="options_reader_toolbar_buttons">Reader toolbar, menu and group\'s buttons</string>
     <string name="lbl_find">Find: </string>
     <string name="dlg_whole_drive">Whole drive</string>
     <string name="dlg_folder_drive">In current folder</string>
@@ -1098,14 +1104,14 @@
     <string name="options_reader_toolbar_buttons_add_info">Selecting the buttons displayed on the toolbar</string>
     <string name="options_view_mode_add_info">Paging, Scrolling</string>
     <string name="options_page_orientation_add_info">Adjust the orientation of the page on the screen</string>
-    <string name="options_page_landscape_pages_add_info">The number of pages displayed in landscape mode (one, two)</string>
+    <string name="options_page_landscape_pages_add_info">The number of columns displayed (one, two)</string>
     <string name="options_inverse_view_add_info">Selecting the reading mode day or night</string>
     <string name="options_color_text_add_info">Selecting the color of the text</string>
     <string name="options_color_background_add_info">Background color selection</string>
     <string name="options_background_texture_add_info">Select a texture (picture) instead of a solid color. You can add a texture by sending it to KnownReader from image viewing software.</string>
     <string name="options_page_titlebar_add_info">Information display options in the header, fullscreen settings</string>
     <string name="options_page_footnotes_add_info">Display footnotes (if any) at the bottom of the page</string>
-    <string name="options_page_animation_add_info">Enable or disable the animation while flipping</string>
+    <string name="options_page_animation_add_info">Enable or disable the animation while flipping. In \'scroll\' view mode animation is only \'scroll\' or \'disabled\'</string>
     <string name="options_view_bookmarks_highlight_add_info">Enable or disable bookmark highlighting</string>
     <string name="options_view_bookmarks_user_dic_add_info">Enable or disable user dic highlighting</string>
     <string name="options_rounded_corners_margin_add_info">Move the right and left side of the header elements closer to the center of the screen on devices with Edge Screen</string>
@@ -1351,7 +1357,7 @@
     <string name="knownreader_donate_line2">1. Visit our site at:</string>
     <string name="knownreader_donate_line3">https://knownreader.com/</string>
     <string name="knownreader_donate_line4">2. Write us on 4pda forum:</string>
-    <string name="knownreader_donate_line5">https://4pda.ru/forum/index.php?showuser=246075</string>
+    <string name="knownreader_donate_line5">https://4pda.to/forum/index.php?showuser=246075</string>
     <string name="with_the_help">With the help of code examples from projects (dic popup windows, shortcuts, intents): FBReader, Librera, AlReader, PocketBook, KOReader</string>
     <string name="options_choose_texture">Choose background pic / texture</string>
     <string name="options_choose_texture_short">Choose background</string>
@@ -1790,7 +1796,7 @@
     <string name="select_transl_dir">Select translation direction</string>
     <string name="all_languages">Select from all languages</string>
     <string name="page_flipping_type">Gesture page flipping</string>
-    <string name="page_flipping_type_add_info">You can flip pages by gestures - if more than one page specified, value of pages turned depends on gesture length</string>
+    <string name="page_flipping_type_add_info">You can flip pages by gestures - if more than one page specified, value of pages turned depends on gesture length. This option is only for \'page\' (not \'scroll\') mode</string>
     <string name="page_flipping_type_0">Disabled</string>
     <string name="page_flipping_type_1">One page - simple gesture</string>
     <string name="page_flipping_type_2">One page - with tracking</string>
@@ -1953,8 +1959,10 @@
     <string name="all_actions">All actions</string>
     <string name="toolbar_actions">Toolbar</string>
     <string name="menu_actions">Reading menu</string>
+    <string name="group_actions">Group</string>
     <string name="to_toolbar_action">+ to toolbar</string>
     <string name="to_menu_action">+ to menu</string>
+    <string name="to_group_action">+ to group</string>
     <string name="def">Default</string>
     <string name="clear">Clear</string>
     <string name="non_sensitive">Non sensitive areas</string>
@@ -1969,6 +1977,7 @@
     <string name="cannot_create_file">Cannot create file</string>
     <string name="cannot_generate_file_name">Cannot generate file name</string>
     <string name="move_file">Move file</string>
+    <string name="cont">Continue</string>
     <string name="move_file_then_open">Move, then open file</string>
     <string name="copy_file">Save file</string>
     <string name="copy_file_then_open">Save, then open file</string>
@@ -2060,4 +2069,16 @@
     <string name="edit_tags">Edit tags...</string>
     <string name="action_in_progress">Action in progress...</string>
     <string name="action_finished">Action finished</string>
+    <string name="command_group_1">Command group 1</string>
+    <string name="command_group_2">Command group 2</string>
+    <string name="command_group_3">Command group 3</string>
+    <string name="command_group_4">Command group 4</string>
+    <string name="command_group_5">Command group 5</string>
+    <string name="command_group_6">Command group 6</string>
+    <string name="command_group_7">Command group 7</string>
+    <string name="command_group_8">Command group 8</string>
+    <string name="command_group_9">Command group 9</string>
+    <string name="command_group_10">Command group 10</string>
+    <string name="create_remote_calibre_msg">You can add remote catalog via navigating into corresponding folder at Yandex Disk (via \'browse cloud\'), then press \'Add calibre catalog\' (on the toolbar)</string>
+    <string name="dic_ex_search">Like</string>
 </resources>

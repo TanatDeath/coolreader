@@ -14,6 +14,7 @@
 
 #include "lvdirectorycontainer.h"
 #include "lvstreamutils.h"
+#include "lvstring.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -21,16 +22,10 @@
 
 LVStreamRef LVDirectoryContainer::OpenStream(const char32_t *fname, lvopen_mode_t mode)
 {
-    int found_index = -1;
-    for (int i=0; i<m_list.length(); i++) {
-        if ( !lStr_cmp( fname, m_list[i]->GetName() ) ) {
-            if ( m_list[i]->IsContainer() ) {
-                // found directory with same name!!!
-                return LVStreamRef();
-            }
-            found_index = i;
-            break;
-        }
+    LVDirectoryContainerItemInfo * item = (LVDirectoryContainerItemInfo*)GetObjectInfo(fname);
+    if ( item && item->IsContainer() ) {
+        // found directory with same name!!!
+        return LVStreamRef();
     }
     // make filename
     lString32 fn = m_fname;
@@ -42,9 +37,9 @@ LVStreamRef LVDirectoryContainer::OpenStream(const char32_t *fname, lvopen_mode_
         return stream;
     }
     //stream->m_parent = this;
-    if (found_index<0) {
+    if (!item) {
         // add new info
-        LVDirectoryContainerItemInfo * item = new LVDirectoryContainerItemInfo;
+        item = new LVDirectoryContainerItemInfo;
         item->m_name = fname;
         stream->GetSize(&item->m_size);
         Add(item);

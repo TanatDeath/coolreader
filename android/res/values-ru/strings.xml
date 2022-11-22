@@ -122,6 +122,11 @@
     <string name="options_page_landscape_pages">Колонок в альбомном режиме</string>
     <string name="options_page_landscape_pages_one">Одна колонка</string>
     <string name="options_page_landscape_pages_two">Две колонки</string>
+    <string name="options_page_2pages_mode">Число колонок текста</string>
+    <string name="options_page_2pages_one">Одна колонка</string>
+    <string name="options_page_2pages_two_in_landscape">Две колонки в альбомном режиме</string>
+    <string name="options_page_2pages_two">Всегда две колонки</string>
+    <string name="options_page_2pages_two_in_landscape_and_square">Две колонки в альбомном режиме и для квадратных экранов</string>
     <string name="options_ignore_document_margins">Игнорировать отступы документа</string>
     <string name="options_page_margin_left">Левый отступ</string>
     <string name="options_page_margin_right">Правый отступ</string>
@@ -407,6 +412,7 @@
     <string name="dlg_about_offlinedicts_dirs">Каталоги оффлайновых словарей:</string>
     <string name="dlg_about_customcovers_dirs">Каталоги своих обложек книг:</string>
     <string name="dlg_about_bookmarks_dirs">Каталоги сохраненных закладок:</string>
+    <string name="dlg_about_calibrelibraries_dirs">Каталоги библиотек Calibre:</string>
     <string name="dlg_about_download_dirs">Каталоги для скачивания:</string>
     <string name="dlg_about_cloudsync_dirs">Каталоги облачной синхронизации:</string>
     <string name="dlg_about_icons_dirs">Каталоги для иконок:</string>
@@ -997,7 +1003,7 @@
     <string name="options_app_show_user_dic_panel">Панель личного словаря</string>
     <string name="options_app_show_user_dic_panel_add_info">Личный словарь - небольшая панель под книгой, на которой выводятся встречающиеся на текущей странице слова с переводом (до 10 слов)</string>
     <string name="dlg_bookmark_info">Подстановка: | необязательное окончание, ~ разделитель вариантов слова</string>
-    <string name="options_reader_toolbar_buttons">Кнопки панели инструментов и меню чтения</string>
+    <string name="options_reader_toolbar_buttons">Кнопки панели инструментов, меню чтения и групп</string>
     <string name="lbl_find">Поиск: </string>
     <string name="dlg_whole_drive">По всему диску</string>
     <string name="dlg_folder_drive">В этой папке</string>
@@ -1075,14 +1081,14 @@
     <string name="options_reader_toolbar_buttons_add_info">Выбор кнопок отображаемых на панели инструментов</string>
     <string name="options_view_mode_add_info">Страницы (перелистывание), свиток (прокручивание)</string>
     <string name="options_page_orientation_add_info">Настройка ориентации страницы на экране</string>
-    <string name="options_page_landscape_pages_add_info">Количество страниц отображаемых в альбомном режиме (одна, две)</string>
+    <string name="options_page_landscape_pages_add_info">Количество отображаемых колонок (одна, две)</string>
     <string name="options_inverse_view_add_info">Выбор режима чтения день или ночь</string>
     <string name="options_color_text_add_info">Выбор цвета текста</string>
     <string name="options_color_background_add_info">Выбор цвета фона</string>
     <string name="options_background_texture_add_info">Выбор текстуры (картинки) вместо сплошного цвета. Для добавления текстуры - отправьте изображение из приложения просмотра изображений в KnownReader</string>
     <string name="options_page_titlebar_add_info">Параметры отображения информации в колонтитуле, параметры полноэкранного отображения</string>
     <string name="options_page_footnotes_add_info">Отображение сносок (если есть) внизу страницы</string>
-    <string name="options_page_animation_add_info">Выбор или отключение анимации при перелистывании</string>
+    <string name="options_page_animation_add_info">Выбор или отключение анимации при перелистывании. В режиме \'свиток\' анимация - только \'прокрутка\' или \'без анимации\'</string>
     <string name="options_view_bookmarks_highlight_add_info">Выбор или отключение выделения закладок</string>
     <string name="options_view_bookmarks_user_dic_add_info">Выбор или отключение выделения слов личного словаря</string>
     <string name="options_rounded_corners_margin_add_info">Смещает правую и левую части элементов колонтитула ближе к центру экрана на устройствах с Edge Screen</string>
@@ -1318,7 +1324,7 @@
     <string name="knownreader_donate_line2">1. Посетите наш сайт:</string>
     <string name="knownreader_donate_line3">https://knownreader.com/</string>
     <string name="knownreader_donate_line4">2. Свяжитесь с нами на форуме 4pda:</string>
-    <string name="knownreader_donate_line5">https://4pda.ru/forum/index.php?showuser=246075</string>
+    <string name="knownreader_donate_line5">https://4pda.to/forum/index.php?showuser=246075</string>
     <string name="with_the_help">Использовались примеры кода из проектов (всплывающие окна, ярлыки, намерения): FBReader, Librera, AlReader, PocketBook, KOReader</string>
     <string name="options_choose_texture">Выбрать фоновую картинку / текстуру</string>
     <string name="options_choose_texture_short">Выбрать фон</string>
@@ -1752,7 +1758,7 @@
     <string name="select_transl_dir">Выберите направление перевода</string>
     <string name="all_languages">Выбрать из всех языков</string>
     <string name="page_flipping_type">Листание жестами</string>
-    <string name="page_flipping_type_add_info">Вы можете листать страницы жестами - если указано более одной страницы, то количество переворачиваемых страниц зависит от длины жеста</string>
+    <string name="page_flipping_type_add_info">Вы можете листать страницы жестами - если указано более одной страницы, то количество переворачиваемых страниц зависит от длины жеста. Эта опция только для режима \'страницы\' (не для \'свитка\')</string>
     <string name="page_flipping_type_0">Отключено</string>
     <string name="page_flipping_type_1">Одна страница - простой жест</string>
     <string name="page_flipping_type_2">Одна страница - с отслеживанием движения</string>
@@ -1913,8 +1919,10 @@
     <string name="all_actions">Все действия</string>
     <string name="toolbar_actions">Панель</string>
     <string name="menu_actions">Меню чтения</string>
+    <string name="group_actions">Группа</string>
     <string name="to_toolbar_action">+ на панель</string>
     <string name="to_menu_action">+ в меню</string>
+    <string name="to_group_action">+ в группу</string>
     <string name="def">По умолчанию</string>
     <string name="clear">Очистить</string>
     <string name="non_sensitive">Нечувствительные зоны</string>
@@ -1929,6 +1937,7 @@
     <string name="cannot_create_file">Невозможно создать файл</string>
     <string name="cannot_generate_file_name">Невозможно сгенерировать имя файла</string>
     <string name="move_file">Переместить файл</string>
+    <string name="cont">Продолжить</string>
     <string name="move_file_then_open">Переместить, а затем открыть файл</string>
     <string name="copy_file">Сохранить файл</string>
     <string name="copy_file_then_open">Сохранить, а затем открыть файл</string>
@@ -2020,5 +2029,17 @@
     <string name="edit_tags">Редактировать метки...</string>
     <string name="action_in_progress">Действие в процессе выполнения...</string>
     <string name="action_finished">Действие завершено</string>
+    <string name="command_group_1">Группа команд 1</string>
+    <string name="command_group_2">Группа команд 2</string>
+    <string name="command_group_3">Группа команд 3</string>
+    <string name="command_group_4">Группа команд 4</string>
+    <string name="command_group_5">Группа команд 5</string>
+    <string name="command_group_6">Группа команд 6</string>
+    <string name="command_group_7">Группа команд 7</string>
+    <string name="command_group_8">Группа команд 8</string>
+    <string name="command_group_9">Группа команд 9</string>
+    <string name="create_remote_calibre_msg">Удаленный каталог можно добавить через Яндекс Диск (раздел \'открыть книгу из облака\'), перейдите в нужную папку, затем нажмите \'Добавить каталог Calibre\' (на панели)</string>
+    <string name="command_group_10">Группа команд 10</string>
+    <string name="dic_ex_search">Похож</string>
 </resources>
 

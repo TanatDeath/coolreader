@@ -178,6 +178,7 @@ public class FileInfo implements Parcelable {
 	public String proxy_passw;
 	public int onion_def_proxy;
 	public String remote_folder; // calibre related
+	public int cat_type; // calibre related
 	// Litres related
 	public String cover_href;
 	public String cover_href2;

@@ -18,6 +18,7 @@
 #if (USE_ZLIB==1)
 
 #include "lvarccontainerbase.h"
+#include "lvstring.h"
 
 class LVZipArc : public LVArcContainerBase
 {

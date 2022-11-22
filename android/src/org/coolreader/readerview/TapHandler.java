@@ -158,7 +158,8 @@ public class TapHandler {
 			return;
 		//plotn - some strange behavior with mIsPageMode
 		//final int swipeDistance = mIsPageMode ? x - start_x : y - start_y;
-		final int swipeDistance = mReaderView.viewMode == ViewMode.PAGES ? x - start_x : y - start_y;
+		//final int swipeDistance = mReaderView.viewMode == ViewMode.PAGES ? x - start_x : y - start_y;
+		final int swipeDistance = x - start_x;
 		//final int swipeDistance = x - start_x;
 		final int distanceForFlip = - ((mReaderView.surface.getWidth() -
 				(mActivity.getPalmTipPixelsK(mReaderView.mGesturePageFlipSensivity) / 2)) / mReaderView.mGesturePageFlipPageCount);
@@ -688,27 +689,10 @@ public class TapHandler {
 					// to work to poke3 ?
 					//mActivity.showToast(" coords: " + y + " max " + mReaderView.surface.getHeight());
 					//int dir = x - start_x;
-					if (mReaderView.mGesturePageFlipSwipeN == 1) {
-						if ((x <= (width / 2) + dragThresholdK) &&
-								(x >= (width / 2) - dragThresholdK) &&
-								(start_x <= (width / 2) + dragThresholdK) &&
-								(start_x >= (width / 2) - dragThresholdK) &&
-								isVerticalStrict // x shoud be three times shorter than y
-						) {
-							menuShown = true;
-							mActivity.showReaderMenu();
-							return endEvent();
-						} else
-						if (isPageTurnSwipe)
-							return performAction(dir < 0 ? ReaderAction.PAGE_DOWN : ReaderAction.PAGE_UP, false);
-						else
-							return endEvent();
-					}
-					if (mReaderView.mGesturePageFlipSwipeN == 2) {
-						//dir *= mGesturePageFlipsPerFullSwipe; // Change sign of page flip direction according to user setting
-						if (mReaderView.getPageFlipAnimationSpeedMs() == 0 || DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
-							// no animation
-							if ((x <= (width / 2) + dragThresholdK) &&
+					if (mReaderView.viewMode == ViewMode.PAGES) {
+						if (mReaderView.mGesturePageFlipSwipeN == 1) {
+							if (
+									(x <= (width / 2) + dragThresholdK) &&
 									(x >= (width / 2) - dragThresholdK) &&
 									(start_x <= (width / 2) + dragThresholdK) &&
 									(start_x >= (width / 2) - dragThresholdK) &&
@@ -717,21 +701,50 @@ public class TapHandler {
 								menuShown = true;
 								mActivity.showReaderMenu();
 								return endEvent();
-							} else
-							if (isPageTurnSwipe)
+							} else if (isPageTurnSwipe)
 								return performAction(dir < 0 ? ReaderAction.PAGE_DOWN : ReaderAction.PAGE_UP, false);
 							else
 								return endEvent();
 						}
+						if (mReaderView.mGesturePageFlipSwipeN == 2) {
+							//dir *= mGesturePageFlipsPerFullSwipe; // Change sign of page flip direction according to user setting
+							if (mReaderView.getPageFlipAnimationSpeedMs() == 0 || DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
+								// no animation
+								if (
+										(x <= (width / 2) + dragThresholdK) &&
+										(x >= (width / 2) - dragThresholdK) &&
+										(start_x <= (width / 2) + dragThresholdK) &&
+										(start_x >= (width / 2) - dragThresholdK) &&
+										isVerticalStrict // x shoud be three times shorter than y
+								) {
+									menuShown = true;
+									mActivity.showReaderMenu();
+									return endEvent();
+								} else if (isPageTurnSwipe)
+									return performAction(dir < 0 ? ReaderAction.PAGE_DOWN : ReaderAction.PAGE_UP, false);
+								else
+									return endEvent();
+							}
+							mReaderView.startAnimation(start_x, start_y, width, height, x, y);
+							mReaderView.updateAnimation(x, y);
+							state = STATE_FLIPPING;
+						}
+					}
+					if (mReaderView.viewMode == ViewMode.SCROLL) {
+						if (isPageTurnSwipe)
+							return performAction(dir < 0 ? ReaderAction.PAGE_DOWN : ReaderAction.PAGE_UP, false);
 						mReaderView.startAnimation(start_x, start_y, width, height, x, y);
 						mReaderView.updateAnimation(x, y);
 						state = STATE_FLIPPING;
+						return true;
 					}
 					if (mReaderView.mGesturePageFlipSwipeN == 3) {
 						state = STATE_FLIP_TRACKING;
 						updatePageFlipTracking(start_x, start_y);
 					}
-					if ((x <= (width / 2) + dragThresholdK) &&
+					if (
+							(mReaderView.viewMode == ViewMode.PAGES) &&
+							(x <= (width / 2) + dragThresholdK) &&
 							(x >= (width / 2) - dragThresholdK) &&
 							(start_x <= (width / 2) + dragThresholdK) &&
 							(start_x >= (width / 2) - dragThresholdK) &&

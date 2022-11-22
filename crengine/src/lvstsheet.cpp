@@ -387,18 +387,36 @@ static bool skip_spaces( const char * & str )
     return *str != 0;
 }
 
-static bool parse_ident( const char * &str, char * ident, size_t maxsize )
+static bool parse_ident( const char * &str, char * ident, size_t maxsize, bool skip_namespace=false )
 {
     // Note: skipping any space before or after should be ensured by caller if needed
     *ident = 0;
-    if ( !css_is_alpha( *str ) )
-        return false;
+    if ( !css_is_alpha( *str ) ) {
+        if ( !skip_namespace )
+            return false;
+        // By checking for the char after to be alpha, we avoid considering the '|'
+        // in cssrt_attrstarts_word ([attr|=foo]) as a namespace separator.
+        if ( str[0] == '|' && css_is_alpha(str[1]) )
+            str++;
+        else if ( str[0] == '*' && str[1] == '|' && css_is_alpha(str[2]) )
+            str+=2;
+        else
+            return false;
+    }
     int i;
     int max_i = maxsize - 1;
     for (i=0; css_is_alnum(str[i]); i++) {
         if ( i < max_i )
             ident[i] = str[i];
         // Keep parsing/skipping even if not accumulated in ident
+    }
+    if ( skip_namespace && str[i] == '|' && css_is_alpha(str[i+1]) ) {
+        str += i+1;
+        *ident = 0;
+        for (i=0; css_is_alnum(str[i]); i++) {
+            if ( i < max_i )
+                ident[i] = str[i];
+        }
     }
     ident[i < max_i ? i : max_i] = 0;
     str += i;
@@ -5235,7 +5253,7 @@ LVCssSelectorRule * parse_attr( const char * &str, lxmlDocBase * doc )
     str++;
     // We may find and skip spaces inside [...]
     skip_spaces( str );
-    if (!parse_ident( str, attrname, 512 ))
+    if (!parse_ident( str, attrname, 512, true ))
         return NULL;
     skip_spaces( str );
     attrvalue[0] = 0;
@@ -5361,7 +5379,7 @@ bool LVCssSelector::parse( const char * &str, lxmlDocBase * doc )
                 check_attribute_rules = false;
             skip_spaces( str );
             _id = 0;
-        } 
+        }
         else if ( *str == '.' ) // classname follows
         {
             _id = 0;
@@ -5382,7 +5400,7 @@ bool LVCssSelector::parse( const char * &str, lxmlDocBase * doc )
         {
             // ident
             char ident[64];
-            if (!parse_ident( str, ident, 64 ))
+            if (!parse_ident( str, ident, 64, true ))
                 return false;
             // All element names have been lowercased by HTMLParser (except
             // a few ones that are added explicitely by crengine): we need
@@ -5730,6 +5748,25 @@ lUInt32 LVStyleSheet::getHash()
     return hash;
 }
 
+// insert with specificity sorting
+static void insert_into_selectors(LVCssSelector *item, LVPtrVector<LVCssSelector> &selectors) {
+    lUInt16 id = item->getElementNameId();
+    if (!selectors[id] || selectors[id]->getSpecificity() > item->getSpecificity()) {
+        // insert as first item
+        item->setNext(selectors[id]);
+        selectors[id] = item;
+    } else {
+        // insert as internal item
+        for (LVCssSelector *p = selectors[id]; p; p = p->getNext()) {
+            if (!p->getNext() || p->getNext()->getSpecificity() > item->getSpecificity()) {
+                item->setNext(p->getNext());
+                p->setNext(item);
+                break;
+            }
+        }
+    }
+}
+
 bool LVStyleSheet::parseAndAdvance( const char * &str, bool higher_importance, lString32 codeBase )
 {
     if ( !_doc ) {
@@ -5818,32 +5855,25 @@ bool LVStyleSheet::parseAndAdvance( const char * &str, bool higher_importance, l
                 lUInt16 id = item->getElementNameId();
                 if (_selectors.length()<=id)
                     _selectors.set(id, NULL);
-                // insert with specificity sorting
-                if ( _selectors[id] == NULL 
-                    || _selectors[id]->getSpecificity() > item->getSpecificity() )
-                {
-                    // insert as first item
-                    item->setNext( _selectors[id] );
-                    _selectors[id] = item;
-                }
-                else
-                {
-                    // insert as internal item
-                    for (LVCssSelector * p = _selectors[id]; p; p = p->getNext() )
-                    {
-                        if ( p->getNext() == NULL
-                            || p->getNext()->getSpecificity() > item->getSpecificity() )
-                        {
-                            item->setNext( p->getNext() );
-                            p->setNext( item );
-                            break;
-                        }
-                    }
-                }
+                insert_into_selectors(item, _selectors);
             }
         }
     }
     return _selectors.length() > 0;
+}
+
+void LVStyleSheet::merge(const LVStyleSheet &other) {
+    int length = other._selectors.length();
+    if (length > _selectors.length())
+        _selectors.set(length - 1, nullptr);
+    for (int i = 0; i < length; ++i) {
+        for (LVCssSelector *p = other._selectors[i]; p; p = p->getNext()) {
+            LVCssSelector *item = p->getCopy();
+            item->addSpecificity(_selector_count);
+            insert_into_selectors(item, _selectors);
+        }
+    }
+    _selector_count += other._selector_count;
 }
 
 bool LVStyleSheet::parseCharsetRule( const char * &str )

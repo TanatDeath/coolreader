@@ -38,6 +38,9 @@
 			<TextView android:text="https://habr.com/ru/post/529244/" android:id="@+id/www_github2"
 					style="@style/TextAppearance.Medium"
 					android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:autoLink="web"/>
+			<TextView android:text="https://habr.com/ru/post/673714/" android:id="@+id/www_github3"
+					style="@style/TextAppearance.Medium"
+					android:layout_margin="4dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:autoLink="web"/>
 			<TextView android:text="@string/this_is_fork"
 					android:id="@+id/this_is_fork"
 					android:textColor="?attr/colorIcon"

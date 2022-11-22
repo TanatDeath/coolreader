@@ -191,6 +191,7 @@
     <attr name="attr_icons8_lock_portrait_2" format="reference" />
     <attr name="attr_icons8_orientation" format="reference" />
     <attr name="attr_icons8_fullscreen" format="reference" />
+    <attr name="attr_icons8_fullscreen_small" format="reference" />
     <attr name="attr_icons8_touchscreen" format="reference" />
     <attr name="attr_icons8_increase_font_2" format="reference" />
     <attr name="attr_icons8_decrease_font_1" format="reference" />
@@ -391,6 +392,7 @@
     <attr name="attr_icons8_send_to_action" format="reference" />
     <attr name="attr_icons8_send_to_action_more" format="reference" />
     <attr name="attr_icons8_speaker_koef" format="reference" />
+    <attr name="attr_icons8_speaker_small" format="reference" />
     <attr name="attr_icons8_user_dic_panel" format="reference" />
     <attr name="attr_icons8_group" format="reference" />
     <attr name="attr_icons8_group2" format="reference" />
@@ -411,6 +413,17 @@
     <attr name="attr_icons8_circle" format="reference" />
     <attr name="attr_icons8_square" format="reference" />
     <attr name="attr_icons8_screenshot" format="reference" />
+    <attr name="attr_icons8_1" format="reference" />
+    <attr name="attr_icons8_2" format="reference" />
+    <attr name="attr_icons8_3" format="reference" />
+    <attr name="attr_icons8_4" format="reference" />
+    <attr name="attr_icons8_5" format="reference" />
+    <attr name="attr_icons8_6" format="reference" />
+    <attr name="attr_icons8_7" format="reference" />
+    <attr name="attr_icons8_8" format="reference" />
+    <attr name="attr_icons8_9" format="reference" />
+    <attr name="attr_icons8_10" format="reference" />
+    <attr name="attr_icons8_download_database" format="reference" />
 
     <attr name="ic_media_ff_drawable" format="reference" />
     <attr name="ic_media_play_drawable" format="reference" />

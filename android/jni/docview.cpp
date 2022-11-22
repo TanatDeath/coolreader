@@ -2207,13 +2207,17 @@ JNIEXPORT void JNICALL Java_org_coolreader_crengine_DocView_updateSelectionInter
         r.sort();
 		if ( !r.getStart().isVisibleWordStart() )
 			r.getStart().prevVisibleWordStart();
-		//lString32 start = r.getStart().toString(); // plotn - NB: this line iscommented out in upstream but nor in mine. Maybe this is "Hemingway" fix, maybe not
-		if ( !r.getEnd().isVisibleWordEnd() )
-			r.getEnd().nextVisibleWordEnd();
+		//lString32 start = r.getStart().toString();
+		if (!r.getEnd().isSentenceEnd()) { // plotn: prevent to select additional word in the next indent
+			if (!r.getEnd().isVisibleWordEnd())
+				r.getEnd().nextVisibleWordEnd();
+		}
         if ( r.isNull() )
             return;
         //lString32 end = r.getEnd().toString();
         //CRLog::debug("Range: %s - %s", UnicodeToUtf8(start).c_str(), UnicodeToUtf8(end).c_str());
+		//lString32 text = r.getRangeText();
+		//CRLog::debug("Range text: %s", UnicodeToUtf8(text).c_str());
         r.setFlags(1);
         p->_docview->selectRange( r );
         int page = p->_docview->getBookmarkPage(startp);

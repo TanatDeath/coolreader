@@ -1,6 +1,5 @@
 package org.coolreader.options;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
 import android.text.Editable;
@@ -13,26 +12,31 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TabHost;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import org.coolreader.R;
-import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.ReaderAction;
 import org.coolreader.crengine.Settings;
+import org.coolreader.layouts.FlowLayout;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
-import org.coolreader.layouts.FlowLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabContentFactory, ActionClickedCallback {
 
-	FlowLayout mFlToolbar;
-	FlowLayout mFlMenu;
+	private FlowLayout mFlToolbar;
+	private FlowLayout mFlMenu;
+	private FlowLayout mFlGroup;
+	ArrayList<Button> btnGroupNums = new ArrayList<>();
+	private int curGroupNum = 1;
+
 
 	public static final int[] mToolbarButtons = new int[] {
 			0, 4, 5, 6, 1, 2, 3, 7, 8, 9, 10, 11, 12
@@ -115,6 +119,7 @@ public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabCon
 		addTab(tabs, mActivity.getString(R.string.all_actions));
 		addTab(tabs, mActivity.getString(R.string.toolbar_actions));
 		addTab(tabs, mActivity.getString(R.string.menu_actions));
+		addTab(tabs, mActivity.getString(R.string.group_actions));
 		tabs.invalidate();
 		tabs.setCurrentTab(0);
 		dlg.setView(tabs);
@@ -140,6 +145,28 @@ public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabCon
 	}
 
 	public String getValueLabel() { return ">"; }
+
+	public enum ForWhat {
+		forMenu,
+		forToolbar,
+		forGroup
+	}
+
+	private void groupButtonClick() {
+		int i = 0;
+		int colorGray = themeColors.get(R.attr.colorThemeGray2);
+		for (Button btn: btnGroupNums) {
+			i++;
+			if (i == curGroupNum) {
+				btn.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
+				if (isEInk) Utils.setSolidButtonEink(btn);
+			}
+			else {
+				btn.setBackgroundColor(themeColors.get(R.attr.colorThemeGray2Contrast));
+				if (isEInk) btn.setBackgroundColor(Color.WHITE);
+			}
+		}
+	}
 
 	@Override
 	public View createTabContent(String tag) {
@@ -196,35 +223,78 @@ public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabCon
 			ibSearch.requestFocus();
 			return view;
 		} else {
-			final boolean forMenu = tag.equals(mActivity.getString(R.string.menu_actions));
+			ForWhat forWhat = ForWhat.forToolbar;
+			if (tag.equals(mActivity.getString(R.string.menu_actions))) forWhat = ForWhat.forMenu;
+			if (tag.equals(mActivity.getString(R.string.group_actions))) forWhat = ForWhat.forGroup;
 			LinearLayout ll = (LinearLayout) mInflater.inflate(R.layout.toolbar_menu_buttons_fl, null);
 			FlowLayout flToolbarMenu = ll.findViewById(R.id.fl_toolbar_menu_buttons);
-			if (!forMenu) mFlToolbar = flToolbarMenu;
-			if (forMenu) mFlMenu = flToolbarMenu;
-			updateButtonsView(forMenu);
+			if (forWhat == ForWhat.forToolbar) mFlToolbar = flToolbarMenu;
+			if (forWhat == ForWhat.forMenu) mFlMenu = flToolbarMenu;
+			if (forWhat == ForWhat.forGroup) mFlGroup = flToolbarMenu;
 			int colorGray = themeColors.get(R.attr.colorThemeGray2);
+			TableLayout tlNums = ll.findViewById(R.id.group_num);
+			if (forWhat == ForWhat.forGroup) {
+				btnGroupNums.clear();
+				Button btnGroupNum_1 = ll.findViewById(R.id.group_num_1);
+				btnGroupNums.add(btnGroupNum_1);
+				Button btnGroupNum_2 = ll.findViewById(R.id.group_num_2);
+				btnGroupNums.add(btnGroupNum_2);
+				Button btnGroupNum_3 = ll.findViewById(R.id.group_num_3);
+				btnGroupNums.add(btnGroupNum_3);
+				Button btnGroupNum_4 = ll.findViewById(R.id.group_num_4);
+				btnGroupNums.add(btnGroupNum_4);
+				Button btnGroupNum_5 = ll.findViewById(R.id.group_num_5);
+				btnGroupNums.add(btnGroupNum_5);
+				Button btnGroupNum_6 = ll.findViewById(R.id.group_num_6);
+				btnGroupNums.add(btnGroupNum_6);
+				Button btnGroupNum_7 = ll.findViewById(R.id.group_num_7);
+				btnGroupNums.add(btnGroupNum_7);
+				Button btnGroupNum_8 = ll.findViewById(R.id.group_num_8);
+				btnGroupNums.add(btnGroupNum_8);
+				Button btnGroupNum_9 = ll.findViewById(R.id.group_num_9);
+				btnGroupNums.add(btnGroupNum_9);
+				Button btnGroupNum_10 = ll.findViewById(R.id.group_num_10);
+				btnGroupNums.add(btnGroupNum_10);
+				int i = 0;
+				for (Button btn: btnGroupNums) {
+					i++;
+					int finalI = i;
+					btn.setOnClickListener(v -> {
+						curGroupNum = finalI;
+						groupButtonClick();
+						updateButtonsView(ForWhat.forGroup);
+					});
+					groupButtonClick();
+				}
+			} else {
+				Utils.hideView(tlNums);
+			}
+			updateButtonsView(forWhat);
 			Button btnDef = ll.findViewById(R.id.btn_def);
 			btnDef.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
 			if (isEInk) Utils.setSolidButtonEink(btnDef);
+			ForWhat finalForWhat = forWhat;
 			btnDef.setOnClickListener(v -> {
-				addButton("", forMenu, 6);
-				updateButtonsView(forMenu);
+				addButton("", finalForWhat, 6);
+				updateButtonsView(finalForWhat);
 			});
+			if (forWhat == ForWhat.forGroup) Utils.hideView(btnDef);
 			Button btnClear = ll.findViewById(R.id.btn_clear);
 			btnClear.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
 			btnClear.setOnClickListener(v -> {
-				addButton("", forMenu, 5);
-				updateButtonsView(forMenu);
+				addButton("", finalForWhat, 5);
+				updateButtonsView(finalForWhat);
 			});
 			if (isEInk) Utils.setSolidButtonEink(btnClear);
 			return ll;
 		}
 	}
 
-	private void addButton(String btnId, boolean forMenu, int loc) {
+	private void addButton(String btnId, ForWhat forWhat, int loc) {
 		// loc - 0 = в конец, 1 = в начало, 2 = влево, 3 = вправо, 4 = удалить, 5 = очистить, 6 = добавить по умолчанию
 		String sSett = Settings.PROP_TOOLBAR_BUTTONS;
-		if (forMenu) sSett = Settings.PROP_READING_MENU_BUTTONS;
+		if (forWhat == ForWhat.forMenu) sSett = Settings.PROP_READING_MENU_BUTTONS;
+		if (forWhat == ForWhat.forGroup) sSett = Settings.PROP_GROUP_BUTTONS + "_" + curGroupNum;
 		if (loc == 5) {
 			mProperties.setProperty(sSett, "");
 			return;
@@ -274,12 +344,16 @@ public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabCon
 		mProperties.setProperty(sSett, res);
 	}
 
-	private void updateButtonsView(boolean forMenu) {
+	private void updateButtonsView(ForWhat forWhat) {
 		String sProp = mProperties.getProperty(Settings.PROP_TOOLBAR_BUTTONS);
 		FlowLayout fl = mFlToolbar;
-		if (forMenu) {
+		if (forWhat == ForWhat.forMenu) {
 			sProp = mProperties.getProperty(Settings.PROP_READING_MENU_BUTTONS);
 			fl = mFlMenu;
+		}
+		if (forWhat == ForWhat.forGroup) {
+			sProp = mProperties.getProperty(Settings.PROP_GROUP_BUTTONS + "_" + curGroupNum);
+			fl = mFlGroup;
 		}
 		if (fl == null) return;
 		fl.removeAllViews();
@@ -295,8 +369,8 @@ public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabCon
 					final String btnId = ra.cmd.nativeId +"."+ ra.param;
 					ImageView iv = view.findViewById(R.id.iv_middle);
 					iv.setOnClickListener(v -> {
-						addButton(btnId, forMenu, 4);
-						updateButtonsView(forMenu);
+						addButton(btnId, forWhat, 4);
+						updateButtonsView(forWhat);
 					});
 
 					LinearLayout llAction = view.findViewById(R.id.ll_action);
@@ -307,37 +381,26 @@ public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabCon
 					ra.setupIconView(mActivity, iv);
 					ImageButton btnLeft = view.findViewById(R.id.btn_left);
 					btnLeft.setOnClickListener(v -> {
-						addButton(btnId, forMenu, 2);
-						updateButtonsView(forMenu);
+						addButton(btnId, forWhat, 2);
+						updateButtonsView(forWhat);
 					});
 					ImageButton btnRight = view.findViewById(R.id.btn_right);
 					btnRight.setOnClickListener(v -> {
-						addButton(btnId, forMenu, 3);
-						updateButtonsView(forMenu);
+						addButton(btnId, forWhat, 3);
+						updateButtonsView(forWhat);
 					});
 					ImageButton btnUp = view.findViewById(R.id.btn_up);
 					btnUp.setOnClickListener(v -> {
-						addButton(btnId, forMenu, 1);
-						updateButtonsView(forMenu);
+						addButton(btnId, forWhat, 1);
+						updateButtonsView(forWhat);
 					});
 					ImageButton btnDown = view.findViewById(R.id.btn_down);
 					btnDown.setOnClickListener(v -> {
-						addButton(btnId, forMenu, 0);
-						updateButtonsView(forMenu);
+						addButton(btnId, forWhat, 0);
+						updateButtonsView(forWhat);
 					});
 					mActivity.tintViewIcons(view);
 					fl.addView(view);
-//					TextView tvSpace = new TextView(mActivity);
-//					tvSpace.setText(" ");
-//					tvSpace.setPadding(10, 10, 10, 10);
-//					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
-//							ViewGroup.LayoutParams.WRAP_CONTENT,
-//							ViewGroup.LayoutParams.WRAP_CONTENT);
-//					llp.setMargins(8, 4, 4, 4);
-//					tvSpace.setLayoutParams(llp);
-//					int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-//					tvSpace.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
-//					fl.addView(tvSpace);
 					break;
 				}
 			}
@@ -345,10 +408,10 @@ public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabCon
 	}
 
 	@Override
-	public void onActionClick(ActionOptionExt actionOption, int clickType) {
+	public void onActionClick(ActionOptionExt actionOption, ForWhat forWhat) {
 		mActivity.showToast(R.string.value_saved);
 		String btn = actionOption.property.replace(Settings.PROP_TOOLBAR_BUTTONS+".", "");
-		addButton(btn, clickType == 1, 0);
-		updateButtonsView(clickType == 1);
+		addButton(btn, forWhat, 0);
+		updateButtonsView(forWhat);
 	}
 }

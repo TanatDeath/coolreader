@@ -36,6 +36,8 @@ public class CalibreCatalogEditDialog extends BaseDialog implements FolderSelect
 	boolean isEInk;
 	HashMap<Integer, Integer> themeColors;
 	private final Runnable mOnUpdate;
+	private boolean mIsCloud;
+	private String mInitialPath;
 
 	private boolean getCheckedFromTag(Object o) {
 		if (o == null) return false;
@@ -67,7 +69,8 @@ public class CalibreCatalogEditDialog extends BaseDialog implements FolderSelect
 		} else btnIsRemoteYD.setBackgroundColor(colorGrayCT);
 	}
 
-	public CalibreCatalogEditDialog(CoolReader activity, FileInfo item, Runnable onUpdate) {
+	public CalibreCatalogEditDialog(CoolReader activity, FileInfo item,
+			boolean isLocal, String path, Runnable onUpdate) {
 		super(activity, activity.getString((item.id == null) ? R.string.dlg_catalog_add_title
 				: R.string.dlg_calibre_catalog_edit_title), true,
 				false);
@@ -76,6 +79,8 @@ public class CalibreCatalogEditDialog extends BaseDialog implements FolderSelect
 		themeColors = Utils.getThemeColors(activity, isEInk);
 		mItem = item;
 		mOnUpdate = onUpdate;
+		mIsCloud = !isLocal;
+		mInitialPath = path;
 		mInflater = LayoutInflater.from(getContext());
 		View view = mInflater.inflate(R.layout.calibre_catalog_edit_dialog, null);
 		nameEdit = view.findViewById(R.id.catalog_name);
@@ -87,7 +92,12 @@ public class CalibreCatalogEditDialog extends BaseDialog implements FolderSelect
 		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
 		Drawable img1 = img.getConstantState().newDrawable().mutate();
 		Drawable img2 = img.getConstantState().newDrawable().mutate();
-		btnIsLocal.setTag("1");
+		btnIsLocal.setTag("0");
+		btnIsRemoteYD.setTag("0");
+		if (!isLocal)
+			btnIsRemoteYD.setTag("1");
+		else
+			btnIsLocal.setTag("1");
 		btnIsLocal.setCompoundDrawablesWithIntrinsicBounds(img1, null, null, null);
 		btnIsRemoteYD.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
 		edtLocalFolder = view.findViewById(R.id.catalog_local_folder);
@@ -95,6 +105,11 @@ public class CalibreCatalogEditDialog extends BaseDialog implements FolderSelect
 		btnChooseCatalog = view.findViewById(R.id.choose_catalog_btn);
 		if (item.id != null)
 			edtLocalFolder.setText(StrUtils.getNonEmptyStr(item.pathname, true).replace(FileInfo.CALIBRE_DIR_PREFIX, ""));
+		else {
+			if (StrUtils.getNonEmptyStr(item.pathname, true).contains(FileInfo.CALIBRE_DIR_PREFIX)) {
+				edtLocalFolder.setText(StrUtils.getNonEmptyStr(item.pathname, true).replace(FileInfo.CALIBRE_DIR_PREFIX, ""));
+			}
+		}
 		btnTestCatalog.setOnClickListener(v -> {
 			boolean ex = false;
 			try {
@@ -129,6 +144,7 @@ public class CalibreCatalogEditDialog extends BaseDialog implements FolderSelect
 					Utils.resolveResourceIdByAttr(activity, R.attr.attr_icons8_minus, R.drawable.icons8_minus),
 					//R.drawable.icons8_minus,
 					R.string.mi_catalog_delete);
+		edtRemoteFolderYD.setText(item.remote_folder);
 		paintScopeButtons();
 		setView(view);
 	}

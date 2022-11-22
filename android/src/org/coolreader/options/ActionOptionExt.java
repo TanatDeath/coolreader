@@ -187,33 +187,41 @@ public class ActionOptionExt extends OptionBase {
 		}
 		Button toToolbar = view.findViewById(R.id.btn_to_toolbar);
 		Button toMenu = view.findViewById(R.id.btn_to_menu);
+		Button toGroup = view.findViewById(R.id.btn_to_group);
 		LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
 				ViewGroup.LayoutParams.WRAP_CONTENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT);
 		toToolbar.setOnClickListener(v -> {
-			mButtonClick.onActionClick(this, 0);
+			mButtonClick.onActionClick(this, ReaderToolbarOption.ForWhat.forToolbar);
 		});
 		toMenu.setOnClickListener(v -> {
-			mButtonClick.onActionClick(this, 1);
+			mButtonClick.onActionClick(this, ReaderToolbarOption.ForWhat.forMenu);
+		});
+		toGroup.setOnClickListener(v -> {
+			mButtonClick.onActionClick(this, ReaderToolbarOption.ForWhat.forGroup);
 		});
 		llp.setMargins(8, 4, 4, 4);
 		toToolbar.setLayoutParams(llp);
 		toMenu.setLayoutParams(llp);
+		toGroup.setLayoutParams(llp);
 		toToolbar.setPadding(10, 20, 10, 20);
 		toMenu.setPadding(10, 20, 10, 20);
+		toGroup.setPadding(10, 20, 10, 20);
 		int colorGray;
 		colorGray = themeColors.get(R.attr.colorThemeGray2);
 		toToolbar.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
 		if (isEInk) Utils.setSolidButtonEink(toToolbar);
 		toMenu.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
 		if (isEInk) Utils.setSolidButtonEink(toMenu);
+		toGroup.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
+		if (isEInk) Utils.setSolidButtonEink(toGroup);
 		//label = label.replace("~", " / ");
 		setupIconView(view.findViewById(R.id.option_icon));
 		mActivity.tintViewIcons(view,false);
 		return view;
 	}
 
-	protected void updateItemContents(final View layout, final OptionsDialog.Three item, final ListView listView, final int position ) {
+	protected void updateItemContents(final View layout, final OptionsDialog.Three item, final ListView listView, final int position) {
 		TextView view;
 		view = layout.findViewById(R.id.option_value_text);
 		ImageView btnOptionAddInfo = layout.findViewById(R.id.btn_option_add_info);

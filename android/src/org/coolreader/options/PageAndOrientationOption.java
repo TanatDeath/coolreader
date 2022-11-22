@@ -11,13 +11,14 @@ import org.coolreader.crengine.Settings;
 public class PageAndOrientationOption extends SubmenuOption {
 
 	int[] mLandscapePages = new int[] {
-			1, 2
+			1, 2, 3, 4
 	};
 	int[] mLandscapePagesTitles = new int[] {
-			R.string.options_page_landscape_pages_one, R.string.options_page_landscape_pages_two
+			R.string.options_page_2pages_one, R.string.options_page_2pages_two_in_landscape,
+			R.string.options_page_2pages_two, R.string.options_page_2pages_two_in_landscape_and_square
 	};
 	int[] mLandscapePagesAddInfos = new int[] {
-			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
 	};
 	int[] mViewModes = new int[] {
 			1, 0
@@ -48,9 +49,9 @@ public class PageAndOrientationOption extends SubmenuOption {
 			,R.string.options_page_orientation_sensor,R.string.options_page_orientation_system
 	};
 	int[] mOrientationsAddInfos_API9 = new int[] {
-			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
+		R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+		R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+		R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
 	};
 
 	public static int[] mOrient;
@@ -58,15 +59,15 @@ public class PageAndOrientationOption extends SubmenuOption {
 	public static int[] mOrientAddInfos;
 
 	int[] mPageAnimationSpeed = new int[] {
-			100, 200, 300, 500, 800
+		100, 200, 300, 500, 800
 	};
 	int[] mPageAnimationSpeedAddInfos = new int[] {
-			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
-			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
+		R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+		R.string.option_add_info_empty_text, R.string.option_add_info_empty_text
 	};
 	int[] mPageAnimationSpeedTitles = new int[] {
-			R.string.page_animation_speed_1, R.string.page_animation_speed_2, R.string.page_animation_speed_3,
-			R.string.page_animation_speed_4, R.string.page_animation_speed_5
+		R.string.page_animation_speed_1, R.string.page_animation_speed_2, R.string.page_animation_speed_3,
+		R.string.page_animation_speed_4, R.string.page_animation_speed_5
 	};
 
 	int[] mAnimation = new int[] {
@@ -123,7 +124,7 @@ public class PageAndOrientationOption extends SubmenuOption {
 		else
 			listView.add(new ListOption(mOwner, mActivity.getString(R.string.options_page_orientation), Settings.PROP_APP_SCREEN_ORIENTATION,
 					mActivity.getString(R.string.options_page_orientation_add_info), this.lastFilteredValue).add(mOrientations, mOrientationsTitles, mOrientationsAddInfos).setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_page_orientation_landscape_drawable, R.drawable.cr3_option_page_orientation_landscape));
-		listView.add(new ListOption(mOwner, mActivity.getString(R.string.options_page_landscape_pages), Settings.PROP_LANDSCAPE_PAGES,
+		listView.add(new ListOption(mOwner, mActivity.getString(R.string.options_page_2pages_mode), Settings.PROP_LANDSCAPE_PAGES,
 				mActivity.getString(R.string.options_page_landscape_pages_add_info), this.lastFilteredValue).add(mLandscapePages, mLandscapePagesTitles, mLandscapePagesAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.cr3_option_pages_two_drawable, R.drawable.cr3_option_pages_two));
 		if (!DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink())) {
 			listView.add(new ListOption(mOwner, mActivity.getString(R.string.page_animation_speed), Settings.PROP_PAGE_ANIMATION_SPEED,
@@ -155,6 +156,8 @@ public class PageAndOrientationOption extends SubmenuOption {
 		for (String s: mOrientTitles) this.updateFilteredMark(s);
 		for (int i: mOrientAddInfos) if (i > 0) this.updateFilteredMark(mActivity.getString(i));
 		this.updateFilteredMark(mActivity.getString(R.string.options_page_landscape_pages), Settings.PROP_LANDSCAPE_PAGES,
+				mActivity.getString(R.string.options_page_landscape_pages_add_info));
+		this.updateFilteredMark(mActivity.getString(R.string.options_page_2pages_mode), Settings.PROP_LANDSCAPE_PAGES,
 				mActivity.getString(R.string.options_page_landscape_pages_add_info));
 		for (int i: mLandscapePagesTitles) if (i > 0) this.updateFilteredMark(mActivity.getString(i));
 		for (int i: mLandscapePagesAddInfos) if (i > 0) this.updateFilteredMark(mActivity.getString(i));

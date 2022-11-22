@@ -1944,7 +1944,8 @@ public class Engine {
 		CloudSyncDirs,
 		IconDirs,
 		OfflineDicsDirs,
-		BookmarksDirs
+		BookmarksDirs,
+		CalibreLibrariesDirs
 	}
 
 	public static ArrayList<String> getDataDirs(DataDirType dirType) {
@@ -2106,6 +2107,22 @@ public class Engine {
 							res.add(subdirBookmarks.getAbsolutePath());
 						else
 							res.add(subdirBookmarks.getAbsolutePath() + " [not found]");
+						break;
+					}
+				case CalibreLibrariesDirs:
+					File subdirCalibreLibraries = new File(base, "calibrelibraries");
+					bCreated = false;
+					if ((doCreate) && (!subdirCalibreLibraries.exists())) {
+						if (subdirCalibreLibraries.mkdir()) {
+							res.add(subdirCalibreLibraries.getAbsolutePath());
+							bCreated = true;
+						}
+					}
+					if (!bCreated) {
+						if (subdirCalibreLibraries.isDirectory())
+							res.add(subdirCalibreLibraries.getAbsolutePath());
+						else
+							res.add(subdirCalibreLibraries.getAbsolutePath() + " [not found]");
 						break;
 					}
 			}

@@ -81,6 +81,7 @@ public interface Settings {
     String PROP_TOOLBAR_APPEARANCE      ="viewer.toolbar.appearance";
     String PROP_TOOLBAR_BUTTONS         ="viewer.toolbar.buttons";
 	String PROP_READING_MENU_BUTTONS    ="viewer.reading.menu.buttons";
+	String PROP_GROUP_BUTTONS			="viewer.group.buttons";
     String PROP_SKIPPED_RES             ="viewer.skipped.resolutions";
 	String PROP_APP_RESTORE_SETTINGS    ="app.restore.settings";
 	String PROP_DIC_LIST_MULTI          ="app.dic.list.multi";

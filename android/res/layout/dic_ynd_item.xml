@@ -40,6 +40,7 @@
 				android:layout_weight="1"
 				android:orientation="horizontal">
 			<ImageButton android:id="@+id/btn_to_user_dic"
+					android:scaleType="fitCenter"
 					android:layout_margin="5dip"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
@@ -64,6 +65,7 @@
 				android:layout_weight="1"
 				android:orientation="horizontal">
 			<ImageButton android:id="@+id/btnTransl"
+					android:scaleType="fitCenter"
 					android:layout_margin="5dip"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
@@ -88,6 +90,7 @@
 				android:layout_weight="1"
 				android:orientation="horizontal">
 			<ImageButton android:id="@+id/btn_copy_to_cb"
+					android:scaleType="fitCenter"
 					android:layout_margin="5dip"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"

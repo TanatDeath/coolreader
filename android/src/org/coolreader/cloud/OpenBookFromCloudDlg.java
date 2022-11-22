@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -31,6 +30,7 @@ import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.Settings;
 import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,6 +49,7 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 	private RadioButton btnFolder;
 	private ImageButton btnFind;
 	private ImageButton btnRoot;
+	private ImageButton btnSaveToOpds;
 	private ImageButton btnUp;
 	private RadioGroup rgScope;
 	private Button btnSaveOpenedBook;
@@ -114,14 +115,14 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 			int res1 = R.layout.open_book_from_gd_item1;
 			int res2 = R.layout.open_book_from_gd_item2;
 			view = mInflater.inflate(res, null);
-			TextView fileView = (TextView)view.findViewById(R.id.file_name);
-			TextView descrView = (TextView)view.findViewById(R.id.file_descr);
-			TextView timeView = (TextView)view.findViewById(R.id.file_time);
+			TextView fileView = view.findViewById(R.id.file_name);
+			TextView descrView = view.findViewById(R.id.file_descr);
+			TextView timeView = view.findViewById(R.id.file_time);
 			view1 = mInflater.inflate(res1, null);
-			TextView fileView1 = (TextView)view1.findViewById(R.id.file_name);
+			TextView fileView1 = view1.findViewById(R.id.file_name);
 			view2 = mInflater.inflate(res2, null);
-			TextView fileView2 = (TextView)view2.findViewById(R.id.file_name);
-			TextView timeView2 = (TextView)view2.findViewById(R.id.file_time);
+			TextView fileView2 = view2.findViewById(R.id.file_name);
+			TextView timeView2 = view2.findViewById(R.id.file_time);
 			com.dropbox.core.v2.files.Metadata md = null;
 			String sFile = "";
 			if (mDBXList.mLFR != null) md = mDBXList.mLFR.get(position);
@@ -231,14 +232,14 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 			int res1 = R.layout.open_book_from_gd_item1;
 			int res2 = R.layout.open_book_from_gd_item2;
 			view = mInflater.inflate(res, null);
-			TextView fileView = (TextView)view.findViewById(R.id.file_name);
-			TextView descrView = (TextView)view.findViewById(R.id.file_descr);
-			TextView timeView = (TextView)view.findViewById(R.id.file_time);
+			TextView fileView = view.findViewById(R.id.file_name);
+			TextView descrView = view.findViewById(R.id.file_descr);
+			TextView timeView = view.findViewById(R.id.file_time);
 			view1 = mInflater.inflate(res1, null);
-			TextView fileView1 = (TextView)view1.findViewById(R.id.file_name);
+			TextView fileView1 = view1.findViewById(R.id.file_name);
 			view2 = mInflater.inflate(res2, null);
-			TextView fileView2 = (TextView)view2.findViewById(R.id.file_name);
-			TextView timeView2 = (TextView)view2.findViewById(R.id.file_time);
+			TextView fileView2 = view2.findViewById(R.id.file_name);
+			TextView timeView2 = view2.findViewById(R.id.file_time);
 			CloudFileInfo md = null;
 			String sFile = "";
 			if (mYNDList.mLFR != null) md = mYNDList.mLFR.fileList.get(position);
@@ -446,37 +447,32 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 		mCoolReader = activity;
 
 		View frame = mInflater.inflate(R.layout.open_book_from_cloud_dialog, null);
-		ViewGroup body = (ViewGroup)frame.findViewById(R.id.book_list);
-		btnWhole = (RadioButton)frame.findViewById(R.id.rb_whole);
-		btnWhole.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if ( isChecked ) {
-					mWholeSearch = true;
-				}
+		ViewGroup body = frame.findViewById(R.id.book_list);
+		btnWhole = frame.findViewById(R.id.rb_whole);
+		btnWhole.setOnCheckedChangeListener((buttonView, isChecked) -> {
+			if ( isChecked ) {
+				mWholeSearch = true;
 			}
 		});
 		btnFolder = (RadioButton)frame.findViewById(R.id.rb_folder);
-		btnFolder.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if ( isChecked ) {
-					mWholeSearch = false;
-				}
+		btnFolder.setOnCheckedChangeListener((buttonView, isChecked) -> {
+			if ( isChecked ) {
+				mWholeSearch = false;
 			}
 		});
 		btnFolder.setChecked(true);
-		btnFind = (ImageButton)frame.findViewById(R.id.do_find);
-		btnRoot = (ImageButton)frame.findViewById(R.id.goto_root);
-		btnUp = (ImageButton)frame.findViewById(R.id.goto_up);
-		lblFolder = (TextView)frame.findViewById(R.id.lbl_folder_text);
-		rgScope = (RadioGroup) frame.findViewById(R.id.rg_scope);
+		btnFind = frame.findViewById(R.id.do_find);
+		btnRoot = frame.findViewById(R.id.goto_root);
+		btnSaveToOpds = frame.findViewById(R.id.save_to_opds);
+		btnUp = frame.findViewById(R.id.goto_up);
+		lblFolder = frame.findViewById(R.id.lbl_folder_text);
+		rgScope = frame.findViewById(R.id.rg_scope);
 
-		edtFind = (EditText)frame.findViewById(R.id.find_text);
+		edtFind = frame.findViewById(R.id.find_text);
 		edtFind.setText("");
-		llSaveBook = (LinearLayout)frame.findViewById(R.id.ll_save_book);
-		btnSaveOpenedBook = (Button)frame.findViewById(R.id.btn_save_book_to_cloud_ynd);
-		tvCurrentBook = (TextView)frame.findViewById(R.id.lbl_save_book);
+		llSaveBook = frame.findViewById(R.id.ll_save_book);
+		btnSaveOpenedBook = frame.findViewById(R.id.btn_save_book_to_cloud_ynd);
+		tvCurrentBook = frame.findViewById(R.id.lbl_save_book);
 		if (bookToSave == null)
 			((ViewGroup)llSaveBook.getParent()).removeView(llSaveBook);
 		else {
@@ -501,36 +497,32 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 
 		System.out.println("initForDBX");
 
-		btnFind.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
-				btnFolder.setChecked(true);
-				mDBXList.mDriveStrList.clear();
-				mDBXList.mLFR = null;
-				listUpdated();
-				CloudAction.dbxLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, "", edtFind.getText().toString());
-			}
+		btnFind.setOnClickListener(v -> {
+			btnFolder.setChecked(true);
+			mDBXList.mDriveStrList.clear();
+			mDBXList.mLFR = null;
+			listUpdated();
+			CloudAction.dbxLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, "", edtFind.getText().toString());
 		});
 
-		btnRoot.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
-				btnFolder.setChecked(true);
-				mDBXList.mDriveStrList.clear();
-				mDBXList.mLFR = null;
-				listUpdated();
-				CloudAction.dbxLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, "", "");
-			}
+		btnRoot.setOnClickListener(v -> {
+			btnFolder.setChecked(true);
+			mDBXList.mDriveStrList.clear();
+			mDBXList.mLFR = null;
+			listUpdated();
+			CloudAction.dbxLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, "", "");
 		});
 
-		btnUp.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
-				if (mDBXList.mDriveStrList.size()>0) {
-					btnFolder.setChecked(true);
-					mDBXList.mDriveStrList.remove(mDBXList.mDriveStrList.size()-1);
-					mDBXList.mLFR = null;
-					listUpdated();
-					String sFolder=mDBXList.getFolderText();
-					CloudAction.dbxLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, sFolder, "");
-				}
+		Utils.hideView(btnSaveToOpds);
+
+		btnUp.setOnClickListener(v -> {
+			if (mDBXList.mDriveStrList.size()>0) {
+				btnFolder.setChecked(true);
+				mDBXList.mDriveStrList.remove(mDBXList.mDriveStrList.size()-1);
+				mDBXList.mLFR = null;
+				listUpdated();
+				String sFolder=mDBXList.getFolderText();
+				CloudAction.dbxLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, sFolder, "");
 			}
 		});
 
@@ -544,8 +536,8 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 	private BaseListView initForYND(YNDListFiles lfr, String homeFolder) {
 		mYNDList = new OpenBookFromYNDList(mCoolReader, this);
 		mYNDList.mLFR = lfr;
-		mYNDList.mDriveStrList = new ArrayList<String>();
-		mYNDList.mDriveStrList1 = new ArrayList<String>();
+		mYNDList.mDriveStrList = new ArrayList<>();
+		mYNDList.mDriveStrList1 = new ArrayList<>();
 		OpenBookFromYNDAdapter ynda = new OpenBookFromYNDAdapter();
 		mYNDList.setAdapter(ynda);
 		ynda.notifyDataSetChanged();
@@ -568,53 +560,53 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 			}
 		});
 
-		btnRoot.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
+		btnRoot.setOnClickListener(v -> {
+			btnFolder.setChecked(true);
+			mYNDList.mDriveStrList.clear();
+			mYNDList.mLFR = null;
+			listUpdated();
+			Properties props = new Properties(mCoolReader.settings());
+			String homeFolder1 = props.getProperty(Settings.PROP_CLOUD_YND_HOME_FOLDER, "");
+			if (
+					(!StrUtils.isEmptyStr(homeFolder1)) &&
+							(!StrUtils.getNonEmptyStr(homeFolder1,true).equals("/"))
+			) for (String s: homeFolder1.split("\\/"))
+				if (!StrUtils.isEmptyStr(s)) mYNDList.mDriveStrList.add(s);
+			CloudAction.yndLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, homeFolder1, "");
+		});
+
+		btnRoot.setOnLongClickListener(v -> {
+			if (mYNDList == null) return false;
+			mCoolReader.askConfirmation(mCoolReader.getString(R.string.ynd_set_def), () -> {
+				String s = "";
+				for (String ss: mYNDList.mDriveStrList) {
+					s = s + "/" + ss;
+				}
+				Properties props = new Properties(mCoolReader.settings());
+				props.setProperty(Settings.PROP_CLOUD_YND_HOME_FOLDER, s);
+				mCoolReader.setSettings(props, -1, true);
+				mCoolReader.showToast(R.string.ok);
+			});
+			return true;
+		});
+
+		btnSaveToOpds.setOnClickListener(v -> {
+			String s = "";
+			for (String ss: mYNDList.mDriveStrList) {
+				s = s + "/" + ss;
+			}
+			mActivity.addOrEditCalibreCatalog(null, false, s);
+			dismiss();
+		});
+
+		btnUp.setOnClickListener(v -> {
+			if (mYNDList.mDriveStrList.size()>0) {
 				btnFolder.setChecked(true);
-				mYNDList.mDriveStrList.clear();
+				mYNDList.mDriveStrList.remove(mYNDList.mDriveStrList.size()-1);
 				mYNDList.mLFR = null;
 				listUpdated();
-				Properties props = new Properties(mCoolReader.settings());
-				String homeFolder = props.getProperty(Settings.PROP_CLOUD_YND_HOME_FOLDER, "");
-				if (
-						(!StrUtils.isEmptyStr(homeFolder)) &&
-								(!StrUtils.getNonEmptyStr(homeFolder,true).equals("/"))
-				) for (String s: homeFolder.split("\\/"))
-					if (!StrUtils.isEmptyStr(s)) mYNDList.mDriveStrList.add(s);
-				CloudAction.yndLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, homeFolder, "");
-			}
-		});
-
-		btnRoot.setOnLongClickListener(new Button.OnLongClickListener() {
-			public boolean onLongClick(View v) {
-				if (mYNDList == null) return false;
-				mCoolReader.askConfirmation(mCoolReader.getString(R.string.ynd_set_def), new Runnable() {
-					@Override
-					public void run() {
-						String s = "";
-						for (String ss: mYNDList.mDriveStrList) {
-							s = s + "/" + ss;
-						}
-						Properties props = new Properties(mCoolReader.settings());
-						props.setProperty(Settings.PROP_CLOUD_YND_HOME_FOLDER, s);
-						mCoolReader.setSettings(props, -1, true);
-						mCoolReader.showToast(R.string.ok);
-					}
-				});
-				return true;
-			}
-		});
-
-		btnUp.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
-				if (mYNDList.mDriveStrList.size()>0) {
-					btnFolder.setChecked(true);
-					mYNDList.mDriveStrList.remove(mYNDList.mDriveStrList.size()-1);
-					mYNDList.mLFR = null;
-					listUpdated();
-					String sFolder=mYNDList.getFolderText();
-					CloudAction.yndLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, sFolder, "");
-				}
+				String sFolder=mYNDList.getFolderText();
+				CloudAction.yndLoadFolderContents(mCoolReader, OpenBookFromCloudDlg.this, sFolder, "");
 			}
 		});
 
@@ -631,21 +623,16 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		btnSaveOpenedBook.setBackgroundColor(colorGrayCT2);
 		btnSaveOpenedBook.setTextColor(mActivity.getTextColor(colorIcon));
-		btnSaveOpenedBook.setOnClickListener(new Button.OnClickListener() {
-			public void onClick(View v) {
-				if (bookToSave != null) {
-					btnSaveOpenedBook.setVisibility(View.INVISIBLE);
-					BackgroundThread.instance().postGUI(new Runnable() {
-						@Override
-						public void run() {
-							btnSaveOpenedBook.setEnabled(true);
-							btnSaveOpenedBook.setVisibility(View.VISIBLE);
-						}
-					}, 5000);
-					listUpdated();
-					String sFolder = mYNDList.getFolderText();
-					CloudAction.yndSaveBookThenLoadFolderContents(mCoolReader, bookToSave, OpenBookFromCloudDlg.this, sFolder, "", false);
-				}
+		btnSaveOpenedBook.setOnClickListener(v -> {
+			if (bookToSave != null) {
+				btnSaveOpenedBook.setVisibility(View.INVISIBLE);
+				BackgroundThread.instance().postGUI(() -> {
+					btnSaveOpenedBook.setEnabled(true);
+					btnSaveOpenedBook.setVisibility(View.VISIBLE);
+				}, 5000);
+				listUpdated();
+				String sFolder = mYNDList.getFolderText();
+				CloudAction.yndSaveBookThenLoadFolderContents(mCoolReader, bookToSave, OpenBookFromCloudDlg.this, sFolder, "", false);
 			}
 		});
 		return mYNDList;

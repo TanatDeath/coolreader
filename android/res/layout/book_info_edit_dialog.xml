@@ -41,6 +41,7 @@
 						android:layout_weight="1"
 						>
 					<ImageButton android:id="@+id/base_dlg_btn_back"
+						android:scaleType="fitCenter"
 						android:layout_margin="5dip"
 						android:layout_width="0dp"
 						android:layout_weight="1"
@@ -55,6 +56,7 @@
 						android:layout_marginRight="3dip"
 						android:contentDescription="@string/dlg_button_back"/>
 					<ImageButton android:id="@+id/base_dlg_btn_positive"
+						android:scaleType="fitCenter"
 						android:layout_margin="5dip"
 						android:layout_width="0dp"
 						android:layout_weight="1"
@@ -70,6 +72,7 @@
 						android:layout_marginRight="3dip"
 						android:contentDescription="@string/dlg_button_ok"/>
 					<ImageButton android:id="@+id/btn_open_book"
+						android:scaleType="fitCenter"
 						android:layout_margin="5dip"
 						android:layout_width="0dp"
 						android:layout_weight="1"
@@ -85,6 +88,7 @@
 						android:layout_marginRight="3dip"
 						android:contentDescription="@string/dlg_button_open_book"/>
 					<ImageButton android:id="@+id/book_folder_open"
+						android:scaleType="fitCenter"
 						android:layout_margin="5dip"
 						android:layout_width="0dp"
 						android:layout_weight="1"
@@ -99,6 +103,7 @@
 						android:layout_marginRight="3dip"
 						android:contentDescription="@string/dlg_button_open_folder"/>
 					<ImageButton android:id="@+id/book_recent_delete"
+						android:scaleType="fitCenter"
 						android:layout_margin="5dip"
 						android:layout_width="0dp"
 						android:layout_weight="1"
@@ -114,6 +119,7 @@
 						android:layout_marginRight="3dip"
 						android:contentDescription="@string/dlg_button_recent_delete"/>
 					<ImageButton android:id="@+id/book_shortcut"
+						android:scaleType="fitCenter"
 						android:layout_margin="5dip"
 						android:layout_width="0dp"
 						android:layout_weight="1"
@@ -129,6 +135,7 @@
 						android:layout_marginRight="3dip"
 						android:contentDescription="@string/btn_shortcut"/>
 					<ImageButton android:id="@+id/save_to_email"
+						android:scaleType="fitCenter"
 						android:layout_margin="5dip"
 						android:layout_width="0dp"
 						android:layout_weight="1"
@@ -144,6 +151,7 @@
 						android:layout_marginRight="3dip"
 						android:contentDescription="@string/save_current_book_to_cloud_email"/>
 					<ImageButton android:id="@+id/save_to_ynd"
+						android:scaleType="fitCenter"
 						android:layout_margin="5dip"
 						android:layout_width="0dp"
 						android:layout_weight="1"
@@ -159,6 +167,7 @@
 						android:layout_marginRight="3dip"
 						android:contentDescription="@string/save_current_book_to_cloud_ynd"/>
 					<ImageButton android:id="@+id/book_delete"
+						android:scaleType="fitCenter"
 						android:layout_margin="5dip"
 						android:layout_width="0dp"
 						android:layout_weight="1"
@@ -174,6 +183,7 @@
 						android:layout_marginRight="3dip"
 						android:contentDescription="@string/dlg_button_book_delete"/>
 					<ImageButton android:id="@+id/book_custom_cover"
+						android:scaleType="fitCenter"
 						android:layout_margin="5dip"
 						android:layout_width="0dp"
 						android:layout_weight="1"
@@ -257,6 +267,7 @@
 							android:layout_marginRight="5dip"
 							>
 						<ImageButton android:id="@+id/book_star1"
+								android:scaleType="fitCenter"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:layout_marginTop="2dip"
@@ -270,6 +281,7 @@
 								android:background="@null"
 								android:contentDescription="@string/mi_book_rate_1"/>
 						<ImageButton android:id="@+id/book_star2"
+								android:scaleType="fitCenter"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:layout_marginTop="2dip"
@@ -283,6 +295,7 @@
 								android:background="@null"
 								android:contentDescription="@string/mi_book_rate_2"/>
 						<ImageButton android:id="@+id/book_star3"
+								android:scaleType="fitCenter"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:layout_marginTop="2dip"
@@ -296,6 +309,7 @@
 								android:background="@null"
 								android:contentDescription="@string/mi_book_rate_3"/>
 						<ImageButton android:id="@+id/book_star4"
+								android:scaleType="fitCenter"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:layout_marginTop="2dip"
@@ -309,6 +323,7 @@
 								android:background="@null"
 								android:contentDescription="@string/mi_book_rate_4"/>
 						<ImageButton android:id="@+id/book_star5"
+								android:scaleType="fitCenter"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:layout_marginTop="2dip"
@@ -1511,6 +1526,7 @@
 						android:layout_weight="1"
 						>
 					<ImageButton android:id="@+id/base_dlg_btn_back1"
+						android:scaleType="fitCenter"
 						android:layout_width="0dp"
 						android:layout_weight="1"
 						android:layout_height="wrap_content"
@@ -1524,6 +1540,7 @@
 						android:layout_marginRight="3dip"
 						android:contentDescription="@string/dlg_button_back"/>
 					<ImageButton android:id="@+id/base_dlg_btn_positive1"
+						android:scaleType="fitCenter"
 						android:layout_width="0dp"
 						android:layout_weight="1"
 						android:layout_height="wrap_content"

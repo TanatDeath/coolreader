@@ -34,19 +34,26 @@ import android.widget.TextView;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
+import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseListView;
 import org.coolreader.crengine.Bookmark;
+import org.coolreader.crengine.CustomLog;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.DownloadImageTask;
 import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.MaxHeightLinearLayout;
 import org.coolreader.crengine.MaxHeightScrollView;
+import org.coolreader.crengine.ReaderCommand;
+import org.coolreader.crengine.Selection;
 import org.coolreader.crengine.Settings;
 import org.coolreader.layouts.FlowLayout;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.crengine.Services;
+import org.coolreader.tts.OnTTSStatusListener;
+import org.coolreader.tts.TTSControlBinder;
+import org.coolreader.tts.TTSControlService;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 import org.coolreader.dic.struct.DicStruct;
@@ -188,9 +195,9 @@ public class DicToastView {
                 return 0;
             if (curToast.wikiArticles == null)
                 return 0;
-               if (position < 0 || position >= curToast.wikiArticles.wikiArticleList.size())
-                    return null;
-                return curToast.wikiArticles.wikiArticleList.get(position);
+            if (position < 0 || position >= curToast.wikiArticles.wikiArticleList.size())
+                return null;
+            return curToast.wikiArticles.wikiArticleList.get(position);
         }
 
         public long getItemId(int position) {
@@ -410,7 +417,37 @@ public class DicToastView {
         return s;
     }
 
-    private static void initRecentDics(ViewGroup vg, String findText, boolean fullScreen) {
+    private static void setupDicButton(Button dicButton, int textSize) {
+        dicButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
+        dicButton.setTextColor(mActivity.getTextColor(colorIcon));
+        dicButton.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
+        Utils.setSolidButton1(dicButton);
+        if (isEInk) Utils.setSolidButtonEink(dicButton);
+        dicButton.setPadding(10, 20, 10, 20);
+        //dicButton.setBackground(null);
+        LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        llp.setMargins(8, 4, 4, 8);
+        dicButton.setLayoutParams(llp);
+        dicButton.setMaxLines(1);
+        dicButton.setEllipsize(TextUtils.TruncateAt.END);
+    }
+
+    private static void setupDicButtonTextSpacing(TextView tv) {
+        tv.setText(" ");
+        tv.setPadding(5, 10, 5, 10);
+        LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        llp.setMargins(8, 4, 4, 8);
+        tv.setLayoutParams(llp);
+        tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
+        tv.setTextColor(mActivity.getTextColor(colorIcon));
+    }
+
+    private static void initRecentDics(ViewGroup vg, String findText, boolean fullScreen,
+                                       boolean addRemoveBtns, boolean addExBtn) {
         int newTextSize = mActivity.settings().getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
         int iCntRecent = 0;
         vg.removeAllViews();
@@ -421,18 +458,18 @@ public class DicToastView {
         }
         if (iCntRecent == 0) iCntRecent++;
         List<Dictionaries.DictInfo> diAllDicts = new ArrayList<>();
-        for (final Dictionaries.DictInfo di: mActivity.mDictionaries.diRecent) {
+        for (final Dictionaries.DictInfo di : mActivity.mDictionaries.diRecent) {
             diAllDicts.add(di);
         }
-        for (final Dictionaries.DictInfo di: mActivity.mDictionaries.getAddDicts()) {
+        for (final Dictionaries.DictInfo di : mActivity.mDictionaries.getAddDicts()) {
             diAllDicts.add(di);
         }
         List<Dictionaries.DictInfo> dicts = Dictionaries.getDictList(mActivity);
         for (Dictionaries.DictInfo dict : dicts) {
-            boolean bUseDic = mActivity.settings().getBool(Settings.PROP_DIC_LIST_MULTI+"."+dict.id,false);
+            boolean bUseDic = mActivity.settings().getBool(Settings.PROP_DIC_LIST_MULTI + "." + dict.id, false);
             if (bUseDic) {
                 boolean bWas = false;
-                for (Dictionaries.DictInfo di: diAllDicts) {
+                for (Dictionaries.DictInfo di : diAllDicts) {
                     if (di.id.equals(dict.id)) {
                         bWas = true;
                         break;
@@ -442,7 +479,105 @@ public class DicToastView {
             }
         }
         ArrayList<String> added = new ArrayList<>();
-        for (final Dictionaries.DictInfo di: diAllDicts) {
+        if (addRemoveBtns) {
+            Button dicButton;
+            TextView tv;
+            if (findText.length() > 1) {
+                dicButton = new Button(mActivity);
+                dicButton.setText("  <  ");
+                setupDicButton(dicButton, newTextSize);
+                tv = new TextView(mActivity);
+                setupDicButtonTextSpacing(tv);
+                vg.addView(dicButton);
+                vg.addView(tv);
+                dicButton.setOnClickListener(v -> {
+                    if (findText.length() > 1) {
+                        String findText1 = findText.substring(0, findText.length() - 1);
+                        mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                        mActivity.mDictionaries.setAdHocFromTo(
+                                mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
+                        doDismiss();
+                        try {
+                            mActivity.mDictionaries.findInDictionary(findText1, fullScreen,
+                                    mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
+                        } catch (Dictionaries.DictionaryException e) {
+                            // do nothing
+                        }
+                    }
+                });
+            }
+            if (findText.length() > 2) {
+                dicButton = new Button(mActivity);
+                dicButton.setText(" << ");
+                setupDicButton(dicButton, newTextSize);
+                tv = new TextView(mActivity);
+                setupDicButtonTextSpacing(tv);
+                vg.addView(dicButton);
+                vg.addView(tv);
+                dicButton.setOnClickListener(v -> {
+                    if (findText.length() > 2) {
+                        String findText1 = findText.substring(0, findText.length() - 2);
+                        mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                        mActivity.mDictionaries.setAdHocFromTo(
+                                mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
+                        doDismiss();
+                        try {
+                            mActivity.mDictionaries.findInDictionary(findText1, fullScreen,
+                                    mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
+                        } catch (Dictionaries.DictionaryException e) {
+                            // do nothing
+                        }
+                    }
+                });
+            }
+            if (findText.length() > 3) {
+                dicButton = new Button(mActivity);
+                dicButton.setText("<<<");
+                setupDicButton(dicButton, newTextSize);
+                tv = new TextView(mActivity);
+                setupDicButtonTextSpacing(tv);
+                vg.addView(dicButton);
+                vg.addView(tv);
+                dicButton.setOnClickListener(v -> {
+                    if (findText.length() > 3) {
+                        String findText1 = findText.substring(0, findText.length() - 3);
+                        mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                        mActivity.mDictionaries.setAdHocFromTo(
+                                mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
+                        doDismiss();
+                        try {
+                            mActivity.mDictionaries.findInDictionary(findText1, fullScreen,
+                                    mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
+                        } catch (Dictionaries.DictionaryException e) {
+                            // do nothing
+                        }
+                    }
+                });
+            }
+        }
+        if (addExBtn) {
+            Button btnDicExtended = new Button(mActivity);
+            btnDicExtended.setText(mActivity.getString(R.string.dic_ex_search));
+            btnDicExtended.setOnClickListener(v -> {
+                try {
+                    mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
+                    mActivity.mDictionaries.setAdHocFromTo(
+                            mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
+                    doDismiss();
+                    mActivity.mDictionaries.findInDictionary(findText, fullScreen,
+                            mActivity.mDictionaries.lastDicView, true,
+                            mActivity.mDictionaries.lastDC);
+                } catch (Dictionaries.DictionaryException e) {
+                    // do nothing
+                }
+            });
+            setupDicButton(btnDicExtended, newTextSize);
+            TextView tv = new TextView(mActivity);
+            setupDicButtonTextSpacing(tv);
+            vg.addView(btnDicExtended);
+            vg.addView(tv);
+        }
+        for (final Dictionaries.DictInfo di : diAllDicts) {
             if (!added.contains(di.id)) {
                 added.add(di.id);
                 Button dicButton = new Button(mActivity);
@@ -453,27 +588,10 @@ public class DicToastView {
                     dicButton.setText(sName);
                 else
                     dicButton.setText(sName + ": " + sAdd);
-                dicButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
-                dicButton.setTextColor(mActivity.getTextColor(colorIcon));
-                dicButton.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
-                Utils.setSolidButton1(dicButton);
-                if (isEInk) Utils.setSolidButtonEink(dicButton);
-                dicButton.setPadding(10, 20, 10, 20);
-                //dicButton.setBackground(null);
-                LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT);
-                llp.setMargins(8, 4, 4, 8);
-                dicButton.setLayoutParams(llp);
+                setupDicButton(dicButton, newTextSize);
                 //dicButton.setMaxWidth((mReaderView.getRequestedWidth() - 20) / iCntRecent); // This is not needed anymore - since we use FlowLayout
-                dicButton.setMaxLines(1);
-                dicButton.setEllipsize(TextUtils.TruncateAt.END);
                 TextView tv = new TextView(mActivity);
-                tv.setText(" ");
-                tv.setPadding(5, 10, 5, 10);
-                tv.setLayoutParams(llp);
-                tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
-                tv.setTextColor(mActivity.getTextColor(colorIcon));
+                setupDicButtonTextSpacing(tv);
                 vg.addView(dicButton);
                 vg.addView(tv);
                 dicButton.setOnClickListener(v -> {
@@ -534,6 +652,7 @@ public class DicToastView {
         Button btnRemove2sym;
         Button btnRemove1sym;
         Button btnDicExtended;
+        ImageView btnSpeak;
         Button tvFull;
         Button tvFullWeb;
         TextView tvLblDic;
@@ -559,6 +678,7 @@ public class DicToastView {
             tvMore = dad.mBody.findViewById(R.id.upper_row_tv_more);
             tvClose = dad.mBody.findViewById(R.id.upper_row_tv_close);
             tvTerm = dad.mBody.findViewById(R.id.lbl_term);
+            btnSpeak = dad.mBody.findViewById(R.id.btn_speak);
             btnRemove3sym = dad.mBody.findViewById(R.id.remove3sym);
             btnRemove2sym = dad.mBody.findViewById(R.id.remove2sym);
             btnRemove1sym = dad.mBody.findViewById(R.id.remove1sym);
@@ -590,6 +710,7 @@ public class DicToastView {
             tvMore = window.getContentView().findViewById(R.id.upper_row_tv_more);
             tvClose = window.getContentView().findViewById(R.id.upper_row_tv_close);
             tvTerm = window.getContentView().findViewById(R.id.lbl_term);
+            btnSpeak = window.getContentView().findViewById(R.id.btn_speak);
             btnRemove3sym = window.getContentView().findViewById(R.id.remove3sym);
             btnRemove2sym = window.getContentView().findViewById(R.id.remove2sym);
             btnRemove1sym = window.getContentView().findViewById(R.id.remove1sym);
@@ -634,90 +755,22 @@ public class DicToastView {
             if (llUpperRowRecent != null) {
                 ViewGroup recentDicsPanel = (ViewGroup) mInflater.inflate(R.layout.recent_dic_panel_scroll, null, true);
                 LinearLayout ll = recentDicsPanel.findViewById(R.id.ll_dic_buttons);
-                initRecentDics(ll, findText, fullScreen);
+                initRecentDics(ll, findText, fullScreen, t.mCurDict != null,
+                        ((t.dicType == IS_OFFLINE) && (t.mCurDict != null)));
                 llUpperRowRecent.addView(recentDicsPanel);
             }
-            btnRemove1sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
-            Utils.setSolidButton1(btnRemove1sym);
-            if (isEInk) Utils.setSolidButtonEink(btnRemove1sym);
-            btnRemove2sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
-            Utils.setSolidButton1(btnRemove2sym);
-            if (isEInk) Utils.setSolidButtonEink(btnRemove2sym);
-            btnRemove3sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
-            Utils.setSolidButton1(btnRemove3sym);
-            if (isEInk) Utils.setSolidButtonEink(btnRemove3sym);
-            Utils.setSolidButton1(btnDicExtended);
-            if (isEInk) Utils.setSolidButtonEink(btnDicExtended);
-            btnDicExtended.setOnClickListener(v -> {
-                try {
-                    mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
-                    mActivity.mDictionaries.setAdHocFromTo(
-                            mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
-                    doDismiss();
-                    mActivity.mDictionaries.findInDictionary(findText, fullScreen,
-                            mActivity.mDictionaries.lastDicView, true, mActivity.mDictionaries.lastDC);
-                } catch (Dictionaries.DictionaryException e) {
-                    // do nothing
-                }
-            });
-            if ((t.dicType != IS_OFFLINE) || (t.mCurDict == null)) Utils.hideView(btnDicExtended);
-            if ((findText.length() <= 1)  || (t.mCurDict == null)) Utils.hideView(btnRemove1sym);
-            else
-                btnRemove1sym.setOnClickListener(v -> {
-                    if (findText.length()>1) {
-                        String findText1 = findText.substring(0, findText.length() - 1);
-                        mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
-                        mActivity.mDictionaries.setAdHocFromTo(
-                                mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
-                        doDismiss();
-                        try {
-                            mActivity.mDictionaries.findInDictionary(findText1, fullScreen,
-                                    mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
-                        } catch (Dictionaries.DictionaryException e) {
-                            // do nothing
-                        }
-                    }
-                });
-            if ((findText.length() <= 2)  || (t.mCurDict == null)) Utils.hideView(btnRemove2sym);
-            else
-                btnRemove2sym.setOnClickListener(v -> {
-                    if (findText.length()>2) {
-                        String findText1 = findText.substring(0, findText.length() - 2);
-                        mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
-                        mActivity.mDictionaries.setAdHocFromTo(
-                                mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
-                        doDismiss();
-                        try {
-                            mActivity.mDictionaries.findInDictionary(findText1, fullScreen,
-                                    mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
-                        } catch (Dictionaries.DictionaryException e) {
-                            // do nothing
-                        }
-                    }
-                });
-            if ((findText.length() <= 3) || (t.mCurDict == null)) Utils.hideView(btnRemove3sym);
-            else
-                btnRemove3sym.setOnClickListener(v -> {
-                    if (findText.length()>3) {
-                        String findText1 = findText.substring(0, findText.length() - 3);
-                        mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
-                        mActivity.mDictionaries.setAdHocFromTo(
-                                mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
-                        doDismiss();
-                        try {
-                            mActivity.mDictionaries.findInDictionary(findText1, fullScreen,
-                                    mActivity.mDictionaries.lastDicView, false, mActivity.mDictionaries.lastDC);
-                        } catch (Dictionaries.DictionaryException e) {
-                            // do nothing
-                        }
-                    }
-                });
+            Utils.hideView(btnDicExtended);
+            Utils.hideView(btnRemove1sym);
+            Utils.hideView(btnRemove2sym);
+            Utils.hideView(btnRemove3sym);
+            mActivity.tintViewIcons(btnSpeak,true);
+            btnSpeak.setOnClickListener(view -> sayTTS(mActivity, t.sFindText));
         }
         setBtnBackgroundColor(tvFull, colr2);
         setBtnBackgroundColor(tvFullWeb, colr2);
         if (tvLblDic != null) {
             if (t.mCurDict != null)
-                tvLblDic.setText(t.mCurDict.shortName);
+                tvLblDic.setText(t.mCurDict.name);
             else {
                 if (StrUtils.getNonEmptyStr(t.mDicName, true).equals("[HIDE]")) tvLblDic.setText("");
                 else tvLblDic.setText(t.mDicName);
@@ -1040,6 +1093,7 @@ public class DicToastView {
         Button btnRemove2sym;
         Button btnRemove1sym;
         Button btnDicExtended;
+        ImageView btnSpeak;
         mInflater = (LayoutInflater) t.anchor.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View dicContent = mInflater.inflate(R.layout.wiki_articles_dlg, null, true);
         DicArticleDlg dad = null;
@@ -1059,6 +1113,7 @@ public class DicToastView {
             tvClose = dad.mBody.findViewById(R.id.upper_row_tv_close);
             tvLblDic = dad.mBody.findViewById(R.id.lbl_dic);
             tvTerm = dad.mBody.findViewById(R.id.lbl_term);
+            btnSpeak = dad.mBody.findViewById(R.id.btn_speak);
             btnRemove3sym = dad.mBody.findViewById(R.id.remove3sym);
             btnRemove2sym = dad.mBody.findViewById(R.id.remove2sym);
             btnRemove1sym = dad.mBody.findViewById(R.id.remove1sym);
@@ -1079,6 +1134,7 @@ public class DicToastView {
             tvClose = window.getContentView().findViewById(R.id.upper_row_tv_close);
             tvLblDic = window.getContentView().findViewById(R.id.lbl_dic);
             tvTerm = window.getContentView().findViewById(R.id.lbl_term);
+            btnSpeak = window.getContentView().findViewById(R.id.btn_speak);
             btnRemove3sym = window.getContentView().findViewById(R.id.remove3sym);
             btnRemove2sym = window.getContentView().findViewById(R.id.remove2sym);
             btnRemove1sym = window.getContentView().findViewById(R.id.remove1sym);
@@ -1086,6 +1142,8 @@ public class DicToastView {
             body = window.getContentView().findViewById(R.id.articles_list);
             body2 = window.getContentView().findViewById(R.id.articles_list2);
         }
+        mActivity.tintViewIcons(btnSpeak,true);
+        btnSpeak.setOnClickListener(view -> sayTTS(mActivity, t.sFindText));
         int colr2 = colorGray;
         int colorFill = colorGrayC;
         if (isEInk) colorFill = Color.WHITE;
@@ -1101,7 +1159,7 @@ public class DicToastView {
 //        }
         if (tvLblDic != null) {
             if (t.mCurDict != null)
-                tvLblDic.setText(t.mCurDict.shortName);
+                tvLblDic.setText(t.mCurDict.name);
             else
                 tvLblDic.setText(t.mDicName);
             if (!fullScreen) {
@@ -1244,6 +1302,78 @@ public class DicToastView {
         }
     }
 
+    private static void sayTTS(CoolReader cr, String textToSay) {
+        cr.initTTS(ttsacc -> BackgroundThread.instance().executeGUI(() -> {
+            ttsacc.bind(ttsbinder -> {
+                ttsbinder.setStatusListener(new OnTTSStatusListener() {
+                    @Override
+                    public void onUtteranceStart() {
+                    }
+
+                    @Override
+                    public void onUtteranceDone() {
+                    }
+
+                    @Override
+                    public void onError(int errorCode) {
+                        BackgroundThread.instance().postGUI(() -> cr.showToast(R.string.tts_failed));
+                    }
+
+                    @Override
+                    public void onStateChanged(TTSControlService.State state) {
+                    }
+
+                    @Override
+                    public void onVolumeChanged(int currentVolume, int maxVolume) {
+                    }
+
+                    @Override
+                    public void onAudioFocusLost() {
+                    }
+
+                    @Override
+                    public void onAudioFocusRestored() {
+                    }
+
+                    @Override
+                    public void onCurrentSentenceRequested(TTSControlBinder ttsbinder) {
+                    }
+
+                    @Override
+                    public void onNextSentenceRequested(TTSControlBinder ttsbinder) {
+                        ttsacc.bind(ttsbinder1 -> {
+                            BackgroundThread.instance().postGUI(() -> {
+                                if (null != ttsacc)
+                                    ttsacc.unbind();
+                                Intent intent = new Intent(cr, TTSControlService.class);
+                                cr.stopService(intent);
+                            });
+                        });
+                    }
+
+                    @Override
+                    public void onPreviousSentenceRequested(TTSControlBinder ttsbinder) {
+                    }
+
+                    @Override
+                    public void onStopRequested(TTSControlBinder ttsbinder) {
+                        ttsacc.bind(ttsbinder1 -> {
+                            ttsbinder1.stop(result -> {
+                                BackgroundThread.instance().postGUI(() -> {
+                                    if (null != ttsacc)
+                                        ttsacc.unbind();
+                                    Intent intent = new Intent(cr, TTSControlService.class);
+                                    cr.stopService(intent);
+                                });
+                            });
+                        });
+                    }
+                });
+                ttsbinder.say(textToSay, null);
+            });
+        }), true);
+    }
+
     private static void extListToast(Toast t, boolean fullScreen) {
         mInflater = (LayoutInflater) t.anchor.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View dicContent = mInflater.inflate(R.layout.ext_dic_dlg, null, true);
@@ -1260,6 +1390,7 @@ public class DicToastView {
         Button btnRemove2sym;
         Button btnRemove1sym;
         Button btnDicExtended;
+        ImageView btnSpeak;
         EditText edtDicTranls;
         ViewGroup body;
         ViewGroup body2;
@@ -1274,6 +1405,7 @@ public class DicToastView {
             tvClose = dad.mBody.findViewById(R.id.upper_row_tv_close);
             tvLblDic = dad.mBody.findViewById(R.id.lbl_dic);
             tvTerm = dad.mBody.findViewById(R.id.lbl_term);
+            btnSpeak = dad.mBody.findViewById(R.id.btn_speak);
             btnRemove3sym = dad.mBody.findViewById(R.id.remove3sym);
             btnRemove2sym = dad.mBody.findViewById(R.id.remove2sym);
             btnRemove1sym = dad.mBody.findViewById(R.id.remove1sym);
@@ -1295,6 +1427,7 @@ public class DicToastView {
             tvClose = window.getContentView().findViewById(R.id.upper_row_tv_close);
             tvLblDic = window.getContentView().findViewById(R.id.lbl_dic);
             tvTerm = window.getContentView().findViewById(R.id.lbl_term);
+            btnSpeak = window.getContentView().findViewById(R.id.btn_speak);
             btnRemove3sym = window.getContentView().findViewById(R.id.remove3sym);
             btnRemove2sym = window.getContentView().findViewById(R.id.remove2sym);
             btnRemove1sym = window.getContentView().findViewById(R.id.remove1sym);
@@ -1312,7 +1445,7 @@ public class DicToastView {
         tvClose.setOnClickListener(v -> doDismiss());
         if (tvLblDic != null) {
             if (t.mCurDict != null)
-                tvLblDic.setText(t.mCurDict.shortName);
+                tvLblDic.setText(t.mCurDict.name);
             else
                 tvLblDic.setText(t.mDicName);
             if (!fullScreen) {
@@ -1329,98 +1462,26 @@ public class DicToastView {
             if (llUpperRowRecent != null) {
                 ViewGroup recentDicsPanel = (ViewGroup) mInflater.inflate(R.layout.recent_dic_panel_scroll, null, true);
                 LinearLayout ll = recentDicsPanel.findViewById(R.id.ll_dic_buttons);
-                initRecentDics(ll, updTerm(t.sFindText), fullScreen);
+                initRecentDics(ll, updTerm(t.sFindText), fullScreen, t.mCurDict != null,
+                        ((t.dicType == IS_OFFLINE) && (t.mCurDict != null)));
                 llUpperRowRecent.addView(recentDicsPanel);
             }
             tvTerm.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             setBtnBackgroundColor(tvClose, colr2);
-            btnRemove1sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
-            Utils.setSolidButton1(btnRemove1sym);
-            if (isEInk) Utils.setSolidButtonEink(btnRemove1sym);
-            btnRemove2sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
-            Utils.setSolidButton1(btnRemove2sym);
-            if (isEInk) Utils.setSolidButtonEink(btnRemove2sym);
-            btnRemove3sym.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
-            Utils.setSolidButton1(btnRemove3sym);
-            if (isEInk) Utils.setSolidButtonEink(btnRemove3sym);
             final String findText = StrUtils.getNonEmptyStr(t.sFindText, true);
-            Utils.setSolidButton1(btnDicExtended);
-            if (isEInk) Utils.setSolidButtonEink(btnDicExtended);
-            btnDicExtended.setOnClickListener(v -> {
-                try {
-                    mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
-                    mActivity.mDictionaries.setAdHocFromTo(
-                            mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
-                    doDismiss();
-                    mActivity.mDictionaries.findInDictionary(findText, fullScreen,
-                            mActivity.mDictionaries.lastDicView, true,
-                            mActivity.mDictionaries.lastDC);
-                } catch (Dictionaries.DictionaryException e) {
-                    // do nothing
-                }
-            });
-            if ((t.dicType != IS_OFFLINE) || (t.mCurDict == null)) Utils.hideView(btnDicExtended);
+            Utils.hideView(btnDicExtended);
+            Utils.hideView(btnRemove1sym);
+            Utils.hideView(btnRemove2sym);
+            Utils.hideView(btnRemove3sym);
+            mActivity.tintViewIcons(btnSpeak,true);
+            btnSpeak.setOnClickListener(view -> sayTTS(mActivity, t.sFindText));
             if ((fullScreen) || (t.mCurDict != null) || (StrUtils.isEmptyStr(t.msg))) Utils.hideView(edtDicTranls);
-            if (!StrUtils.isEmptyStr(t.msg))
+            if (!StrUtils.isEmptyStr(t.msg)) {
                 if (edtDicTranls != null) {
                     edtDicTranls.setText(t.msg);
                     Utils.setHighLightedText(edtDicTranls, sFindText, mColorIconL);
                 }
-            if ((t.dicType != IS_OFFLINE) || (t.mCurDict == null)) Utils.hideView(btnDicExtended);
-            if ((findText.length() <= 1) || (t.mCurDict == null)) Utils.hideView(btnRemove1sym);
-            else
-                btnRemove1sym.setOnClickListener(v -> {
-                    if (findText.length() > 1) {
-                        String findText1 = findText.substring(0, findText.length() - 1);
-                        mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
-                        mActivity.mDictionaries.setAdHocFromTo(
-                                mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
-                        doDismiss();
-                        try {
-                            mActivity.mDictionaries.findInDictionary(findText1, fullScreen,
-                                    mActivity.mDictionaries.lastDicView, false,
-                                    mActivity.mDictionaries.lastDC);
-                        } catch (Dictionaries.DictionaryException e) {
-                            // do nothing
-                        }
-                    }
-                });
-            if ((findText.length() <= 2) || (t.mCurDict == null)) Utils.hideView(btnRemove2sym);
-            else
-                btnRemove2sym.setOnClickListener(v -> {
-                    if (findText.length() > 2) {
-                        String findText1 = findText.substring(0, findText.length() - 2);
-                        mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
-                        mActivity.mDictionaries.setAdHocFromTo(
-                                mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
-                        doDismiss();
-                        try {
-                            mActivity.mDictionaries.findInDictionary(findText1, fullScreen,
-                                mActivity.mDictionaries.lastDicView, false,
-                                mActivity.mDictionaries.lastDC);
-                        } catch (Dictionaries.DictionaryException e) {
-                            // do nothing
-                        }
-                    }
-                });
-            if ((findText.length() <= 3) || (t.mCurDict == null)) Utils.hideView(btnRemove3sym);
-            else
-                btnRemove3sym.setOnClickListener(v -> {
-                    if (findText.length() > 3) {
-                        String findText1 = findText.substring(0, findText.length() - 3);
-                        mActivity.mDictionaries.setAdHocDict(mActivity.mDictionaries.lastDicCalled);
-                        mActivity.mDictionaries.setAdHocFromTo(
-                                mActivity.mDictionaries.lastDicFromLang, mActivity.mDictionaries.lastDicToLang);
-                        doDismiss();
-                        try {
-                            mActivity.mDictionaries.findInDictionary(findText1, fullScreen,
-                                    mActivity.mDictionaries.lastDicView, false,
-                                    mActivity.mDictionaries.lastDC);
-                        } catch (Dictionaries.DictionaryException e) {
-                            // do nothing
-                        }
-                    }
-                });
+            }
         }
         int eight = 8;
         if ((t.mCurDict == null) && (!StrUtils.isEmptyStr(t.msg))) eight = 7;

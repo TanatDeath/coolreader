@@ -172,9 +172,13 @@ public class ExtDicList extends BaseListView {
 									mDicList.mHandleDismiss, 100);
 						BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
 							.postBackground(() -> BackgroundThread.instance()
-								.postGUI(() ->
-									Dictionaries.reversoTranslate.reversoTranslateAsLast(mCoolReader, finalText,
-										tl.transLink))), 300);
+								.postGUI(() -> {
+											if (Dictionaries.reversoTranslate == null)
+												Dictionaries.reversoTranslate = new ReversoTranslate();
+											Dictionaries.reversoTranslate.reversoTranslateAsLast(mCoolReader, finalText,
+													tl.transLink);
+										}
+								)), 300);
 						//m.findInDictionary(selection.text, false, null);
 					});
 					Utils.setSolidButton(btnFollow);

@@ -13,8 +13,10 @@ buildscript {
             allowInsecureProtocol = true
         }
         maven {  // only needed by onyx flavour
-            url "http://repo.boox.com/repository/maven-partner-public/"
             allowInsecureProtocol = true
+            authentication {
+                basic(BasicAuthentication)
+            }
             credentials {
                 def apikeyPropertiesFile = rootProject.file("apikey.properties")
                 def apikeyProperties = new Properties()
@@ -22,10 +24,12 @@ buildscript {
                 username = apikeyProperties['ONYX_REPO_ID']
                 password = apikeyProperties['ONYX_REPO_PASS']
             }
+            url "http://repo.boox.com/repository/maven-partner-public/"
+            //url "http://$uname:$passw@repo.boox.com/repository/maven-partner-public/"
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.2'
+        classpath 'com.android.tools.build:gradle:7.3.1'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -43,8 +47,10 @@ allprojects {
             allowInsecureProtocol = true
         }
         maven { // only needed by onyx flavour
-            url "http://repo.boox.com/repository/maven-partner-public/"
             allowInsecureProtocol = true
+            authentication {
+                basic(BasicAuthentication)
+            }
             credentials {
                 def apikeyPropertiesFile = rootProject.file("apikey.properties")
                 def apikeyProperties = new Properties()
@@ -52,6 +58,7 @@ allprojects {
                 username = apikeyProperties['ONYX_REPO_ID']
                 password = apikeyProperties['ONYX_REPO_PASS']
             }
+            url "http://repo.boox.com/repository/maven-partner-public/"
         }
     }
 }

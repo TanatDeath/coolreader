@@ -848,11 +848,7 @@ public class Dictionaries {
 		diRecent.add(0,curDict);
 		if (diRecent.size() > 5)
 			while (diRecent.size() > 5) diRecent.remove(5);
-		boolean isDouble = false;
-		//save to dic search history
 		CoolReader cr = (CoolReader) mActivity;
-		isDouble = (cr.settings().getInt(Settings.PROP_LANDSCAPE_PAGES,1)==2) &&
-				(cr.settings().getInt(Settings.PROP_LANDSCAPE_PAGES,1)==2);
 
 		if (!curDict.isOnline)
 			saveToDicSearchHistory(cr, s, "", curDict, "");
@@ -992,7 +988,15 @@ public class Dictionaries {
 				final PopupFrameMetric frameMetrics =
 						new PopupFrameMetric(metrics, selectionTop, selectionBottom);
 
-				if ((isDouble)&&(frameMetrics.widthPixels>frameMetrics.heightPixels)) {
+				boolean isDouble = false;
+				if (cr.settings().getInt(Settings.PROP_LANDSCAPE_PAGES,1)==2)
+					isDouble = frameMetrics.widthPixels>frameMetrics.heightPixels;
+				if (cr.settings().getInt(Settings.PROP_LANDSCAPE_PAGES,1)==3)
+					isDouble = true;
+				if (cr.settings().getInt(Settings.PROP_LANDSCAPE_PAGES,1)==4)
+					isDouble = (frameMetrics.widthPixels>frameMetrics.heightPixels) ||
+						cr.getIsSquareScreen();
+				if (isDouble) {
 					int iPage = 0;
 					if ((selectionX1<(frameMetrics.widthPixels / 2)) &&
 							(selectionX2<(frameMetrics.widthPixels / 2))) iPage = 1;
@@ -1078,7 +1082,15 @@ public class Dictionaries {
 				final PopupFrameMetric frameMetrics2 =
 						new PopupFrameMetric(metrics2, selectionTop2, selectionBottom2);
 				intent6.putExtra(EXTRA_FULLSCREEN, false);
-				if ((isDouble)&&(frameMetrics2.widthPixels>frameMetrics2.heightPixels)) {
+				boolean isDouble2 = false;
+				if (cr.settings().getInt(Settings.PROP_LANDSCAPE_PAGES,1)==2)
+					isDouble2 = frameMetrics2.widthPixels>frameMetrics2.heightPixels;
+				if (cr.settings().getInt(Settings.PROP_LANDSCAPE_PAGES,1)==3)
+					isDouble2 = true;
+				if (cr.settings().getInt(Settings.PROP_LANDSCAPE_PAGES,1)==4)
+					isDouble2 = (frameMetrics2.widthPixels>frameMetrics2.heightPixels) ||
+						cr.getIsSquareScreen();
+				if (isDouble2) {
 					int iPage = 0;
 					if ((selectionX1_2<(frameMetrics2.widthPixels / 2)) &&
 					   (selectionX2_2<(frameMetrics2.widthPixels / 2))) iPage = 1;

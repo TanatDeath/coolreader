@@ -66,7 +66,7 @@ public class MainDB extends BaseDB {
 	public static int iMaxGroupSizeDates = 0;
 
 	private boolean pathCorrectionRequired = false;
-	public static final int DB_VERSION = 60;
+	public static final int DB_VERSION = 62;
 
 	@Override
 	protected boolean upgradeSchema() {
@@ -286,6 +286,14 @@ public class MainDB extends BaseDB {
 				execSQLIgnoreErrors("ALTER TABLE bookmark ADD COLUMN shortcut INTEGER DEFAULT 0");
 			if (currentVersion < 4)
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN flags INTEGER DEFAULT 0");
+			String calibeStr = "CREATE TABLE IF NOT EXISTS calibre_catalog (" +
+					"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+					"name VARCHAR NOT NULL COLLATE NOCASE, " +
+					"cat_type INTEGER DEFAULT 0, "+
+					"local_folder VARCHAR DEFAULT NULL, " +
+					"remote_folder VARCHAR DEFAULT NULL, " +
+					"last_usage INTEGER DEFAULT 0" +
+					");";
 			if (currentVersion < 6)
 				execSQL("CREATE TABLE IF NOT EXISTS opds_catalog (" +
 						"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -302,14 +310,7 @@ public class MainDB extends BaseDB {
 						"books_downloaded INTEGER DEFAULT 0, " +
 						"was_error INTEGER DEFAULT 0" +
 						")");
-				execSQL("CREATE TABLE IF NOT EXISTS calibre_catalog (" +
-						"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-						"name VARCHAR NOT NULL COLLATE NOCASE, " +
-						"cat_type INTEGER DEFAULT 0, "+
-						"local_folder VARCHAR DEFAULT NULL, " +
-						"remote_folder VARCHAR DEFAULT NULL, " +
-						"last_usage INTEGER DEFAULT 0" +
-						");");
+				execSQL(calibeStr);
 			if (currentVersion < 7) {
 				addOPDSCatalogs(DEF_OPDS_URLS1);
 			}
@@ -617,7 +618,7 @@ public class MainDB extends BaseDB {
 				execSQLIgnoreErrors("ALTER TABLE book ADD COLUMN description TEXT DEFAULT NULL");
 			}
 			if (currentVersion < 51) {
-				execSQL("CREATE TABLE IF NOT EXISTS calcaibre_catalog (" +
+				execSQL("CREATE TABLE IF NOT EXISTS calibre_catalog (" +
 						"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
 						"name VARCHAR NOT NULL COLLATE NOCASE, " +
 						"cat_type INTEGER DEFAULT 0," + // 0 = local, 1 = yandex, 2 = .. unimplemented yet
@@ -804,6 +805,9 @@ public class MainDB extends BaseDB {
 						"tags_name_index");
 				execSQL("CREATE UNIQUE INDEX IF NOT EXISTS " +
 						"tags_name_index ON tags (name) ");
+			}
+			if (currentVersion < 62) {
+				execSQL(calibeStr);
 			}
 			//==============================================================
 			// add more updates above this line
@@ -1472,13 +1476,13 @@ public class MainDB extends BaseDB {
 		String sql = "SELECT id, name, url, username, password, " +
 				"proxy_addr, proxy_port, proxy_uname, proxy_passw, " +
 				"onion_def_proxy, books_downloaded, coalesce(was_error, 0) as was_error, " +
-				"last_usage, '' as local_folder, '' as remote_folder " +
+				"last_usage, '' as local_folder, '' as remote_folder, 0 as cat_type " +
 				"FROM opds_catalog " +
 				"union all " +
 				"select id, name, '@calibre' as url, '' as username, '' as password, " +
 				"'' as proxy_addr, '' as proxy_port, '' as proxy_uname, '' as proxy_passw, " +
 				"0 as onion_def_proxy, 0 as books_downloaded, 0 as was_error, " +
-				"last_usage, local_folder, remote_folder from calibre_catalog " +
+				"last_usage, local_folder, remote_folder, cat_type from calibre_catalog " +
 				"ORDER BY 12, 13 DESC, 2";
 		if (mDB == null) return false;
 		try (Cursor rs = mDB.rawQuery(sql, null)) {
@@ -1501,6 +1505,7 @@ public class MainDB extends BaseDB {
 					int was_error = rs.getInt(11);
 					String local_folder = rs.getString(13);
 					String remote_folder = rs.getString(14);
+					int cat_type = rs.getInt(15);
 
 					FileInfo opds = new FileInfo();
 					opds.isDirectory = true;
@@ -1522,6 +1527,7 @@ public class MainDB extends BaseDB {
 					opds.id = id;
 					opds.book_downloaded = book_downloaded;
 					opds.was_error = was_error;
+					opds.cat_type = cat_type;
 					list.add(opds);
 					found = true;
 				} while (rs.moveToNext());
@@ -4375,6 +4381,7 @@ public class MainDB extends BaseDB {
 					FileInfo fi = new FileInfo(fileInfo);
 					fi.pathname = FileInfo.CALIBRE_BOOKS_PREFIX + fi.pathname;
 					fi.remote_folder = catalogDBFileInfo.pathname;
+					fi.cat_type = catalogDBFileInfo.cat_type;
 					list.add(fi);
 					found = true;
 				} while (rs.moveToNext());

@@ -676,12 +676,16 @@ public class SelectionToolbarDlg {
 				v -> changeSelectionBound(true, SELECTION_SMALL_STEP));
 		if (llSliderTop != null) llSliderTop.findViewById(R.id.btn_next_t).setOnTouchListener(lsnrStartSmallStepPlus);
 		llMiddleContents.findViewById(R.id.middle_contents_top_h3).setOnTouchListener(lsnrStartSmallStepPlus);
+		if ((!isEInk) && (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0))
+			llMiddleContents.findViewById(R.id.middle_contents_top_h3).setBackgroundResource(R.drawable.view_bg_dashed_border_transp);
 		if (llSliderTop != null)
 			if (isEInk) Utils.setBtnBackground(llSliderTop.findViewById(R.id.btn_next_t), null, isEInk);
 		RepeatOnTouchListener lsnrStartSmallStepMinus = new RepeatOnTouchListener(500, 150,
 				v -> changeSelectionBound(true, -SELECTION_SMALL_STEP));
 		if (llSliderTop != null) llSliderTop.findViewById(R.id.btn_prev_t).setOnTouchListener(lsnrStartSmallStepMinus);
 		llMiddleContents.findViewById(R.id.middle_contents_top_h2).setOnTouchListener(lsnrStartSmallStepMinus);
+		if ((!isEInk) && (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0))
+			llMiddleContents.findViewById(R.id.middle_contents_top_h2).setBackgroundResource(R.drawable.view_bg_dashed_border_transp);
 		if (llSliderTop != null)
 			if (isEInk) Utils.setBtnBackground(llSliderTop.findViewById(R.id.btn_prev_t), null, isEInk);
 		RepeatOnTouchListener lsnrStartSentenceStepPlus = new RepeatOnTouchListener(500, 150,
@@ -700,12 +704,16 @@ public class SelectionToolbarDlg {
 				v -> changeSelectionBound(false, SELECTION_SMALL_STEP));
 		if (llSliderBottom != null) llSliderBottom.findViewById(R.id.btn_next_b).setOnTouchListener(lsnrFinishSmallStepPlus);
 		llMiddleContents.findViewById(R.id.middle_contents_bottom_h3).setOnTouchListener(lsnrFinishSmallStepPlus);
+		if ((!isEInk) && (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0))
+			llMiddleContents.findViewById(R.id.middle_contents_bottom_h3).setBackgroundResource(R.drawable.view_bg_dashed_border_transp);
 		if (llSliderBottom != null)
 			if (isEInk) Utils.setBtnBackground(llSliderBottom.findViewById(R.id.btn_next_b), null, isEInk);
 		RepeatOnTouchListener lsnrFinishSmallStepMinus = new RepeatOnTouchListener(500, 150,
 				v -> changeSelectionBound(false, -SELECTION_SMALL_STEP));
 		if (llSliderBottom != null) llSliderBottom.findViewById(R.id.btn_prev_b).setOnTouchListener(lsnrFinishSmallStepMinus);
 		llMiddleContents.findViewById(R.id.middle_contents_bottom_h2).setOnTouchListener(lsnrFinishSmallStepMinus);
+		if ((!isEInk) && (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0))
+			llMiddleContents.findViewById(R.id.middle_contents_bottom_h2).setBackgroundResource(R.drawable.view_bg_dashed_border_transp);
 		if (llSliderBottom != null)
 			if (isEInk) Utils.setBtnBackground(llSliderBottom.findViewById(R.id.btn_prev_b), null, isEInk);
 		RepeatOnTouchListener lsnrFinishSentenceStepPlus = new RepeatOnTouchListener(500, 150,

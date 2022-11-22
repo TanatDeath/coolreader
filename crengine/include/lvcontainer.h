@@ -21,6 +21,7 @@
 #define __LVCONTAINER_H_INCLUDED__
 
 #include "lvstorageobject.h"
+#include "lvstring.h"
 
 class LVStream;
 class LVContainerItemInfo;
@@ -34,6 +35,7 @@ public:
     //virtual const LVContainerItemInfo * GetObjectInfo(const char32_t * pname);
     virtual const LVContainerItemInfo * GetObjectInfo(int index) = 0;
     virtual const LVContainerItemInfo * operator [] (int index) { return GetObjectInfo(index); }
+    virtual const LVContainerItemInfo * GetObjectInfo(lString32 name) = 0;
     virtual int GetObjectCount() const = 0;
     virtual LVStreamRef OpenStream( const lChar32 * fname, lvopen_mode_t mode ) = 0;
     LVContainer() {}

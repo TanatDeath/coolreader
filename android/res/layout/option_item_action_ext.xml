@@ -71,6 +71,14 @@
                     android:text="@string/to_menu_action"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"/>
+            <Button
+                    android:id="@+id/btn_to_group"
+                    android:layout_margin="2dip"
+                    android:textColor="?attr/colorIcon"
+                    android:background="@null"
+                    android:text="@string/to_group_action"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
         </LinearLayout>
     </RelativeLayout>
     <ImageView android:id="@+id/btn_option_add_info"

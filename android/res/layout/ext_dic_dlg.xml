@@ -58,19 +58,10 @@
 				android:scrollbarAlwaysDrawVerticalTrack="true"
 				android:text="" />
 	</LinearLayout>
-	<LinearLayout
-			android:id="@+id/upper_row_ll_recent"
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:gravity="center_vertical|left"
-			android:minHeight="?android:attr/listPreferredItemHeightSmall"
-			android:maxHeight="?android:attr/listPreferredItemHeightSmall"
-			android:orientation="horizontal">
-	</LinearLayout>
 	<RelativeLayout
 			android:id="@+id/tl_term_row"
 			android:layout_width="match_parent"
-			android:layout_height="match_parent">
+			android:layout_height="wrap_content">
 		<TextView
 				android:id="@+id/lbl_term"
 				android:layout_width="match_parent"
@@ -78,9 +69,11 @@
 				android:layout_alignParentLeft="true"
 				android:layout_toLeftOf="@+id/ll_buttons_sym"
 				android:layout_margin="5dip"
-				android:singleLine="true"
+				android:singleLine="false"
+				android:maxLines="3"
+				android:ellipsize="end"
 				android:textColor="?attr/colorIcon"
-				style="@style/TextAppearance.Smaller"
+				style="@style/TextAppearance.Medium"
 				android:layout_gravity="center|left"
 				android:text="" />
 		<LinearLayout
@@ -141,8 +134,31 @@
 					android:background="@null"
 					android:padding="4dip"
 					/>
+			<ImageView
+					android:id="@+id/btn_speak"
+					style="@style/TextAppearance.Small"
+					android:singleLine="true"
+					android:layout_margin="2dip"
+					android:layout_width="wrap_content"
+					android:minWidth="?android:attr/listPreferredItemHeightSmall"
+					android:layout_height="wrap_content"
+					android:textColor="?attr/colorIcon"
+					android:background="@null"
+					android:src="?attr/attr_icons8_speaker_small"
+					android:padding="4dip"
+					android:tag="tint"
+					/>
 		</LinearLayout>
 	</RelativeLayout>
+	<LinearLayout
+			android:id="@+id/upper_row_ll_recent"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center_vertical|left"
+			android:minHeight="?android:attr/listPreferredItemHeightSmall"
+			android:maxHeight="?android:attr/listPreferredItemHeightSmall"
+			android:orientation="horizontal">
+	</LinearLayout>
 	<org.coolreader.crengine.MaxHeightLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:id="@+id/items_list"
 		android:orientation="vertical"

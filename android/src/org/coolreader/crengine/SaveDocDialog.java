@@ -58,6 +58,8 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 	FolderControls selectedFolder;
 	FolderControls notMoveFolder;
 
+	private Button mBtnSaveDoc;
+
 	boolean mIsHTML = true;
 	int mChosenState = FileInfo.STATE_NEW;
 	private int mChosenRate = 0;
@@ -177,6 +179,14 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 				mActivity.tintViewIcons(fc.folderButton,true);
 				fc.folderButton.setBackgroundColor(colorGrayCT2);
 				fc.folderLabel.setBackgroundColor(colorGrayCT2);
+				if (selectedFolder == notMoveFolder) {
+						mBtnSaveDoc.setText(mActivity.getString(R.string.cont));
+				} else {
+					if (mDoMove)
+						mBtnSaveDoc.setText(mActivity.getString(R.string.move_file));
+					else
+						mBtnSaveDoc.setText(mActivity.getString(R.string.copy_file));
+				}
 			}
 		}
 		if (bookStateNew != null) {
@@ -499,12 +509,12 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 
 	private void setupButtons(TableLayout mainTl) {
 		View viewButton = mInflater.inflate(R.layout.save_doc_button, null);
-		Button btn = viewButton.findViewById(R.id.btn_save_doc);
+		mBtnSaveDoc = viewButton.findViewById(R.id.btn_save_doc);
 		if (mDoMove)
-			btn.setText(mActivity.getString(R.string.move_file));
+			mBtnSaveDoc.setText(mActivity.getString(R.string.move_file));
 		else
-			btn.setText(mActivity.getString(R.string.copy_file));
-		btn.setOnClickListener(v -> {
+			mBtnSaveDoc.setText(mActivity.getString(R.string.copy_file));
+		mBtnSaveDoc.setOnClickListener(v -> {
 			String toFileName = "";
 			String toDir = "";
 			if (selectedFolder != null) {
@@ -519,8 +529,8 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 			else
 				saveFile(toFileName, toDir, mUri);
 		});
-		Utils.setDashedButton(btn);
-		btn.setTextColor(mActivity.getTextColor(colorIcon));
+		Utils.setDashedButton(mBtnSaveDoc);
+		mBtnSaveDoc.setTextColor(mActivity.getTextColor(colorIcon));
 		mainTl.addView(viewButton);
 	}
 
@@ -739,8 +749,12 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 				} else
 					BackgroundThread.instance().postGUI(() ->
 					{
-						cr.showToast(R.string.book_is_the_same);
-						FileInfo fiResF = FileUtils.getFileProps(null, result, new FileInfo(result.getParent()), true);
+						File resultF = result;
+						if (!(StrUtils.isEmptyStr(toDir)))
+							cr.showToast(R.string.book_is_the_same);
+						else
+							resultF = new File(fromFileName);
+						FileInfo fiResF = FileUtils.getFileProps(null, resultF, new FileInfo(result.getParent()), true);
 						if (StrUtils.isEmptyStr(fiResF.getAuthors())) Services.getEngine().scanBookProperties(fiResF);
 						if (bd != null) bd.onPositiveButtonClick();
 						Services.getHistory().getOrCreateBookInfo(cr.getDB(), fiResF,

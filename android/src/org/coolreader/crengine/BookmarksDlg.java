@@ -482,20 +482,23 @@ public class BookmarksDlg  extends BaseDialog {
         // in this function menuInfo is always first item,
         // but selectedItem is already set in BookmarkList's OnItemLongClickListener
 		Bookmark bm = mList.getSelectedBookmark();
-		String bookmarkText = bm.getPosText();
+		String bookmarkText = "";
+		if (bm != null)
+			bookmarkText = bm.getPosText();
 		if (bookmarkText == null || bookmarkText.length() == 0)
-			bookmarkText = bm.getTitleText();
+			if (bm != null)
+				bookmarkText = bm.getTitleText();
 		if (bookmarkText != null && bookmarkText.length() > 0)
-			menu.setHeaderTitle(getContext().getString(R.string.context_menu_title_bookmark) + ": " + bookmarkText);
+		    menu.setHeaderTitle(getContext().getString(R.string.context_menu_title_bookmark) + ": " + bookmarkText);
 		else
-			menu.setHeaderTitle(getContext().getString(R.string.context_menu_title_bookmark));
+		    menu.setHeaderTitle(getContext().getString(R.string.context_menu_title_bookmark));
 	    for ( int i=0; i<menu.size(); i++ ) {
 	    	MenuItem menuItem = menu.getItem(i);
-	    	if ( menuItem.getItemId()==R.id.bookmark_shortcut_goto || menuItem.getItemId()==R.id.bookmark_edit ||
-	    			menuItem.getItemId()==R.id.bookmark_delete )
-	    		menuItem.setEnabled(bm!=null);
-	    	if ( menuItem.getItemId()==R.id.bookmark_edit )
-	    		menuItem.setEnabled(bm!=null && (bm.getType()==Bookmark.TYPE_COMMENT || bm.getType()==Bookmark.TYPE_CORRECTION));
+	    	if (menuItem.getItemId() == R.id.bookmark_shortcut_goto || menuItem.getItemId() == R.id.bookmark_goto
+					|| menuItem.getItemId() == R.id.bookmark_edit || menuItem.getItemId() == R.id.bookmark_delete)
+	    		menuItem.setEnabled(bm != null);
+	    	if (menuItem.getItemId() == R.id.bookmark_edit)
+	    		menuItem.setEnabled(bm != null && (bm.getType() == Bookmark.TYPE_COMMENT || bm.getType() == Bookmark.TYPE_CORRECTION));
 	    	menuItem.setOnMenuItemClickListener(item -> {
 				onContextItemSelected(item);
 				return true;

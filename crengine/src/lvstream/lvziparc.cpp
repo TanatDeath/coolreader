@@ -13,6 +13,7 @@
 *******************************************************/
 
 #include "lvziparc.h"
+#include "lvstring.h"
 
 #if (USE_ZLIB==1)
 
@@ -34,34 +35,23 @@ LVStreamRef LVZipArc::OpenStream(const char32_t *fname, lvopen_mode_t)
 {
     if ( fname[0]=='/' )
         fname++;
-    int found_index = -1;
-    for (int i=0; i<m_list.length(); i++) {
-        if ( m_list[i]->GetName() != NULL && !lStr_cmp( fname, m_list[i]->GetName() ) ) {
-            if ( m_list[i]->IsContainer() ) {
-                // found directory with same name!!!
-                return LVStreamRef();
-            }
-            found_index = i;
-            break;
-        }
-    }
-    if (found_index<0)
+    LVCommonContainerItemInfo * item = (LVCommonContainerItemInfo*)GetObjectInfo(fname);
+    if ( !item )
         return LVStreamRef(); // not found
     // make filename
     lString32 fn = fname;
     LVStreamRef strm = m_stream; // fix strange arm-linux-g++ bug
     LVStreamRef stream(
-                LVZipDecodeStream::Create(
+            LVZipDecodeStream::Create(
                     strm,
-                    m_list[found_index]->GetSrcPos(),
+                    item->GetSrcPos(),
                     fn,
-                    m_list[found_index]->GetSrcSize(),
-                    m_list[found_index]->GetSize() )
+                    item->GetSrcSize(),
+                    item->GetSize() )
                 );
     if (!stream.isNull()) {
-        stream->SetName(m_list[found_index]->GetName());
+        stream->SetName(item->GetName());
         // Use buffering?
-        //return stream;
         return stream;
         //return LVCreateBufferedStream( stream, ZIP_STREAM_BUFFER_SIZE );
     }
@@ -73,8 +63,8 @@ int LVZipArc::ReadContents()
     lvByteOrderConv cnv;
     //bool arcComment = false;
     bool truncated = false;
-    
-    m_list.clear();
+
+    Clear();
     if (!m_stream || m_stream->Seek(0, LVSEEK_SET, NULL) != LVERR_OK)
         return -1;
 
@@ -366,7 +356,7 @@ int LVZipArc::ReadContents()
         item->SetItemInfo(fName.c_str(), ZipHeader.UnpSize, (ZipHeader.getAttr() & 0x3f));
         item->SetSrc(ZipHeader.getOffset(), ZipHeader.PackSize, ZipHeader.Method);
 #endif
-        m_list.add(item);
+        Add(item);
         
 //#define DUMP_ZIP_HEADERS
 #ifdef DUMP_ZIP_HEADERS

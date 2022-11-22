@@ -286,6 +286,7 @@
         <item name="cr3_button_go_percent_drawable">@drawable/icons8_fast_forward_percent</item>
         <item name="cr3_browser_folder_drawable">@drawable/icons8_folder</item>
         <item name="cr3_button_tts_drawable">@drawable/icons8_speaker</item>
+        <item name="attr_icons8_speaker_small">@drawable/icons8_speaker_small</item>
         <item name="cr3_browser_folder_recent_drawable">@drawable/icons8_folder_star</item>
         <item name="cr3_button_scroll_go_drawable">@drawable/icons8_scroll</item>
         <item name="cr3_btn_books_swap_drawable">@drawable/icons8_books_switch</item>
@@ -314,6 +315,7 @@
         <item name="cr3_option_font_gamma_drawable">@drawable/icons8_gamma</item>
         <item name="cr3_option_text_width_drawable">@drawable/icons8_document_space_width</item>
         <item name="cr3_option_fullscreen_drawable">@drawable/icons8_fullscreen</item>
+        <item name="attr_icons8_fullscreen_small">@drawable/icons8_fullscreen_small</item>
         <item name="cr3_option_view_mode_scroll_drawable">@drawable/icons8_scroll</item>
         <item name="cr3_option_page_orientation_landscape_drawable">@drawable/icons8_orientation</item>
         <item name="cr3_option_pages_two_drawable">@drawable/icons8_document_2pages</item>
@@ -444,6 +446,7 @@
         <item name="attr_icons8_lock_portrait_2">@drawable/icons8_lock_portrait_2</item>
         <item name="attr_icons8_orientation">@drawable/icons8_orientation</item>
         <item name="attr_icons8_fullscreen">@drawable/icons8_fullscreen</item>
+        <item name="attr_icons8_fullscreen_small">@drawable/icons8_fullscreen_small</item>
         <item name="attr_icons8_touchscreen">@drawable/icons8_touchscreen</item>
         <item name="attr_icons8_increase_font_2">@drawable/icons8_increase_font_2</item>
         <item name="attr_icons8_decrease_font_1">@drawable/icons8_decrease_font_1</item>
@@ -645,6 +648,17 @@
         <item name="attr_icons8_circle">@drawable/icons8_circle</item>
         <item name="attr_icons8_square">@drawable/icons8_square</item>
         <item name="attr_icons8_screenshot">@drawable/icons8_screenshot</item>
+        <item name="attr_icons8_1">@drawable/icons8_1</item>
+        <item name="attr_icons8_2">@drawable/icons8_2</item>
+        <item name="attr_icons8_3">@drawable/icons8_3</item>
+        <item name="attr_icons8_4">@drawable/icons8_4</item>
+        <item name="attr_icons8_5">@drawable/icons8_5</item>
+        <item name="attr_icons8_6">@drawable/icons8_6</item>
+        <item name="attr_icons8_7">@drawable/icons8_7</item>
+        <item name="attr_icons8_8">@drawable/icons8_8</item>
+        <item name="attr_icons8_9">@drawable/icons8_9</item>
+        <item name="attr_icons8_10">@drawable/icons8_10</item>
+        <item name="attr_icons8_download_database">@drawable/icons8_download_database</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
@@ -732,6 +746,7 @@
         <item name="cr3_button_go_percent_drawable">@drawable/icons8_fast_forward_percent</item>
         <item name="cr3_browser_folder_drawable">@drawable/icons8_folder</item>
         <item name="cr3_button_tts_drawable">@drawable/icons8_speaker</item>
+        <item name="attr_icons8_speaker_small">@drawable/icons8_speaker_small</item>
         <item name="cr3_browser_folder_recent_drawable">@drawable/icons8_folder_star</item>
         <item name="cr3_button_scroll_go_drawable">@drawable/icons8_scroll</item>
         <item name="cr3_btn_books_swap_drawable">@drawable/icons8_books_switch</item>
@@ -760,6 +775,7 @@
         <item name="cr3_option_font_gamma_drawable">@drawable/icons8_gamma</item>
         <item name="cr3_option_text_width_drawable">@drawable/icons8_document_space_width</item>
         <item name="cr3_option_fullscreen_drawable">@drawable/icons8_fullscreen</item>
+        <item name="attr_icons8_fullscreen_small">@drawable/icons8_fullscreen_small</item>
         <item name="cr3_option_view_mode_scroll_drawable">@drawable/icons8_scroll</item>
         <item name="cr3_option_page_orientation_landscape_drawable">@drawable/icons8_orientation</item>
         <item name="cr3_option_pages_two_drawable">@drawable/icons8_document_2pages</item>
@@ -890,6 +906,7 @@
         <item name="attr_icons8_lock_portrait_2">@drawable/icons8_lock_portrait_2</item>
         <item name="attr_icons8_orientation">@drawable/icons8_orientation</item>
         <item name="attr_icons8_fullscreen">@drawable/icons8_fullscreen</item>
+        <item name="attr_icons8_fullscreen_small">@drawable/icons8_fullscreen_small</item>
         <item name="attr_icons8_touchscreen">@drawable/icons8_touchscreen</item>
         <item name="attr_icons8_increase_font_2">@drawable/icons8_increase_font_2</item>
         <item name="attr_icons8_decrease_font_1">@drawable/icons8_decrease_font_1</item>
@@ -1091,6 +1108,17 @@
         <item name="attr_icons8_circle">@drawable/icons8_circle</item>
         <item name="attr_icons8_square">@drawable/icons8_square</item>
         <item name="attr_icons8_screenshot">@drawable/icons8_screenshot</item>
+        <item name="attr_icons8_1">@drawable/icons8_1</item>
+        <item name="attr_icons8_2">@drawable/icons8_2</item>
+        <item name="attr_icons8_3">@drawable/icons8_3</item>
+        <item name="attr_icons8_4">@drawable/icons8_4</item>
+        <item name="attr_icons8_5">@drawable/icons8_5</item>
+        <item name="attr_icons8_6">@drawable/icons8_6</item>
+        <item name="attr_icons8_7">@drawable/icons8_7</item>
+        <item name="attr_icons8_8">@drawable/icons8_8</item>
+        <item name="attr_icons8_9">@drawable/icons8_9</item>
+        <item name="attr_icons8_10">@drawable/icons8_10</item>
+        <item name="attr_icons8_download_database">@drawable/icons8_download_database</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
@@ -1163,6 +1191,7 @@
         <item name="cr3_button_go_percent_drawable">@drawable/icons8_fast_forward_percent</item>
         <item name="cr3_browser_folder_drawable">@drawable/icons8_folder</item>
         <item name="cr3_button_tts_drawable">@drawable/icons8_speaker</item>
+        <item name="attr_icons8_speaker_small">@drawable/icons8_speaker_small</item>
         <item name="cr3_browser_folder_recent_drawable">@drawable/icons8_folder_star</item>
         <item name="cr3_button_scroll_go_drawable">@drawable/icons8_scroll</item>
         <item name="cr3_btn_books_swap_drawable">@drawable/icons8_books_switch</item>
@@ -1191,6 +1220,7 @@
         <item name="cr3_option_font_gamma_drawable">@drawable/icons8_gamma</item>
         <item name="cr3_option_text_width_drawable">@drawable/icons8_document_space_width</item>
         <item name="cr3_option_fullscreen_drawable">@drawable/icons8_fullscreen</item>
+        <item name="attr_icons8_fullscreen_small">@drawable/icons8_fullscreen_small</item>
         <item name="cr3_option_view_mode_scroll_drawable">@drawable/icons8_scroll</item>
         <item name="cr3_option_page_orientation_landscape_drawable">@drawable/icons8_orientation</item>
         <item name="cr3_option_pages_two_drawable">@drawable/icons8_document_2pages</item>
@@ -1319,6 +1349,7 @@
         <item name="attr_icons8_lock_portrait_2">@drawable/icons8_lock_portrait_2</item>
         <item name="attr_icons8_orientation">@drawable/icons8_orientation</item>
         <item name="attr_icons8_fullscreen">@drawable/icons8_fullscreen</item>
+        <item name="attr_icons8_fullscreen_small">@drawable/icons8_fullscreen_small</item>
         <item name="attr_icons8_touchscreen">@drawable/icons8_touchscreen</item>
         <item name="attr_icons8_increase_font_2">@drawable/icons8_increase_font_2</item>
         <item name="attr_icons8_decrease_font_1">@drawable/icons8_decrease_font_1</item>
@@ -1526,6 +1557,7 @@
         <item name="cr3_button_go_percent_drawable">@drawable/icons8_fast_forward_percent</item>
         <item name="cr3_browser_folder_drawable">@drawable/icons8_folder</item>
         <item name="cr3_button_tts_drawable">@drawable/icons8_speaker</item>
+        <item name="attr_icons8_speaker_small">@drawable/icons8_speaker_small</item>
         <item name="cr3_browser_folder_recent_drawable">@drawable/icons8_folder_star</item>
         <item name="cr3_button_scroll_go_drawable">@drawable/icons8_scroll</item>
         <item name="cr3_btn_books_swap_drawable">@drawable/icons8_books_switch</item>
@@ -1554,6 +1586,7 @@
         <item name="cr3_option_font_gamma_drawable">@drawable/icons8_gamma</item>
         <item name="cr3_option_text_width_drawable">@drawable/icons8_document_space_width</item>
         <item name="cr3_option_fullscreen_drawable">@drawable/icons8_fullscreen</item>
+        <item name="attr_icons8_fullscreen_small">@drawable/icons8_fullscreen_small</item>
         <item name="cr3_option_view_mode_scroll_drawable">@drawable/icons8_scroll</item>
         <item name="cr3_option_page_orientation_landscape_drawable">@drawable/icons8_orientation</item>
         <item name="cr3_option_pages_two_drawable">@drawable/icons8_document_2pages</item>
@@ -1682,6 +1715,7 @@
         <item name="attr_icons8_lock_portrait_2">@drawable/icons8_lock_portrait_2</item>
         <item name="attr_icons8_orientation">@drawable/icons8_orientation</item>
         <item name="attr_icons8_fullscreen">@drawable/icons8_fullscreen</item>
+        <item name="attr_icons8_fullscreen_small">@drawable/icons8_fullscreen_small</item>
         <item name="attr_icons8_touchscreen">@drawable/icons8_touchscreen</item>
         <item name="attr_icons8_increase_font_2">@drawable/icons8_increase_font_2</item>
         <item name="attr_icons8_decrease_font_1">@drawable/icons8_decrease_font_1</item>
@@ -2062,6 +2096,7 @@
         <item name="attr_icons8_lock_portrait_2">@drawable/icons8_lock_portrait_2</item>
         <item name="attr_icons8_orientation">@drawable/icons8_orientation</item>
         <item name="attr_icons8_fullscreen">@drawable/icons8_fullscreen</item>
+        <item name="attr_icons8_fullscreen_small">@drawable/icons8_fullscreen_small</item>
         <item name="attr_icons8_touchscreen">@drawable/icons8_touchscreen</item>
         <item name="attr_icons8_increase_font_2">@drawable/icons8_increase_font_2</item>
         <item name="attr_icons8_decrease_font_1">@drawable/icons8_decrease_font_1</item>
@@ -2263,6 +2298,17 @@
         <item name="attr_icons8_circle">@drawable/icons8_circle</item>
         <item name="attr_icons8_square">@drawable/icons8_square</item>
         <item name="attr_icons8_screenshot">@drawable/icons8_screenshot</item>
+        <item name="attr_icons8_1">@drawable/icons8_1</item>
+        <item name="attr_icons8_2">@drawable/icons8_2</item>
+        <item name="attr_icons8_3">@drawable/icons8_3</item>
+        <item name="attr_icons8_4">@drawable/icons8_4</item>
+        <item name="attr_icons8_5">@drawable/icons8_5</item>
+        <item name="attr_icons8_6">@drawable/icons8_6</item>
+        <item name="attr_icons8_7">@drawable/icons8_7</item>
+        <item name="attr_icons8_8">@drawable/icons8_8</item>
+        <item name="attr_icons8_9">@drawable/icons8_9</item>
+        <item name="attr_icons8_10">@drawable/icons8_10</item>
+        <item name="attr_icons8_download_database">@drawable/icons8_download_database</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
@@ -2509,6 +2555,7 @@
         <item name="attr_icons8_lock_portrait_2">@drawable/icons8_lock_portrait_2</item>
         <item name="attr_icons8_orientation">@drawable/icons8_orientation</item>
         <item name="attr_icons8_fullscreen">@drawable/icons8_fullscreen</item>
+        <item name="attr_icons8_fullscreen_small">@drawable/icons8_fullscreen_small</item>
         <item name="attr_icons8_touchscreen">@drawable/icons8_touchscreen</item>
         <item name="attr_icons8_increase_font_2">@drawable/icons8_increase_font_2</item>
         <item name="attr_icons8_decrease_font_1">@drawable/icons8_decrease_font_1</item>
@@ -2706,6 +2753,17 @@
         <item name="attr_icons8_circle">@drawable/icons8_circle</item>
         <item name="attr_icons8_square">@drawable/icons8_square</item>
         <item name="attr_icons8_screenshot">@drawable/icons8_screenshot</item>
+        <item name="attr_icons8_1">@drawable/icons8_1</item>
+        <item name="attr_icons8_2">@drawable/icons8_2</item>
+        <item name="attr_icons8_3">@drawable/icons8_3</item>
+        <item name="attr_icons8_4">@drawable/icons8_4</item>
+        <item name="attr_icons8_5">@drawable/icons8_5</item>
+        <item name="attr_icons8_6">@drawable/icons8_6</item>
+        <item name="attr_icons8_7">@drawable/icons8_7</item>
+        <item name="attr_icons8_8">@drawable/icons8_8</item>
+        <item name="attr_icons8_9">@drawable/icons8_9</item>
+        <item name="attr_icons8_10">@drawable/icons8_10</item>
+        <item name="attr_icons8_download_database">@drawable/icons8_download_database</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>

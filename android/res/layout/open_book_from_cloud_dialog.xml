@@ -60,6 +60,7 @@
                     android:layout_weight="15"
                     android:text="find text" />
                 <ImageButton android:id="@+id/do_find"
+                        android:scaleType="fitCenter"
                         android:layout_weight="1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -82,6 +83,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <ImageButton android:id="@+id/goto_up"
+            android:scaleType="fitCenter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dip"
@@ -95,6 +97,7 @@
             android:background="@null"
             android:contentDescription="root"/>
         <ImageButton android:id="@+id/goto_root"
+            android:scaleType="fitCenter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dip"
@@ -107,6 +110,19 @@
             android:focusableInTouchMode="false"
             android:background="@null"
             android:contentDescription="root"/>
+        <ImageButton android:id="@+id/save_to_opds"
+            android:scaleType="fitCenter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dip"
+            android:layout_marginBottom="5dip"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:src="?attr/attr_icons8_calibre"
+            android:tag="tint"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:background="@null"/>
         <RadioButton
             android:id="@+id/rb_whole"
             android:layout_width="wrap_content"

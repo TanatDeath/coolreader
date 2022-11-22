@@ -1,88 +1,5 @@
 package org.coolreader.readerview;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.Callable;
-
-import org.coolreader.CoolReader;
-import org.coolreader.R;
-import org.coolreader.cloud.CloudAction;
-import org.coolreader.cloud.CloudSync;
-
-import org.coolreader.cloud.litres.LitresJsons;
-import org.coolreader.crengine.BackgroundTextureInfo;
-import org.coolreader.crengine.BackgroundThread;
-import org.coolreader.crengine.BaseActivity;
-import org.coolreader.crengine.BaseDialog;
-import org.coolreader.crengine.BookInfo;
-import org.coolreader.crengine.BookInfoDialog;
-import org.coolreader.crengine.BookTag;
-import org.coolreader.crengine.Bookmark;
-import org.coolreader.crengine.BookmarkEditDialog;
-import org.coolreader.crengine.CalibreCatalogEditDialog;
-import org.coolreader.crengine.CoverpageManager;
-import org.coolreader.crengine.CustomLog;
-import org.coolreader.crengine.DelayedExecutor;
-import org.coolreader.crengine.DeviceInfo;
-import org.coolreader.crengine.DeviceOrientation;
-import org.coolreader.crengine.ExternalDocCameDialog;
-import org.coolreader.crengine.TagsEditDialog;
-import org.coolreader.dic.DictsDlg;
-import org.coolreader.crengine.DocProperties;
-import org.coolreader.crengine.DocView;
-import org.coolreader.crengine.DocumentFormat;
-import org.coolreader.eink.EinkScreen;
-import org.coolreader.crengine.Engine;
-import org.coolreader.crengine.FileInfo;
-import org.coolreader.crengine.FindNextDlg;
-import org.coolreader.crengine.FlavourConstants;
-import org.coolreader.crengine.GotoPageDialog;
-import org.coolreader.crengine.HelpFileGenerator;
-import org.coolreader.crengine.ImageInfo;
-import org.coolreader.crengine.L;
-import org.coolreader.crengine.Logger;
-import org.coolreader.crengine.OrientationToolbarDlg;
-import org.coolreader.crengine.PositionProperties;
-import org.coolreader.crengine.Properties;
-import org.coolreader.crengine.ReaderAction;
-import org.coolreader.crengine.ReaderCallback;
-import org.coolreader.crengine.ReaderCommand;
-import org.coolreader.crengine.ResizeHistory;
-import org.coolreader.crengine.Scanner;
-import org.coolreader.crengine.SearchDlg;
-import org.coolreader.crengine.Selection;
-import org.coolreader.crengine.SelectionToolbarDlg;
-import org.coolreader.crengine.Services;
-import org.coolreader.crengine.Settings;
-import org.coolreader.crengine.SomeButtonsToolbarDlg;
-import org.coolreader.onyx.OnyxLibrary;
-import org.coolreader.options.BoolOption;
-import org.coolreader.userdic.UserDicPanel;
-import org.coolreader.utils.StrUtils;
-import org.coolreader.crengine.SwitchProfileDialog;
-import org.coolreader.crengine.TOCDlg;
-import org.coolreader.crengine.TOCItem;
-import org.coolreader.utils.Utils;
-import org.coolreader.crengine.VMRuntimeHack;
-import org.coolreader.crengine.ViewMode;
-import org.coolreader.dic.DicToastView;
-import org.coolreader.dic.Dictionaries;
-import org.coolreader.dic.OfflineDicsDlg;
-import org.coolreader.options.BacklightOption;
-import org.coolreader.options.OptionsDialog;
-import org.coolreader.tts.TTSToolbarDlg;
-import org.coolreader.userdic.UserDicDlg;
-
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.ContentValues;
@@ -124,6 +41,85 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import org.coolreader.CoolReader;
+import org.coolreader.R;
+import org.coolreader.cloud.CloudAction;
+import org.coolreader.cloud.CloudSync;
+import org.coolreader.crengine.BackgroundTextureInfo;
+import org.coolreader.crengine.BackgroundThread;
+import org.coolreader.crengine.BaseActivity;
+import org.coolreader.crengine.BaseDialog;
+import org.coolreader.crengine.BookInfo;
+import org.coolreader.crengine.BookInfoDialog;
+import org.coolreader.crengine.BookTag;
+import org.coolreader.crengine.Bookmark;
+import org.coolreader.crengine.BookmarkEditDialog;
+import org.coolreader.crengine.CoverpageManager;
+import org.coolreader.crengine.CustomLog;
+import org.coolreader.crengine.DelayedExecutor;
+import org.coolreader.crengine.DeviceInfo;
+import org.coolreader.crengine.DeviceOrientation;
+import org.coolreader.crengine.DocProperties;
+import org.coolreader.crengine.DocView;
+import org.coolreader.crengine.DocumentFormat;
+import org.coolreader.crengine.Engine;
+import org.coolreader.crengine.ExternalDocCameDialog;
+import org.coolreader.crengine.FileInfo;
+import org.coolreader.crengine.FindNextDlg;
+import org.coolreader.crengine.FlavourConstants;
+import org.coolreader.crengine.GotoPageDialog;
+import org.coolreader.crengine.HelpFileGenerator;
+import org.coolreader.crengine.ImageInfo;
+import org.coolreader.crengine.L;
+import org.coolreader.crengine.Logger;
+import org.coolreader.crengine.OrientationToolbarDlg;
+import org.coolreader.crengine.PositionProperties;
+import org.coolreader.crengine.Properties;
+import org.coolreader.crengine.ReaderAction;
+import org.coolreader.crengine.ReaderCallback;
+import org.coolreader.crengine.ReaderCommand;
+import org.coolreader.crengine.ResizeHistory;
+import org.coolreader.crengine.Scanner;
+import org.coolreader.crengine.SearchDlg;
+import org.coolreader.crengine.Selection;
+import org.coolreader.crengine.SelectionToolbarDlg;
+import org.coolreader.crengine.Services;
+import org.coolreader.crengine.Settings;
+import org.coolreader.crengine.SomeButtonsToolbarDlg;
+import org.coolreader.crengine.SwitchProfileDialog;
+import org.coolreader.crengine.TOCDlg;
+import org.coolreader.crengine.TOCItem;
+import org.coolreader.crengine.TagsEditDialog;
+import org.coolreader.crengine.VMRuntimeHack;
+import org.coolreader.crengine.ViewMode;
+import org.coolreader.dic.DicToastView;
+import org.coolreader.dic.Dictionaries;
+import org.coolreader.dic.DictsDlg;
+import org.coolreader.eink.EinkScreen;
+import org.coolreader.onyx.OnyxLibrary;
+import org.coolreader.options.BacklightOption;
+import org.coolreader.options.BoolOption;
+import org.coolreader.options.OptionsDialog;
+import org.coolreader.tts.TTSToolbarDlg;
+import org.coolreader.userdic.UserDicDlg;
+import org.coolreader.userdic.UserDicPanel;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.Callable;
 
 public class ReaderView implements android.view.SurfaceHolder.Callback, Settings, DocProperties,
 		OnKeyListener, OnTouchListener, OnFocusChangeListener {
@@ -1922,6 +1918,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		BackgroundThread.ensureGUI();
 		log.i("On command " + cmd + (param!=0?" ("+param+")":" "));
 		boolean eink = false;
+		String sProp = "";
 		if ((cmd != ReaderCommand.DCMD_NEXT_BOOKMARK) && (cmd != ReaderCommand.DCMD_PREV_BOOKMARK)) lastNavBmkIndex = -1;
 		switch (cmd) {
 			case DCMD_FILE_BROWSER_ROOT:
@@ -2100,7 +2097,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 						}
 					}
 					eink = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-					if (param == 1 && !eink)
+					if (((param == 1) && (!eink) && (pageFlipAnimationMode != ReaderView.PAGE_ANIMATION_NONE)))
 						animatePageFlip(1, onFinishHandler);
 					else {
 						if ((mActivity.getScreenBlackpageInterval() != 0) &&
@@ -2122,7 +2119,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			case DCMD_PAGEUP:
 				if (isBookLoaded()) {
 					eink = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-					if (param == 1 && !eink)
+					if (((param == 1) && (!eink) && (pageFlipAnimationMode != ReaderView.PAGE_ANIMATION_NONE)))
 						animatePageFlip(-1, onFinishHandler);
 					else {
 						if ((mActivity.getScreenBlackpageInterval() != 0) &&
@@ -2691,11 +2688,69 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				});
 				dlgTagsEditDialog.show();
 				break;
+			case DCMD_COMMAND_GROUP_1:
+				sProp = StrUtils.getNonEmptyStr(getSettings().getProperty(Settings.PROP_GROUP_BUTTONS + "_1"), true);
+				showGroupToolbarMenu(sProp);
+				break;
+			case DCMD_COMMAND_GROUP_2:
+				sProp = StrUtils.getNonEmptyStr(getSettings().getProperty(Settings.PROP_GROUP_BUTTONS + "_2"), true);
+				showGroupToolbarMenu(sProp);
+				break;
+			case DCMD_COMMAND_GROUP_3:
+				sProp = StrUtils.getNonEmptyStr(getSettings().getProperty(Settings.PROP_GROUP_BUTTONS + "_3"), true);
+				showGroupToolbarMenu(sProp);
+				break;
+			case DCMD_COMMAND_GROUP_4:
+				sProp = StrUtils.getNonEmptyStr(getSettings().getProperty(Settings.PROP_GROUP_BUTTONS + "_4"), true);
+				showGroupToolbarMenu(sProp);
+				break;
+			case DCMD_COMMAND_GROUP_5:
+				sProp = StrUtils.getNonEmptyStr(getSettings().getProperty(Settings.PROP_GROUP_BUTTONS + "_5"), true);
+				showGroupToolbarMenu(sProp);
+				break;
+			case DCMD_COMMAND_GROUP_6:
+				sProp = StrUtils.getNonEmptyStr(getSettings().getProperty(Settings.PROP_GROUP_BUTTONS + "_6"), true);
+				showGroupToolbarMenu(sProp);
+				break;
+			case DCMD_COMMAND_GROUP_7:
+				sProp = StrUtils.getNonEmptyStr(getSettings().getProperty(Settings.PROP_GROUP_BUTTONS + "_7"), true);
+				showGroupToolbarMenu(sProp);
+				break;
+			case DCMD_COMMAND_GROUP_8:
+				sProp = StrUtils.getNonEmptyStr(getSettings().getProperty(Settings.PROP_GROUP_BUTTONS + "_8"), true);
+				showGroupToolbarMenu(sProp);
+				break;
+			case DCMD_COMMAND_GROUP_9:
+				sProp = StrUtils.getNonEmptyStr(getSettings().getProperty(Settings.PROP_GROUP_BUTTONS + "_9"), true);
+				showGroupToolbarMenu(sProp);
+				break;
+			case DCMD_COMMAND_GROUP_10:
+				sProp = StrUtils.getNonEmptyStr(getSettings().getProperty(Settings.PROP_GROUP_BUTTONS + "_10"), true);
+				showGroupToolbarMenu(sProp);
+				break;
 			default:
 				// do nothing
 				break;
 		}
 	}
+
+	public void showGroupToolbarMenu(String sProp) {
+		List<ReaderAction> actions = ReaderAction.getAvailActions(true);
+		List<ReaderAction> actionsA = new ArrayList<>();
+		for (String btn: sProp.split(",")) {
+			for (ReaderAction ra: actions) {
+				if ((ra.cmd.nativeId +"."+ ra.param).equals(btn)) {
+					actionsA.add(ra);
+					break;
+				}
+			}
+		}
+		mActivity.showActionsToolbarMenu(actionsA.toArray(new ReaderAction[]{}), item -> {
+			onCommand(item.cmd, item.param, item);
+			return false;
+		});
+	}
+
 	boolean firstShowBrowserCall = true;
 
 	public TTSToolbarDlg ttsToolbar;
@@ -4197,8 +4252,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					}
 				} else {
 					//new ScrollViewAnimation(startY, maxY);
-					int fromY = dir>0 ? h*7/8 : 0;
-					int toY = dir>0 ? 0 : h*7/8;
+//					int fromY = dir>0 ? h*7/8 : 0;
+//					int toY = dir>0 ? 0 : h*7/8;
+					int shift = mSettings.getInt(PROP_FONT_SIZE, 30) / 3;
+					int fromY = dir>0 ? (h - shift) : 0; // plotn - prevent of non full page scroll - just for 1/3 of font height
+					int toY = dir>0 ? 0 : (h - shift);
 					new ScrollViewAnimation(ReaderView.this, fromY, h);
 					if (currentAnimation != null) {
 						if (currentAnimation != null) {

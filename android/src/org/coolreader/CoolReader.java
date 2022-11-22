@@ -21,6 +21,7 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.hardware.Sensor;
@@ -41,6 +42,7 @@ import android.os.storage.StorageVolume;
 import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
@@ -1470,7 +1472,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		String intentAction = StrUtils.getNonEmptyStr(intent.getAction(),false);
 
 		for (ReaderAction ra: ReaderAction.getAvailActions(true)) {
-			String acname = "org.knownreder.cmd." + StrUtils.getNonEmptyStr(ra.id, true);
+			String acname = "org.knownreader.cmd." + StrUtils.getNonEmptyStr(ra.id, true);
 			if (acname.equals(intentAction)) {
 				mReaderView.onCommand(ra.cmd, ra.param, null);
 				return true;
@@ -4345,6 +4347,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}
 		if (StrUtils.getNonEmptyStr(opds.pathname, false).startsWith("@calibre")) {
 			CalibreCatalogEditDialog dlg = new CalibreCatalogEditDialog(CoolReader.this, opds,
+					opds.cat_type == 0, opds.pathname,
 					() -> refreshOPDSRootDirectory(true));
 			dlg.show();
 		} else {
@@ -4354,17 +4357,27 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}
 	}
 
-	public void editCalibreCatalog(FileInfo fi) {
+	public void addOrEditCalibreCatalog(FileInfo fi, boolean isLocal, String remote_path) {
 		if (fi == null) {
 			fi = new FileInfo();
 			fi.isDirectory = true;
-			fi.pathname = FileInfo.OPDS_DIR_PREFIX + "http://";
+			String lastSegm = Utils.getLastSlashSegment(remote_path);
 			fi.setFilename("New Calibre Catalog");
+			if (!StrUtils.isEmptyStr(lastSegm))
+				fi.setFilename(lastSegm);
 			fi.isListed = true;
 			fi.isScanned = true;
 			fi.parent = Services.getScanner().getOPDSRoot();
+			fi.remote_folder = remote_path;
+			String sDir = "";
+			ArrayList<String> tDirs = Engine.getDataDirsExt(Engine.DataDirType.CalibreLibrariesDirs, true);
+			if (tDirs.size()>0) sDir=tDirs.get(0);
+			if (!StrUtils.isEmptyStr(sDir))
+				if ((!sDir.endsWith("/"))&&(!sDir.endsWith("\\"))) sDir = sDir + "/";
+			fi.pathname = FileInfo.CALIBRE_DIR_PREFIX + sDir + fi.getFilename() + "/";
 		}
 		CalibreCatalogEditDialog dlg = new CalibreCatalogEditDialog(CoolReader.this, fi,
+				isLocal, remote_path,
 				() -> refreshOPDSRootDirectory(true));
 		dlg.show();
 	}

@@ -21,6 +21,7 @@
 #define __LVARCCONTAINERBASE_H_INCLUDED__
 
 #include "lvnamedcontainer.h"
+#include "lvstring.h"
 
 class LVArcContainerBase : public LVNamedContainer
 {
@@ -36,23 +37,6 @@ public:
     {
         return (LVContainer*)m_parent;
     }
-    virtual const LVContainerItemInfo * GetObjectInfo(int index)
-    {
-        if (index>=0 && index<m_list.length())
-            return m_list[index];
-        return NULL;
-    }
-    virtual const LVContainerItemInfo * GetObjectInfo(lString32 name)
-    {
-        for ( int i=0; i<m_list.length(); i++ )
-            if (m_list[i]->GetName()==name )
-                return m_list[i];
-        return NULL;
-    }
-    virtual int GetObjectCount() const
-    {
-        return m_list.length();
-    }
     virtual lverror_t GetSize( lvsize_t * pSize )
     {
         if (m_fname.empty())
@@ -66,7 +50,6 @@ public:
     virtual ~LVArcContainerBase()
     {
         SetName(NULL);
-        Clear();
     }
     virtual int ReadContents() = 0;
 

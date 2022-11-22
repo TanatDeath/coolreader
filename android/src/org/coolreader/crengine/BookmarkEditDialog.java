@@ -139,8 +139,8 @@ public class BookmarkEditDialog extends BaseDialog {
 			if (mBookmark.getType() == Bookmark.TYPE_CITATION) ude.setIs_citation(1);
 			mActivity.getDB().saveUserDic(ude, UserDicEntry.ACTION_NEW);
 			if (mActivity instanceof CoolReader) {
-				((CoolReader) mActivity).getmUserDic().put(ude.getIs_citation()+ude.getDic_word(), ude);
-				BackgroundThread.instance().postGUI(() -> ((CoolReader) mActivity).getmReaderFrame().getUserDicPanel().updateUserDicWords(), 1000);
+				mActivity.getmUserDic().put(ude.getIs_citation()+ude.getDic_word(), ude);
+				BackgroundThread.instance().postGUI(() -> mActivity.getmReaderFrame().getUserDicPanel().updateUserDicWords(), 1000);
 			}
 		} else {
 			if (mIsNew) {

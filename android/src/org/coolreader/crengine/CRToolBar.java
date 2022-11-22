@@ -819,27 +819,29 @@ public class CRToolBar extends ViewGroup {
 		ArrayList<ReaderAction> itemsToShow = new ArrayList<ReaderAction>();
 		itemsOverflow.clear();
 		int maxButtonCount = 1;
+		boolean addEllipsis = true; //visibleButtonCount > maxButtonCount || visibleNonButtonCount > 0;
 		if (isVertical) {
 			rect.right -= BAR_SPACING;
-			int maxHeight = bottom - top - getPaddingTop() - getPaddingBottom() + BUTTON_SPACING;
+			int maxHeight = bottom - top - getPaddingTop() - getPaddingBottom() + BUTTON_SPACING - buttonHeight;
 			maxButtonCount = maxHeight / (buttonHeight + BUTTON_SPACING);
 		} else {
 			rect.bottom -= BAR_SPACING;
-			int maxWidth = right - left - getPaddingLeft() - getPaddingRight() + BUTTON_SPACING;
+			int maxWidth = right - left - getPaddingLeft() - getPaddingRight() + BUTTON_SPACING - buttonWidth;
 			if ((buttonWidth + BUTTON_SPACING) > 0)
 				maxButtonCount = maxWidth / (buttonWidth + BUTTON_SPACING);
 		}
 		int count = 0;
-		boolean addEllipsis = true; //visibleButtonCount > maxButtonCount || visibleNonButtonCount > 0;
 		int diff = 0;
 		if (maxButtonCount > visibleButtonCount) {
 			diff = maxButtonCount - visibleButtonCount;
 			if (isVertical) diff = diff * (buttonHeight + BUTTON_SPACING);
 				else diff = diff * (buttonWidth + BUTTON_SPACING);
-			if ((visibleButtonCount + (addEllipsis? 1: 0)) > 0)
-				diff = diff / (visibleButtonCount + (addEllipsis? 1: 0));
+//			if ((visibleButtonCount + (addEllipsis? 1: 0)) > 0)
+//				diff = diff / (visibleButtonCount + (addEllipsis? 1: 0));
+			if (visibleButtonCount > 0)
+				diff = diff / visibleButtonCount;
 		}
-		if (addEllipsis) maxButtonCount--;
+		//if (addEllipsis) maxButtonCount--;
 		if (addEllipsis)
 			addButton(rect, null, false, diff);
 		for (int i = 0; i < actionsToolbar.size(); i++) {
@@ -870,10 +872,10 @@ public class CRToolBar extends ViewGroup {
 	        	int lineCount = calcLineCount(contentWidth);
 	        	if (lineCount > maxMultilineLines)
 	        		lineCount = maxMultilineLines;
-	        	int h = lineCount * itemHeight + BAR_SPACING + BAR_SPACING + (windowDividerHeight *4) + 4;
+	        	int h = lineCount * itemHeight + BAR_SPACING + BAR_SPACING + (windowDividerHeight * 4) + 4;
 	        	setMeasuredDimension(contentWidth, h);
 	        } else {
-	        	setMeasuredDimension(contentWidth, buttonHeight + BUTTON_SPACING * 2 + BAR_SPACING + (windowDividerHeight *4));
+	        	setMeasuredDimension(contentWidth, buttonHeight + BUTTON_SPACING * 2 + BAR_SPACING + (windowDividerHeight * 4));
 	        }
         }
 	}

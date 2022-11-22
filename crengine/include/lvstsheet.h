@@ -192,10 +192,23 @@ public:
         }
     }
     void setDeclaration( LVCssDeclRef decl ) { _decl = decl; }
+    void addSpecificity(lUInt32 specificity) { _specificity += specificity; }
     int getSpecificity() { return _specificity; }
     LVCssSelector * getNext() { return _next; }
     void setNext(LVCssSelector * next) { _next = next; }
     lUInt32 getHash();
+    LVCssSelector * getCopy() {
+        // Return a copy (with everything except _next) that can
+        // be delete()'d without impacting this LVCssSelector
+        LVCssSelector *s = new LVCssSelector();
+        s->_id = _id;
+        s->_decl = _decl; // (this is a LVRef)
+        s->_specificity = _specificity;
+        s->_pseudo_elem = _pseudo_elem;
+        if ( _rules ) // (deep copy of each rule)
+            s->_rules = new LVCssSelectorRule(*_rules);
+        return s;
+    }
 };
 
 
@@ -284,6 +297,7 @@ public:
     void apply( const ldomNode * node, css_style_rec_t * style );
     /// calculate hash
     lUInt32 getHash();
+    void merge(const LVStyleSheet &other);
 };
 
 /// parse number/length value like "120px" or "90%"

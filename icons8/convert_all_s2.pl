@@ -13,30 +13,23 @@ my %ic_bigicons_sizes = (ldpi=>36, mdpi=>48, hdpi=>72, xhdpi=>96, xxhdpi=>144, x
 my %ic_smaller_list=(
         'icons8_minus_minus_small.svg' => 'icons8_minus_minus_small.png',
         'icons8_visible.svg' => 'icons8_visible.png',
-        'icons8_tear_off_calendar.svg' => 'icons8_tear_off_calendar.png'
+        'icons8_tear_off_calendar.svg' => 'icons8_tear_off_calendar.png',
+        'icons8_speaker.svg' => 'icons8_speaker_small.png',
+        'icons8_fullscreen.svg' => 'icons8_fullscreen_small.png'
 );
 
 my %ic_actions_list=(
-        'icons8_hide.svg' => 'icons8_hide.png',
-        'icons8_brightness_down.svg' => 'icons8_brightness_down.png',
-        'icons8_brightness_up.svg' => 'icons8_brightness_up.png',
-        'icons8_brightness_warm_down.svg' => 'icons8_brightness_warm_down.png',
-        'icons8_brightness_warm_up.svg' => 'icons8_brightness_warm_up.png',
-        'icons8_offline_dics1.svg' => 'icons8_offline_dics1.png',
-        'icons8_offline_dics2.svg' => 'icons8_offline_dics2.png',
-        'icons8_google_web_search.svg' => 'icons8_google_web_search.png',
-        'icons8_bookmarks_export.svg' => 'icons8_bookmarks_export.png',
-        'icons8_save_ell.svg' => 'icons8_save_ell.png',
-        'icons8_autoflip_page.svg' => 'icons8_autoflip_page.png',
-        'icons8_autoflip_page_show_speed.svg' => 'icons8_autoflip_page_show_speed.png',
-        'icons8_triangle.svg' => 'icons8_triangle.png',
-        'icons8_refresh_screen.svg' => 'icons8_refresh_screen.png',
-        'icons8_circle.svg' => 'icons8_circle.png',
-        'icons8_square.svg' => 'icons8_square.png',
-        'icons8_screenshot.svg' => 'icons8_screenshot.png',
-        'icons8_slider.svg' => 'icons8_slider.png',
-        'icons8_tag.svg' => 'icons8_tag.png',
-        'icons8_save.svg' => 'icons8_save.png'
+        'icons8_1.svg' => 'icons8_1.png',
+        'icons8_2.svg' => 'icons8_2.png',
+        'icons8_3.svg' => 'icons8_3.png',
+        'icons8_4.svg' => 'icons8_4.png',
+        'icons8_5.svg' => 'icons8_5.png',
+        'icons8_6.svg' => 'icons8_6.png',
+        'icons8_7.svg' => 'icons8_7.png',
+        'icons8_8.svg' => 'icons8_8.png',
+        'icons8_9.svg' => 'icons8_9.png',
+        'icons8_10.svg' => 'icons8_10.png',
+        'icons8_download_database.svg' => 'icons8_download_database.png'
 );
 
 my %ic_menu_list=(

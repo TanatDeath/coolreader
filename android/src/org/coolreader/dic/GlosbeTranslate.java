@@ -70,7 +70,7 @@ public class GlosbeTranslate {
 					DicStruct dsl = new DicStruct();
 					dsl.srcText = s;
 
-					Elements phraseTs = doc.select("div.phrase__translation");
+					Elements phraseTs = doc.select("div.phrase__translation__section");
 
 					for (Element phraseT: phraseTs) {
 						Lemma le = new Lemma();

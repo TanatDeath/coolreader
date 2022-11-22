@@ -5,6 +5,7 @@ import android.view.View;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BackgroundThread;
+import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.FlavourConstants;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
@@ -109,6 +110,16 @@ public class ReversoTranslate {
 	}
 
 	public void reversoTranslateAsLast(CoolReader cr, String s, String topicHref) {
+		try {
+			if (lastLangf == null)
+				lastLangf = cr.getReaderView().getBookInfo().getFileInfo().lang_from;
+			if (lastLang == null)
+				lastLang = cr.getReaderView().getBookInfo().getFileInfo().lang_to;
+			if (lastCurDict == null) lastCurDict = Dictionaries.findById("Reveso context (online)",
+					cr);
+		} catch (Exception e) {
+
+		}
 		reversoTranslate(cr, s, lastFullScreen,
 		lastLangf, lastLang, lastCurDict, lastView,
 		topicHref,
