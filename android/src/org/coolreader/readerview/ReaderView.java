@@ -120,6 +120,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 
 public class ReaderView implements android.view.SurfaceHolder.Callback, Settings, DocProperties,
 		OnKeyListener, OnTouchListener, OnFocusChangeListener {
@@ -693,6 +694,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				copyToClipboardAndToast(sel.text);
 				clearSelection();
 				break;
+			case SELECTION_ACTION_COPY_WITH_PUNCT:
+				copyToClipboardWithPunctAndToast(sel.text);
+				clearSelection();
+				break;
 			case SELECTION_ACTION_DICTIONARY:
 				if ((!isMultiSelection(sel))&&(mActivity.ismDictWordCorrrection())) {
 					if (!bSkipDic)
@@ -902,6 +907,39 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			ClipboardManager cm = mActivity.getClipboardmanager();
 			cm.setText(text);
 			log.i("Setting clipboard text: " + text);
+			mActivity.showToast(mActivity.getString(R.string.copied_to_cb));
+		}
+	}
+
+	public void copyToClipboardWithPunctAndToast(String text) {
+		if (text != null && text.length() > 0) {
+			String text2 = StrUtils.getNonEmptyStr(text, false);
+			int curPage = mActivity.getReaderView().getDoc().getCurPage();
+			String sPageText = StrUtils.getNonEmptyStr(mActivity.getReaderView().getPageTextFromEngine(curPage), false);
+			String textSrink = text2;
+			boolean found = false;
+			if (sPageText.contains(textSrink)) {
+				int ind = sPageText.indexOf(textSrink);
+				if (sPageText.length() > ind + textSrink.length() + 1) {
+					String next = sPageText.substring(ind + textSrink.length(), ind + textSrink.length() + 1);
+					found = true;
+					if (Pattern.matches("\\p{Punct}", next))
+						text2 = text2 + next;
+				}
+			}
+			// if the text spans more than one page
+			while ((!found) && (textSrink.length()>0)) {
+				textSrink = textSrink.substring(1); // reduce by 1 sym
+				if (sPageText.startsWith(textSrink)) {
+					String next = sPageText.substring(textSrink.length(), textSrink.length() + 1);
+					found = true;
+					if (Pattern.matches("\\p{Punct}", next))
+						text2 = text2 + next;
+				}
+			}
+			ClipboardManager cm = mActivity.getClipboardmanager();
+			cm.setText(text2);
+			log.i("Setting clipboard text: " + text2);
 			mActivity.showToast(mActivity.getString(R.string.copied_to_cb));
 		}
 	}
@@ -1967,7 +2005,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					ttsToolbar = TTSToolbarDlg.showDialog(mActivity, ReaderView.this, ttsacc);
 					ttsToolbar.setOnCloseListener(() -> ttsToolbar = null);
 					ttsToolbar.setAppSettings(mSettings, null);
-				}), false);
+				})/*, false*/);
 			}
 			break;
 			case DCMD_TOGGLE_DOCUMENT_STYLES:
@@ -3112,9 +3150,6 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			} catch (NumberFormatException e) {
 				// ignore
 			}
-//			isBacklightControlFlick = "1".equals(value) ? 1 : ("2".equals(value) ? 2 : 0);
-//		} else if (key.equals(PROP_APP_FLICK_WARMLIGHT_CONTROL)) {
-//			isWarmBacklightControlFlick = "1".equals(value) ? 1 : ("2".equals(value) ? 2 : 0);
 		} else if (key.equals(PROP_APP_SCREEN_BACKLIGHT_FIX_DELTA)) {
 			backlightFixDelta = false;
 			try {

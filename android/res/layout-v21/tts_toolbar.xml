@@ -150,34 +150,34 @@
 					android:tag="tint"
 					android:contentDescription="@string/tts_options"/>
 		</LinearLayout>
-		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-				android:orientation="horizontal"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:baselineAligned="true"
-				>
-			<TextView android:id="@+id/tts_lbl_volume"
-					android:layout_height="wrap_content"
-					android:layout_width="0dip" android:layout_weight="1"
-					android:text="@string/tts_volume"
-					android:layout_marginTop="5dip"
-					android:layout_marginBottom="2dip"
-					android:layout_marginLeft="5dip"
-					android:layout_marginRight="5dip"
-					android:textColor="?attr/colorIcon"
-					android:textStyle="bold"
-					/>
-			<TextView android:id="@+id/tts_lbl_speed" android:layout_height="wrap_content"
-					android:layout_width="0dip" android:layout_weight="1"
-					android:text="@string/tts_rate"
-					android:layout_marginTop="5dip"
-					android:layout_marginBottom="2dip"
-					android:layout_marginLeft="5dip"
-					android:layout_marginRight="5dip"
-					android:textColor="?attr/colorIcon"
-					android:textStyle="bold"
-					/>
-		</LinearLayout>
+<!--		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--				android:orientation="horizontal"-->
+<!--				android:layout_width="fill_parent"-->
+<!--				android:layout_height="wrap_content"-->
+<!--				android:baselineAligned="true"-->
+<!--				>-->
+<!--			<TextView android:id="@+id/tts_lbl_volume"-->
+<!--					android:layout_height="wrap_content"-->
+<!--					android:layout_width="0dip" android:layout_weight="1"-->
+<!--					android:text="@string/tts_volume"-->
+<!--					android:layout_marginTop="5dip"-->
+<!--					android:layout_marginBottom="2dip"-->
+<!--					android:layout_marginLeft="5dip"-->
+<!--					android:layout_marginRight="5dip"-->
+<!--					android:textColor="?attr/colorIcon"-->
+<!--					android:textStyle="bold"-->
+<!--					/>-->
+<!--			<TextView android:id="@+id/tts_lbl_speed" android:layout_height="wrap_content"-->
+<!--					android:layout_width="0dip" android:layout_weight="1"-->
+<!--					android:text="@string/tts_rate"-->
+<!--					android:layout_marginTop="5dip"-->
+<!--					android:layout_marginBottom="2dip"-->
+<!--					android:layout_marginLeft="5dip"-->
+<!--					android:layout_marginRight="5dip"-->
+<!--					android:textColor="?attr/colorIcon"-->
+<!--					android:textStyle="bold"-->
+<!--					/>-->
+<!--		</LinearLayout>-->
 		<TableLayout
 				android:id="@+id/tts_seek_bars"
 				android:layout_width="match_parent"
@@ -204,15 +204,16 @@
 							android:layout_marginTop="3dip"
 							android:layout_marginBottom="3dip"
 							android:layout_marginLeft="3dip"
-							android:layout_marginRight="3dip"
+							android:layout_marginRight="0dip"
+							android:padding="2dp"
 							/>
 					<SeekBar android:id="@+id/tts_sb_volume"
 							android:layout_height="wrap_content"
 							android:layout_width="0dip" android:layout_weight="1"
 							android:layout_marginTop="2dip"
 							android:layout_marginBottom="2dip"
-							android:layout_marginLeft="2dip"
-							android:layout_marginRight="2dip"
+							android:layout_marginLeft="0dip"
+							android:layout_marginRight="0dip"
 							android:max="100"
 							android:progress="50"
 							android:progressDrawable="@drawable/seekbar_progressbar"
@@ -225,9 +226,10 @@
 							android:tag="tint"
 							android:layout_marginTop="3dip"
 							android:layout_marginBottom="3dip"
-							android:layout_marginLeft="3dip"
+							android:layout_marginLeft="0dip"
 							android:layout_marginRight="3dip"
 							android:src="?attr/attr_icons8_volume_up"
+							android:padding="2dp"
 							/>
 				</LinearLayout>
 				<LinearLayout
@@ -249,15 +251,16 @@
 							android:layout_marginTop="3dip"
 							android:layout_marginBottom="3dip"
 							android:layout_marginLeft="3dip"
-							android:layout_marginRight="3dip"
+							android:layout_marginRight="0dip"
+							android:padding="2dp"
 							/>
 					<SeekBar android:id="@+id/tts_sb_speed"
 							android:layout_height="wrap_content"
 							android:layout_width="0dip" android:layout_weight="1"
 							android:layout_marginTop="2dip"
 							android:layout_marginBottom="2dip"
-							android:layout_marginLeft="2dip"
-							android:layout_marginRight="2dip"
+							android:layout_marginLeft="0dip"
+							android:layout_marginRight="0dip"
 							android:max="100"
 							android:progress="50"
 							android:progressDrawable="@drawable/seekbar_progressbar"
@@ -270,9 +273,10 @@
 							android:tag="tint"
 							android:layout_marginTop="3dip"
 							android:layout_marginBottom="3dip"
-							android:layout_marginLeft="3dip"
+							android:layout_marginLeft="0dip"
 							android:layout_marginRight="3dip"
 							android:src="?attr/attr_icons8_rate_up"
+							android:padding="2dp"
 							/>
 				</LinearLayout>
 			</TableRow>

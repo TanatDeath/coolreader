@@ -36,7 +36,8 @@ public class SelectionModesOption extends SubmenuOption {
 			ReaderView.SELECTION_ACTION_DICTIONARY_10,
 			ReaderView.SELECTION_ACTION_COMBO,
 			ReaderView.SELECTION_ACTION_SUPER_COMBO,
-			ReaderView.SELECTION_ACTION_TOOLBAR_SHORT
+			ReaderView.SELECTION_ACTION_TOOLBAR_SHORT,
+			ReaderView.SELECTION_ACTION_COPY_WITH_PUNCT
 	};
 
 	public static int getSelectionActionTitle(int v) {
@@ -70,7 +71,8 @@ public class SelectionModesOption extends SubmenuOption {
 			R.string.options_selection_action_dictionary_10,
 			R.string.online_combo,
 			R.string.online_super_combo,
-			R.string.options_selection_action_toolbar_short
+			R.string.options_selection_action_toolbar_short,
+			R.string.options_selection_action_copy_with_punct
 	};
 
 	int[] mSelectionActionAddInfos = new int[] {
@@ -98,6 +100,7 @@ public class SelectionModesOption extends SubmenuOption {
 			R.string.option_add_info_empty_text,
 			R.string.online_combo_add_info,
 			R.string.online_super_combo_add_info,
+			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text
 	};
 
@@ -126,7 +129,8 @@ public class SelectionModesOption extends SubmenuOption {
 			ReaderView.SELECTION_ACTION_DICTIONARY_10,
 			ReaderView.SELECTION_ACTION_COMBO,
 			ReaderView.SELECTION_ACTION_SUPER_COMBO,
-			ReaderView.SELECTION_ACTION_TOOLBAR_SHORT
+			ReaderView.SELECTION_ACTION_TOOLBAR_SHORT,
+			ReaderView.SELECTION_ACTION_COPY_WITH_PUNCT
 	};
 	int[] mMultiSelectionActionTitles = new int[] {
 			R.string.options_selection_action_same_as_common,
@@ -153,7 +157,8 @@ public class SelectionModesOption extends SubmenuOption {
 			R.string.options_selection_action_dictionary_10,
 			R.string.online_combo,
 			R.string.online_super_combo,
-			R.string.options_selection_action_toolbar_short
+			R.string.options_selection_action_toolbar_short,
+			R.string.options_selection_action_copy_with_punct
 	};
 
 	int[] mMultiSelectionActionAddInfo = new int[] {
@@ -181,6 +186,7 @@ public class SelectionModesOption extends SubmenuOption {
 			R.string.option_add_info_empty_text,
 			R.string.online_combo_add_info,
 			R.string.online_super_combo_add_info,
+			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text
 	};
 

@@ -62,6 +62,8 @@
     <string name="mi_book_sort_order_timestamp_desc">By timestamp (desc)</string>
     <string name="mi_book_sort_order_author">By author</string>
     <string name="mi_book_sort_order_author_desc">By author (desc)</string>
+    <string name="mi_book_sort_order_series">By series</string>
+    <string name="mi_book_sort_order_series_desc">By series (desc)</string>
     <string name="mi_book_sort_order_title">By title</string>
     <string name="mi_book_sort_order_title_desc">By title (desc)</string>
     <string name="toggle_dict_once">Toggle dictionary (once)</string>
@@ -305,6 +307,7 @@
     <string name="options_multi_selection3_action">Inspector mode: some words</string>
     <string name="options_selection_action_bookmark">Add bookmark</string>
     <string name="options_selection_action_bookmark_quick">Add quick bookmark</string>
+    <string name="options_selection_action_copy_with_punct">Copy to clipboard with punct mark</string>
     <string name="options_selection_action_dictionary">Find in dictionary</string>
     <string name="options_selection_action_dictionary_1">Find in dictionary 1</string>
     <string name="options_selection_action_dictionary_2">Find in dictionary 2</string>
@@ -376,6 +379,7 @@
     <string name="book_info_system_device_model">Manufacturer / model / device / product / brand</string>
     <string name="book_info_system_device_flags">Device features</string>
     <string name="book_info_position_chapter">Chapter</string>
+    <string name="book_info_position_calendar">Reading calendar</string>
     <string name="book_info_position_page">Page</string>
     <string name="book_info_position_percent">Percent</string>
     <string name="dlg_bookmark_edit_correction">Corrected text</string>
@@ -1743,9 +1747,13 @@
     <string name="sel_panel_transp_buttons">Selection panel: transparent buttons</string>
     <string name="sel_panel_add_info">You can see the book contents behind transparent elements, on the other hand - they are less visible</string>
     <string name="sel_panel_sliders">Show selection change sliders</string>
+    <string name="sel_panel_recent_dics">Dics panel view mode</string>
     <string name="sel_panel_sliders_0">Only in portrait mode</string>
     <string name="sel_panel_sliders_1">Always</string>
     <string name="sel_panel_sliders_2">Never</string>
+    <string name="sel_panel_recent_dics_0">Multiline</string>
+    <string name="sel_panel_recent_dics_1">One (scrollable) line</string>
+    <string name="sel_panel_recent_dics_2">Disabled</string>
     <string name="open_url">Open external url (%s)?</string>
     <string name="open_url_browser">In browser</string>
     <string name="open_url_kr">In KnownReader</string>
@@ -2081,4 +2089,21 @@
     <string name="command_group_10">Command group 10</string>
     <string name="create_remote_calibre_msg">You can add remote catalog via navigating into corresponding folder at Yandex Disk (via \'browse cloud\'), then press \'Add calibre catalog\' (on the toolbar)</string>
     <string name="dic_ex_search">Like</string>
+    <string name="options_dic_auto_speak">Auto speak selected text, when calling dictionary</string>
+    <string name="device_turn_explain">Turn your device to the position, in which page should turn, and press \'fix\' button</string>
+    <string name="device_page_turn_enable">Turn page by device inclination</string>
+    <string name="device_page_turn">Turn page by device inclination settings</string>
+    <string name="device_page_turn_fix">Fix (turn)</string>
+    <string name="device_page_turn_fix_use_explain_turn">Select tracked coords - turn</string>
+    <string name="device_page_turn_fix_use_explain_turn_back">Select tracked coords - turn back</string>
+    <string name="device_page_turn_back_fix">Fix (turn back)</string>
+    <string name="device_page_turn_precision">Turn detection precision</string>
+    <string name="device_page_turn_test_expl">Test area</string>
+    <string name="start_behaviour">App start action</string>
+    <string name="start_behaviour_0">Open last reading book</string>
+    <string name="start_behaviour_1">Show main screen</string>
+    <string name="start_behaviour_2">Show \'reading\' book list</string>
+    <string name="start_behaviour_3">Show \'to read\' book list</string>
+    <string name="start_behaviour_4">Show \'recent\' book list</string>
+    <string name="start_behaviour_5">Root folder</string>
 </resources>

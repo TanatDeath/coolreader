@@ -178,11 +178,14 @@ public interface Settings {
     String PROP_APP_TAP_ZONE_ACTIONS_TAP     ="app.tapzone.action.tap";
 	String PROP_APP_TAP_ZONE_NON_SENS_LEFT     ="app.tapzone.non.sens.left";
 	String PROP_APP_TAP_ZONE_NON_SENS_RIGHT     ="app.tapzone.non.sens.right";
-    String PROP_APP_KEY_ACTIONS_PRESS     ="app.key.action.press";
+	String PROP_APP_DEVICE_TURN     ="app.device.turn";
+	String PROP_APP_DEVICE_TURN_ENABLE     ="app.device.turn.enable";
+	String PROP_APP_KEY_ACTIONS_PRESS     ="app.key.action.press";
     String PROP_APP_TRACKBALL_DISABLED    ="app.trackball.disabled";
     String PROP_APP_SCREEN_BACKLIGHT_LOCK    ="app.screen.backlight.lock.enabled";
     String PROP_APP_TAP_ZONE_HILIGHT     ="app.tapzone.hilight";
-    String PROP_APP_FLICK_BACKLIGHT_CONTROL = "app.screen.backlight.control.flick";
+	String PROP_APP_TURN_PAGE     ="app.turn.page";
+	String PROP_APP_FLICK_BACKLIGHT_CONTROL = "app.screen.backlight.control.flick";
 	//String PROP_APP_FLICK_WARMLIGHT_CONTROL = "app.screen.warmlight.control.flick"; //CR!
 	String PROP_APP_BOOK_SORT_ORDER = "app.browser.sort.order";
 	String PROP_APP_TRANSLATE_DIR = "app.translate.dir";
@@ -201,6 +204,7 @@ public interface Settings {
 	String PROP_APP_DICT_TYPE_SELECTED2 = "app.dict.type.selected2";
     String PROP_APP_DICT_WORD_CORRECTION = "app.dictionary.word.correction";
 	String PROP_APP_DICT_DONT_SAVE_IF_MORE = "app.dictionary.dont.save.if.more";
+	String PROP_APP_DICT_AUTO_SPEAK = "app.dictionary.auto.speak";
 	String PROP_INSPECTOR_MODE_NO_DIC_HISTORY = "app.inspector.mode.no.dic.history";
     String PROP_APP_SHOW_USER_DIC_PANEL = "app.dictionary.show.user.dic.panel";
 	String PROP_APP_SHOW_USER_DIC_CONTENT = "app.dictionary.user.dic.content";
@@ -249,6 +253,7 @@ public interface Settings {
 	String PROP_APP_OPTIONS_SELECTION_TOOLBAR_BACKGROUND = "app.options.selection.toolbar.background";
 	String PROP_APP_OPTIONS_SELECTION_TOOLBAR_TRANSP_BUTTONS = "app.options.ext.selection.toolbar.transp.buttons";
 	String PROP_APP_OPTIONS_SELECTION_TOOLBAR_SLIDERS = "app.options.ext.selection.toolbar.sliders";
+	String PROP_APP_OPTIONS_SELECTION_TOOLBAR_RECENT_DICS = "app.options.ext.selection.toolbar.recent.dics";
 	String PROP_APP_OPTIONS_TTS_TOOLBAR_BACKGROUND = "app.options.tts.toolbar.background";
 	String PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS = "app.options.ext.tts.toolbar.transp.buttons";
 	String PROP_APP_INIT = "app.init";
@@ -340,6 +345,7 @@ public interface Settings {
     String PROP_APP_THEME_DAY  = "app.ui.theme.day";
     String PROP_APP_THEME_NIGHT = "app.ui.theme.night";
 	String PROP_APP_FONT_SCALE = "app.ui.font.scale";
+	String PROP_APP_START_BEHAVIOUR = "app.start.behaviour";
 
     String PROP_APP_LOCALE = "app.locale.name";
     
@@ -421,6 +427,7 @@ public interface Settings {
 	int SELECTION_ACTION_COMBO = 18;
 	int SELECTION_ACTION_SUPER_COMBO = 19;
 	int SELECTION_ACTION_TOOLBAR_SHORT = 20;
+	int SELECTION_ACTION_COPY_WITH_PUNCT = 24;
 
 	// available options for PROP_APP_SECONDARY_TAP_ACTION_TYPE setting
     int TAP_ACTION_TYPE_LONGPRESS = 0;
@@ -586,6 +593,7 @@ public interface Settings {
 		PROP_APP_SHOW_USER_DIC_CONTENT,
         PROP_APP_DICT_WORD_CORRECTION,
 		PROP_APP_DICT_DONT_SAVE_IF_MORE,
+		PROP_APP_DICT_AUTO_SPEAK,
 		PROP_INSPECTOR_MODE_NO_DIC_HISTORY,
         PROP_APP_DICT_LONGTAP_CHANGE,
 		PROP_CLOUD_SYNC_VARIANT,

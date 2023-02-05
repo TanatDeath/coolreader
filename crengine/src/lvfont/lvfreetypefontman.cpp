@@ -645,8 +645,12 @@ bool LVFreeTypeFontManager::initSystemFonts() {
                         index
                         );
             CRLog::debug("FONTCONFIG: Font family:%s style:%s weight:%d slant:%d spacing:%d file:%s", family, style, weight, slant, spacing, s);
+
+            FT_Done_Face( face );
+            face = NULL;
+
             if ( _cache.findDuplicate( &def ) ) {
-                CRLog::debug("is duplicate, skipping");
+                CRLog::trace("font definition is duplicate");
                 continue;
             }
             _cache.update( &def, LVFontRef(NULL) );
@@ -840,11 +844,6 @@ bool LVFreeTypeFontManager::SetAlias(lString8 alias, lString8 facename, int id, 
                 index,
                 id
         );
-
-        if ( face ) {
-            FT_Done_Face( face );
-            face = NULL;
-        }
 
         if ( _cache.findDuplicate( &def2 ) ) {
             CRLog::trace("font definition is duplicate");

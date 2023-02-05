@@ -200,6 +200,7 @@ public class DictionariesOption extends SubmenuOption {
 				setIconIdByAttr(R.attr.attr_icons8_airplane_mode_on, R.drawable.icons8_airplane_mode_on));
 		listView.add(OptionsDialog.getOption(Settings.PROP_APP_DICT_LONGTAP_CHANGE, this.lastFilteredValue));
 		listView.add(OptionsDialog.getOption(Settings.PROP_APP_DICT_WORD_CORRECTION, this.lastFilteredValue));
+		listView.add(OptionsDialog.getOption(Settings.PROP_APP_DICT_AUTO_SPEAK, this.lastFilteredValue));
 		dlg.setView(listView);
 		dlg.show();
 	}
@@ -216,6 +217,8 @@ public class DictionariesOption extends SubmenuOption {
 		this.updateFilteredMark(mActivity.getString(R.string.options_app_dict_longtap_change), Settings.PROP_APP_DICT_LONGTAP_CHANGE,
 				mActivity.getString(R.string.options_app_dict_longtap_change_add_info));
 		this.updateFilteredMark(mActivity.getString(R.string.options_app_dict_word_correction), Settings.PROP_APP_DICT_WORD_CORRECTION,
+				mActivity.getString(R.string.option_add_info_empty_text));
+		this.updateFilteredMark(mActivity.getString(R.string.options_dic_auto_speak), Settings.PROP_APP_DICT_AUTO_SPEAK,
 				mActivity.getString(R.string.option_add_info_empty_text));
 		return this.lastFiltered;
 	}

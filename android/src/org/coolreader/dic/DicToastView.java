@@ -7,6 +7,7 @@ import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.Browser;
@@ -94,6 +95,7 @@ public class DicToastView {
     private static String mListLink;
     private static String mListLink2;
     private static boolean mListUseFirstLink;
+    private static boolean autoSpeak;
 
     private static void setBtnBackgroundColor(Button btn, int col) {
         if (!isEInk)
@@ -119,6 +121,7 @@ public class DicToastView {
         private int mCurAction;
         private boolean mUseFirstLink;
         private String mPicAddr;
+        private boolean wasSpeaking = false;
 
         private Toast(View anchor,
                       String sFindText, String msg, int duration, Object dicStructObject,
@@ -157,6 +160,8 @@ public class DicToastView {
     private static int mListSkipCount = 0;
 
     public static void doDismiss() {
+        if (curToast != null)
+            if (curToast.wasSpeaking) stopTTS(mActivity);
         if (toastWindow != null) {
             if (toastWindow instanceof PopupWindow)
                 ((PopupWindow) toastWindow).dismiss();
@@ -765,6 +770,25 @@ public class DicToastView {
             Utils.hideView(btnRemove3sym);
             mActivity.tintViewIcons(btnSpeak,true);
             btnSpeak.setOnClickListener(view -> sayTTS(mActivity, t.sFindText));
+            autoSpeak = mActivity.settings().getBool(Settings.PROP_APP_DICT_AUTO_SPEAK, false);
+            btnSpeak.setOnLongClickListener((v) -> {
+                autoSpeak = !autoSpeak;
+                mActivity.setSetting(Settings.PROP_APP_DICT_AUTO_SPEAK, String.valueOf(autoSpeak), true);
+                if (!isEInk) mActivity.showToast(R.string.value_saved);
+                if (autoSpeak)
+                    btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_on));
+                else
+                    btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_off));
+                return true;
+            });
+            if (autoSpeak) {
+                btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_on));
+                BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+                    sayTTS(mActivity, t.sFindText);
+                }, 500));
+            } else
+                btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_off));
+            mActivity.tintViewIcons(btnSpeak, true);
         }
         setBtnBackgroundColor(tvFull, colr2);
         setBtnBackgroundColor(tvFullWeb, colr2);
@@ -1144,6 +1168,25 @@ public class DicToastView {
         }
         mActivity.tintViewIcons(btnSpeak,true);
         btnSpeak.setOnClickListener(view -> sayTTS(mActivity, t.sFindText));
+        autoSpeak = mActivity.settings().getBool(Settings.PROP_APP_DICT_AUTO_SPEAK, false);
+        btnSpeak.setOnLongClickListener((v) -> {
+            autoSpeak = !autoSpeak;
+            mActivity.setSetting(Settings.PROP_APP_DICT_AUTO_SPEAK, String.valueOf(autoSpeak), true);
+            if (!isEInk) mActivity.showToast(R.string.value_saved);
+            if (autoSpeak)
+                btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_on));
+            else
+                btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_off));
+            return true;
+        });
+        if (autoSpeak) {
+            btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_on));
+            BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+                sayTTS(mActivity, t.sFindText);
+            }, 500));
+        } else
+            btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_off));
+        mActivity.tintViewIcons(btnSpeak, true);
         int colr2 = colorGray;
         int colorFill = colorGrayC;
         if (isEInk) colorFill = Color.WHITE;
@@ -1302,7 +1345,16 @@ public class DicToastView {
         }
     }
 
-    private static void sayTTS(CoolReader cr, String textToSay) {
+    public static void stopTTS(CoolReader cr) {
+        cr.initTTS(ttsacc -> BackgroundThread.instance().executeGUI(() -> {
+            ttsacc.bind(ttsbinder -> {
+                ttsbinder.stop(null);
+            });
+        })/*, true*/);
+    }
+
+    public static void sayTTS(CoolReader cr, String textToSay) {
+        if (curToast != null) curToast.wasSpeaking = true;
         cr.initTTS(ttsacc -> BackgroundThread.instance().executeGUI(() -> {
             ttsacc.bind(ttsbinder -> {
                 ttsbinder.setStatusListener(new OnTTSStatusListener() {
@@ -1371,7 +1423,7 @@ public class DicToastView {
                 });
                 ttsbinder.say(textToSay, null);
             });
-        }), true);
+        })/*, true*/);
     }
 
     private static void extListToast(Toast t, boolean fullScreen) {
@@ -1475,6 +1527,25 @@ public class DicToastView {
             Utils.hideView(btnRemove3sym);
             mActivity.tintViewIcons(btnSpeak,true);
             btnSpeak.setOnClickListener(view -> sayTTS(mActivity, t.sFindText));
+            autoSpeak = mActivity.settings().getBool(Settings.PROP_APP_DICT_AUTO_SPEAK, false);
+            btnSpeak.setOnLongClickListener((v) -> {
+                autoSpeak = !autoSpeak;
+                mActivity.setSetting(Settings.PROP_APP_DICT_AUTO_SPEAK, String.valueOf(autoSpeak), true);
+                if (!isEInk) mActivity.showToast(R.string.value_saved);
+                if (autoSpeak)
+                    btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_on));
+                else
+                    btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_off));
+                return true;
+            });
+            if (autoSpeak) {
+                btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_on));
+                BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
+                    sayTTS(mActivity, t.sFindText);
+                }, 500));
+            } else
+                btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_off));
+            mActivity.tintViewIcons(btnSpeak, true);
             if ((fullScreen) || (t.mCurDict != null) || (StrUtils.isEmptyStr(t.msg))) Utils.hideView(edtDicTranls);
             if (!StrUtils.isEmptyStr(t.msg)) {
                 if (edtDicTranls != null) {

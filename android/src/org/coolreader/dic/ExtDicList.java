@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -130,6 +131,10 @@ public class ExtDicList extends BaseListView {
 				if (!StrUtils.isEmptyStr(curToast.sFindText))
 					Utils.setHighLightedText(labelView, curToast.sFindText, mColorIconL);
 				if  (mArticleMode) Utils.hideView(btnOpen);
+				ImageView ivSpeak = view.findViewById(R.id.btn_speak);
+				mCoolReader.tintViewIconsForce(ivSpeak);
+				String finalText = text;
+				ivSpeak.setOnClickListener(view1 -> DicToastView.sayTTS(mCoolReader, finalText));
 				return view;
 			}
 
@@ -200,7 +205,10 @@ public class ExtDicList extends BaseListView {
 				int res = R.layout.ext_dic_example_line;
 				view = mInflater.inflate(res, null);
 				TextView labelView = view.findViewById(R.id.ext_dic_example_line);
+				ImageView ivSpeak = view.findViewById(R.id.btn_speak);
+				mCoolReader.tintViewIconsForce(ivSpeak);
 				String text = StrUtils.getNonEmptyStr(el.line, true);
+				ivSpeak.setOnClickListener(view1 -> DicToastView.sayTTS(mCoolReader, text));
 				labelView.setText(text);
 				if (mArticleMode) labelView.setMaxLines(999);
 				if (!StrUtils.isEmptyStr(curToast.sFindText))
@@ -240,14 +248,20 @@ public class ExtDicList extends BaseListView {
 				int res = R.layout.ext_dic_res_pair;
 				view = mInflater.inflate(res, null);
 				TextView labelView = view.findViewById(R.id.ext_dic_res_pair1);
+				ImageView ivSpeak1 = view.findViewById(R.id.btn_speak1);
+				mCoolReader.tintViewIconsForce(ivSpeak1);
 				String text = StrUtils.getNonEmptyStr(lp.leftPart, true);
+				ivSpeak1.setOnClickListener(view1 -> DicToastView.sayTTS(mCoolReader, text));
 				labelView.setText(text);
 				if (mArticleMode) labelView.setMaxLines(999);
 				if (!StrUtils.isEmptyStr(curToast.sFindText))
 					Utils.setHighLightedText(labelView, curToast.sFindText, mColorIconL);
 				TextView labelView2 = view.findViewById(R.id.ext_dic_res_pair2);
+				ImageView ivSpeak2 = view.findViewById(R.id.btn_speak2);
+				mCoolReader.tintViewIconsForce(ivSpeak2);
 				String text2 = StrUtils.getNonEmptyStr(lp.rightPart, true);
 				labelView2.setText(text2);
+				ivSpeak2.setOnClickListener(view1 -> DicToastView.sayTTS(mCoolReader, text2));
 				if (mArticleMode) labelView.setMaxLines(999);
 				if (!StrUtils.isEmptyStr(curToast.sFindText))
 					Utils.setHighLightedText(labelView2, curToast.sFindText, mColorIconL);

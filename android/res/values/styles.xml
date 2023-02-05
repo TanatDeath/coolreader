@@ -247,6 +247,7 @@
         <item name="attr_icons8_speaker_koef">@drawable/icons8_speaker_koef</item>
         <item name="attr_icons8_user_dic_panel">@drawable/icons8_user_dic_panel</item>
         <item name="attr_icons8_dic_list">@drawable/icons8_dic_list</item>
+        <item name="attr_icons8_dic_panel">@drawable/icons8_dic_panel</item>
         <item name="attr_icons8_db_stats">@drawable/icons8_db_stats</item>
         <item name="attr_icons8_eink_snow">@drawable/icons8_eink_snow</item>
         <item name="attr_icons8_eink_sett">@drawable/icons8_eink_sett</item>
@@ -422,6 +423,7 @@
         <item name="attr_icons8_speaker_koef">@drawable/icons8_speaker_koef</item>
         <item name="attr_icons8_user_dic_panel">@drawable/icons8_user_dic_panel</item>
         <item name="attr_icons8_dic_list">@drawable/icons8_dic_list</item>
+        <item name="attr_icons8_dic_panel">@drawable/icons8_dic_panel</item>
         <item name="attr_icons8_db_stats">@drawable/icons8_db_stats</item>
         <item name="attr_icons8_eink_snow">@drawable/icons8_eink_snow</item>
         <item name="attr_icons8_eink_sett">@drawable/icons8_eink_sett</item>
@@ -622,6 +624,7 @@
         <item name="attr_icons8_speaker_koef">@drawable/icons8_speaker_koef</item>
         <item name="attr_icons8_user_dic_panel">@drawable/icons8_user_dic_panel</item>
         <item name="attr_icons8_dic_list">@drawable/icons8_dic_list</item>
+        <item name="attr_icons8_dic_panel">@drawable/icons8_dic_panel</item>
         <item name="attr_icons8_db_stats">@drawable/icons8_db_stats</item>
         <item name="attr_icons8_eink_snow">@drawable/icons8_eink_snow</item>
         <item name="attr_icons8_eink_sett">@drawable/icons8_eink_sett</item>
@@ -796,6 +799,7 @@
         <item name="attr_icons8_speaker_koef">@drawable/icons8_speaker_koef</item>
         <item name="attr_icons8_user_dic_panel">@drawable/icons8_user_dic_panel</item>
         <item name="attr_icons8_dic_list">@drawable/icons8_dic_list</item>
+        <item name="attr_icons8_dic_panel">@drawable/icons8_dic_panel</item>
         <item name="attr_icons8_db_stats">@drawable/icons8_db_stats</item>
         <item name="attr_icons8_eink_snow">@drawable/icons8_eink_snow</item>
         <item name="attr_icons8_eink_sett">@drawable/icons8_eink_sett</item>

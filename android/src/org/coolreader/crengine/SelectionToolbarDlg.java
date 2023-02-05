@@ -6,7 +6,6 @@ import org.coolreader.readerview.ReaderView;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.R;
 import org.coolreader.dic.TranslationDirectionDialog;
-import org.coolreader.layouts.FlowLayout;
 import org.coolreader.options.OptionsDialog;
 import org.coolreader.options.SelectionModesOption;
 import org.coolreader.userdic.UserDicEntry;
@@ -206,6 +205,7 @@ public class SelectionToolbarDlg {
 	LinearLayout llSliderBottom;
 	LinearLayout llSliderTop;
 	LinearLayout llRecentDics;
+	LinearLayout svRecentDics;
 	LinearLayout llAddButtons;
 	LinearLayout llButtonsRow;
 	LinearLayout llButtonsRow2;
@@ -481,6 +481,7 @@ public class SelectionToolbarDlg {
 		if (!isInvisible) return;
 		isInvisible = false;
 		if (llRecentDics != null) llRecentDics.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+		if (svRecentDics != null) svRecentDics.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
 		if (llAddButtons != null) llAddButtons.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
 		if (llButtonsRow != null) llButtonsRow.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
 		if (llButtonsRow2 != null) llButtonsRow2.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
@@ -490,6 +491,7 @@ public class SelectionToolbarDlg {
 
 	private void placeLayouts() {
 		String sSliders = mActivity.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_SLIDERS, "0");
+		String sDicsPanel = mActivity.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_RECENT_DICS, "0");
 		boolean slidersVisible = sSliders.equals("1");
 		if (!slidersVisible) slidersVisible = sSliders.equals("0") && (!mIsHorz);
 		llTopLine.setOnClickListener(v -> setVisibile());
@@ -498,7 +500,8 @@ public class SelectionToolbarDlg {
 			llTopLine.removeAllViews();
 			if (!mIsShort)
 				if (slidersVisible) llTopLine.addView(llSliderTop);
-			llTopLine.addView(llRecentDics);
+			if (sDicsPanel.equals("0")) llTopLine.addView(llRecentDics);
+			if (sDicsPanel.equals("1")) llTopLine.addView(svRecentDics);
 			if (!mIsShort) llTopLine.addView(llButtonsRow);
 			llBottomLine.removeAllViews();
 			if (!mIsShort)
@@ -509,7 +512,8 @@ public class SelectionToolbarDlg {
 			if (!mIsShort)
 				if (slidersVisible) llTopLine.addView(llSliderTop);
 			llBottomLine.removeAllViews();
-			llBottomLine.addView(llRecentDics);
+			if (sDicsPanel.equals("0")) llBottomLine.addView(llRecentDics);
+			if (sDicsPanel.equals("1")) llBottomLine.addView(svRecentDics);
 			if (!mIsShort) llBottomLine.addView(llButtonsRow);
 			if (!mIsShort)
 				if (slidersVisible) llBottomLine.addView(llSliderBottom);
@@ -520,7 +524,10 @@ public class SelectionToolbarDlg {
 			if (!mIsShort) llSliderTop.setBackgroundColor(Color.argb(alphaVal, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
 		if (llSliderBottom != null)
 			if (!mIsShort) llSliderBottom.setBackgroundColor(Color.argb(alphaVal, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
-		llRecentDics.setBackgroundColor(Color.argb(alphaVal, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
+		if (llRecentDics != null)
+			llRecentDics.setBackgroundColor(Color.argb(alphaVal, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
+		if (svRecentDics != null)
+			svRecentDics.setBackgroundColor(Color.argb(alphaVal, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
 		if (!mIsShort) llButtonsRow.setBackgroundColor(Color.argb(alphaVal, Color.red(colorFill),Color.green(colorFill),Color.blue(colorFill)));
 
 		String sExt = mActivity.settings().getProperty(Settings.PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR, "0");
@@ -532,6 +539,7 @@ public class SelectionToolbarDlg {
 		btnVisible.setOnClickListener(v -> {
 			isInvisible = !isInvisible;
 			if (llRecentDics != null) llRecentDics.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+			if (svRecentDics != null) svRecentDics.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
 			if (llAddButtons != null) llAddButtons.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
 			if (llButtonsRow != null) llButtonsRow.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
 			if (llButtonsRow2 != null) llButtonsRow2.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
@@ -541,6 +549,7 @@ public class SelectionToolbarDlg {
 		btnVisible.setOnLongClickListener(v -> {
 			isInvisible = !isInvisible;
 			if (llRecentDics != null) llRecentDics.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
+			if (svRecentDics != null) svRecentDics.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
 			if (llAddButtons != null) llAddButtons.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
 			if (llButtonsRow != null) llButtonsRow.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
 			if (llButtonsRow2 != null) llButtonsRow2.setVisibility(isInvisible? View.INVISIBLE: View.VISIBLE);
@@ -734,7 +743,13 @@ public class SelectionToolbarDlg {
 	}
 
 	private void initRecentDics() {
-		FlowLayout flRecentDics = llRecentDics.findViewById(R.id.fl_recent_dics);
+		if ((llRecentDics == null) && (svRecentDics == null)) return;
+		String sDicsPanel = mActivity.settings().getProperty(Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_RECENT_DICS, "0");
+		ViewGroup flRecentDics;
+		if (sDicsPanel.equals("1"))
+			flRecentDics = svRecentDics.findViewById(R.id.ll_dic_buttons);
+		else
+			flRecentDics = llRecentDics.findViewById(R.id.fl_recent_dics);
 		int newTextSize = props.getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
 		int iCntRecent = 0;
 		if (flRecentDics!=null) {
@@ -783,7 +798,10 @@ public class SelectionToolbarDlg {
 			dicButton.setTextColor(mActivity.getTextColor(colorIcon));
 			if (!sTranspButtons.equals("0")) dicButton.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
 			else dicButton.setBackgroundColor(Color.argb(255, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
-			dicButton.setPadding(10, 20, 10, 20);
+			if (sDicsPanel.equals("1"))
+				dicButton.setPadding(5, 20, 5, 20);
+			else
+				dicButton.setPadding(10, 20, 10, 20);
 			//dicButton.setBackground(null);
 			LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
 					ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -808,7 +826,10 @@ public class SelectionToolbarDlg {
 			});
 			TextView tv = new TextView(mActivity);
 			tv.setText(" ");
-			tv.setPadding(10, 10, 10, 10);
+			if (sDicsPanel.equals("1"))
+				tv.setPadding(1, 10, 1, 10);
+			else
+				tv.setPadding(10, 10, 10, 10);
 			tv.setLayoutParams(llp);
 			tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
 			tv.setTextColor(mActivity.getTextColor(colorIcon));
@@ -830,7 +851,10 @@ public class SelectionToolbarDlg {
 					dicButton.setTextColor(mActivity.getTextColor(colorIcon));
 					if (!sTranspButtons.equals("0")) dicButton.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
 					else dicButton.setBackgroundColor(Color.argb(255, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
-					dicButton.setPadding(10, 20, 10, 20);
+					if (sDicsPanel.equals("1"))
+						dicButton.setPadding(5, 20, 5, 20);
+					else
+						dicButton.setPadding(10, 20, 10, 20);
 					//dicButton.setBackground(null);
 					llp = new LinearLayout.LayoutParams(
 							ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -842,7 +866,10 @@ public class SelectionToolbarDlg {
 					dicButton.setEllipsize(TextUtils.TruncateAt.END);
 					tv = new TextView(mActivity);
 					tv.setText(" ");
-					tv.setPadding(10, 10, 10, 10);
+					if (sDicsPanel.equals("1"))
+						tv.setPadding(1, 10, 1, 10);
+					else
+						tv.setPadding(10, 10, 10, 10);
 					tv.setLayoutParams(llp);
 					tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
 					tv.setTextColor(mActivity.getTextColor(colorIcon));
@@ -896,6 +923,7 @@ public class SelectionToolbarDlg {
 		llSliderBottom = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_slider_bottom, null));
 		llSliderTop = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_slider_top, null));
 		llRecentDics = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_recent_dics, null));
+		svRecentDics = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.recent_dic_panel_scroll, null));
 
 		if (mIsHorz) {
 			llButtonsRow = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_wide_buttons_row, null));

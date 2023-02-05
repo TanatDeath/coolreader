@@ -15,6 +15,8 @@ my %ic_smaller_list=(
         'icons8_visible.svg' => 'icons8_visible.png',
         'icons8_tear_off_calendar.svg' => 'icons8_tear_off_calendar.png',
         'icons8_speaker.svg' => 'icons8_speaker_small.png',
+        'icons8_speaker_on.svg' => 'icons8_speaker_small_on.png',
+        'icons8_speaker_off.svg' => 'icons8_speaker_small_off.png',
         'icons8_fullscreen.svg' => 'icons8_fullscreen_small.png'
 );
 
@@ -29,7 +31,12 @@ my %ic_actions_list=(
         'icons8_8.svg' => 'icons8_8.png',
         'icons8_9.svg' => 'icons8_9.png',
         'icons8_10.svg' => 'icons8_10.png',
-        'icons8_download_database.svg' => 'icons8_download_database.png'
+        'icons8_download_database.svg' => 'icons8_download_database.png',
+        'icons8_dic_panel.svg' => 'icons8_dic_panel.png',
+        'icons8_speaker_on.svg' => 'icons8_speaker_on.png',
+        'icons8_speaker_off.svg' => 'icons8_speaker_off.png',
+        'icons8_page_turn.svg' => 'icons8_page_turn.png',
+        'icons8_page_turn_back.svg' => 'icons8_page_turn_back.png'
 );
 
 my %ic_menu_list=(

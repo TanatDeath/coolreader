@@ -330,7 +330,7 @@ public class BaseDialog extends Dialog {
 			}
 	}
 
-	protected View createLayout( View view )
+	protected View createLayout(View view)
 	{
         LayoutInflater mInflater = LayoutInflater.from(getContext());
         ViewGroup layout = (ViewGroup)mInflater.inflate(R.layout.base_dialog, null);

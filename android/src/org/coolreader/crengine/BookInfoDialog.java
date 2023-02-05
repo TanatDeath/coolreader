@@ -196,6 +196,7 @@ public class BookInfoDialog extends BaseDialog {
 		mLabelMap.put("position.percent", R.string.book_info_position_percent);
 		mLabelMap.put("position.page", R.string.book_info_position_page);
 		mLabelMap.put("position.chapter", R.string.book_info_position_chapter);
+		mLabelMap.put("position.calendar", R.string.book_info_position_calendar);
 		mLabelMap.put("section.book", R.string.book_info_section_book_properties);
 		mLabelMap.put("book.authors", R.string.book_info_book_authors);
 		mLabelMap.put("book.title", R.string.book_info_book_title);

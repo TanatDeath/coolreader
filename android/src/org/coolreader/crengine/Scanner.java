@@ -931,6 +931,98 @@ public class Scanner extends FileInfoChangeSource {
 	private void addTitleRoot() {
 		addRoot(createTitleRoot());
 	}
+
+	public FileInfo createRatingRoot() {
+		FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.RATING_TAG;
+		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_rating));
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	private void addRatingRoot() {
+		addRoot(createRatingRoot());
+	}
+
+	public FileInfo createBookDateRoot() {
+		FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.BOOK_DATE_TAG;
+		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_bookdate));
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	private void addBookDateRoot() {
+		addRoot(createBookDateRoot());
+	}
+
+	public FileInfo createFileDateRoot() {
+		FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.FILE_DATE_TAG;
+		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_filedate));
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	private void addFileDateRoot() {
+		addRoot(createFileDateRoot());
+	}
+
+	public FileInfo createDocDateRoot() {
+		FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.DOC_DATE_TAG;
+		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_docdate));
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	private void addDocDateRoot() {
+		addRoot(createDocDateRoot());
+	}
+
+	public FileInfo createPublYearRoot() {
+		FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.PUBL_YEAR_TAG;
+		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_publyear));
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	private void addPublYearRoot() {
+		addRoot(createPublYearRoot());
+	}
+
+	private void addTagRoot() {
+		addRoot(createTagRoot());
+	}
+
+	private void addGenreRoot() {
+		addRoot(createGenreRoot());
+	}
+
+	public FileInfo createStateRoot() {
+		FileInfo dir = new FileInfo();
+		dir.isDirectory = true;
+		dir.pathname = FileInfo.STATE_TAG;
+		dir.setFilename(mActivity.getString(R.string.folder_name_books_by_state));
+		dir.isListed = true;
+		dir.isScanned = true;
+		return dir;
+	}
+
+	private void addStateRoot() {
+		addRoot(createStateRoot());
+	}
 	
 	/**
 	 * Lists all directories from root to directory of specified file, returns found directory.
@@ -1116,6 +1208,15 @@ public class Scanner extends FileInfoChangeSource {
 		addSeriesRoot();
 		// create books by title root
 		addTitleRoot();
+
+		addRatingRoot();
+		addBookDateRoot();
+		addFileDateRoot();
+		addDocDateRoot();
+		addPublYearRoot();
+		addGenreRoot();
+		addTagRoot();
+		//addStateRoot();
 	}
 
 	public boolean autoAddRootForFile( File f ) {

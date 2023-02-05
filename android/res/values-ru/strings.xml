@@ -45,13 +45,15 @@
     <string name="mi_book_recent_goto">Перейти в папку</string>
     <string name="mi_book_sort_order">Сортировать</string>
     <string name="mi_book_sort_order_filename">По имени файла</string>
-    <string name="mi_book_sort_order_filename_desc">По имени файла (по убыв.)</string>
+    <string name="mi_book_sort_order_filename_desc">По имени файла (убыв.)</string>
     <string name="mi_book_sort_order_timestamp">По времени файла</string>
-    <string name="mi_book_sort_order_timestamp_desc">По времени файла (по убыв.)</string>
+    <string name="mi_book_sort_order_timestamp_desc">По времени файла (убыв.)</string>
     <string name="mi_book_sort_order_author">По автору</string>
-    <string name="mi_book_sort_order_author_desc">По автору (по убыв.)</string>
+    <string name="mi_book_sort_order_author_desc">По автору (убыв.)</string>
+    <string name="mi_book_sort_order_series">По серии</string>
+    <string name="mi_book_sort_order_series_desc">По серии (убыв.)</string>
     <string name="mi_book_sort_order_title">По названию</string>
-    <string name="mi_book_sort_order_title_desc">По названию (по убыв.)</string>
+    <string name="mi_book_sort_order_title_desc">По названию (убыв.)</string>
     <string name="toggle_dict_once">Переключить словарь (однократно)</string>
     <string name="toggle_dict_once_short">Другой словарь (раз)</string>
     <string name="toggle_dict">Переключить словарь</string>
@@ -287,6 +289,7 @@
     <string name="options_multi_selection3_action">Режим инспектора: несколько слов</string>
     <string name="options_selection_action_bookmark">Добавить закладку</string>
     <string name="options_selection_action_bookmark_quick">Добавить быструю закладку</string>
+    <string name="options_selection_action_copy_with_punct">Копировать со знаком препинания</string>
     <string name="options_selection_action_dictionary">Найти в словаре</string>
     <string name="options_selection_action_dictionary_1">Найти в словаре 1</string>
     <string name="options_selection_action_dictionary_2">Найти в словаре 2</string>
@@ -358,6 +361,7 @@
     <string name="book_info_system_device_model">Производитель / модель / устройство / продукт / марка</string>
     <string name="book_info_system_device_flags">Особенности устройства</string>
     <string name="book_info_position_chapter">Глава</string>
+    <string name="book_info_position_calendar">Календарь чтения</string>
     <string name="book_info_position_page">Страница</string>
     <string name="book_info_position_percent">Процент</string>
     <string name="dlg_bookmark_edit_correction">Исправленный текст</string>
@@ -1705,9 +1709,13 @@
     <string name="sel_panel_transp_buttons">Панель выделения: прозрачные кнопки</string>
     <string name="sel_panel_add_info">Сквозь прозрачные элементы виден текст страницы книги, с другой стороны - так они становятся менее видны</string>
     <string name="sel_panel_sliders">Показывать ползунки изменения выделения</string>
+    <string name="sel_panel_recent_dics">Отображение панели словарей</string>
     <string name="sel_panel_sliders_0">Только в портретном режиме</string>
     <string name="sel_panel_sliders_1">Всегда</string>
     <string name="sel_panel_sliders_2">Никогда</string>
+    <string name="sel_panel_recent_dics_0">Несколько строк</string>
+    <string name="sel_panel_recent_dics_1">Одна (прокручиваемая) строка</string>
+    <string name="sel_panel_recent_dics_2">Отключена</string>
     <string name="open_url">Открыть внешнюю ссылку (%s)?</string>
     <string name="open_url_browser">В браузере</string>
     <string name="open_url_kr">В KnownReader</string>
@@ -2041,5 +2049,22 @@
     <string name="create_remote_calibre_msg">Удаленный каталог можно добавить через Яндекс Диск (раздел \'открыть книгу из облака\'), перейдите в нужную папку, затем нажмите \'Добавить каталог Calibre\' (на панели)</string>
     <string name="command_group_10">Группа команд 10</string>
     <string name="dic_ex_search">Похож</string>
+    <string name="options_dic_auto_speak">Автоматически проговаривать выделенный текст при вызове словаря</string>
+    <string name="device_turn_explain">Поверните ваше устройство в ту позицию, находясь в которой страница должна будет перевернуться и нажмите кнопку \'зафиксировать\'</string>
+    <string name="device_page_turn_enable">Листание наклоном устройства</string>
+    <string name="device_page_turn">Листание наклоном устройства - настройки</string>
+    <string name="device_page_turn_fix">Зафиксировать (листание)</string>
+    <string name="device_page_turn_fix_use_explain_turn">Отметьте отслеживаемые координаты - вперед</string>
+    <string name="device_page_turn_fix_use_explain_turn_back">Отметьте отслеживаемые координаты - назад</string>
+    <string name="device_page_turn_back_fix">Зафиксировать (листание назад)</string>
+    <string name="device_page_turn_precision">Точность определения поворота</string>
+    <string name="device_page_turn_test_expl">Тестовая область</string>
+    <string name="start_behaviour">Действие при старте приложения</string>
+    <string name="start_behaviour_0">Открыть последнюю читаемую книгу</string>
+    <string name="start_behaviour_1">Показать главный экран</string>
+    <string name="start_behaviour_2">Показать список \'Читаю\'</string>
+    <string name="start_behaviour_3">Показать список \'К прочтению\'</string>
+    <string name="start_behaviour_4">Показать список \'последние\'</string>
+    <string name="start_behaviour_5">Корневая папка</string>
 </resources>
 

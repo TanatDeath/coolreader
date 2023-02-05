@@ -22,6 +22,8 @@ public class FilebrowserOption extends SubmenuOption {
 			FileInfo.SortOrder.AUTHOR_TITLE_DESC.name(),
 			FileInfo.SortOrder.TITLE_AUTHOR.name(),
 			FileInfo.SortOrder.TITLE_AUTHOR_DESC.name(),
+			FileInfo.SortOrder.SERIES_AUTHOR.name(),
+			FileInfo.SortOrder.SERIES_AUTHOR_DESC.name(),
 			FileInfo.SortOrder.TIMESTAMP.name(),
 			FileInfo.SortOrder.TIMESTAMP_DESC.name(),
 	};
@@ -33,11 +35,15 @@ public class FilebrowserOption extends SubmenuOption {
 			FileInfo.SortOrder.AUTHOR_TITLE_DESC.resourceId,
 			FileInfo.SortOrder.TITLE_AUTHOR.resourceId,
 			FileInfo.SortOrder.TITLE_AUTHOR_DESC.resourceId,
+			FileInfo.SortOrder.SERIES_AUTHOR.resourceId,
+			FileInfo.SortOrder.SERIES_AUTHOR_DESC.resourceId,
 			FileInfo.SortOrder.TIMESTAMP.resourceId,
 			FileInfo.SortOrder.TIMESTAMP_DESC.resourceId,
 	};
 
 	public static int[] sortOrderAddInfos = {
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,

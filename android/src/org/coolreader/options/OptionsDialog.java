@@ -279,6 +279,28 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.option_add_info_empty_text
 	};
 
+	int[] mStartBehaviour = new int[] {
+			0, 1, 2, 3, 4, 5
+	};
+
+	int[] mStartBehaviourTitles = new int[] {
+			R.string.start_behaviour_0,
+			R.string.start_behaviour_1,
+			R.string.start_behaviour_2,
+			R.string.start_behaviour_3,
+			R.string.start_behaviour_4,
+			R.string.start_behaviour_5
+	};
+
+	int[] mStartBehaviourAddInfos = new int[] {
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text
+	};
+
 	ViewGroup mContentView;
 	TabHost mTabs;
 	LayoutInflater mInflater;
@@ -339,7 +361,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		void click(View view, String optionLabel, String optionValue);
 	}
 
-	static public void saveColor( Properties mProperties, boolean night )
+	static public void saveColor(Properties mProperties, boolean night)
 	{
 		if (night) {
 			mProperties.setProperty(PROP_PAGE_BACKGROUND_IMAGE_NIGHT, mProperties.getProperty(PROP_PAGE_BACKGROUND_IMAGE, "(NONE)"));
@@ -380,7 +402,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		}
 	}
 
-	static public void restoreColor( Properties mProperties,  boolean night )
+	static public void restoreColor(Properties mProperties,  boolean night)
 	{
 		if (night) {
 			mProperties.setProperty(PROP_PAGE_BACKGROUND_IMAGE, mProperties.getProperty(PROP_PAGE_BACKGROUND_IMAGE_NIGHT, "(NONE)"));
@@ -1249,7 +1271,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	}
 
 	public void createOptions() {
-		//asdf
+		//TODO: Finish this work
 		ALL_OPTIONS.clear();
 		new BoolOption(this, getString(R.string.mi_book_styles_enable_def), PROP_EMBEDDED_STYLES_DEF,
 				getString(R.string.mi_book_styles_enable_def_add_info), "", true).setDefaultValue("0").noIcon();
@@ -1278,6 +1300,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		new BoolOption(this, getString(R.string.disable_two_pointer_gestures), PROP_APP_DISABLE_TWO_POINTER_GESTURES,
 				getString(R.string.two_pointer_gestures_add_info), "", true).setDefaultValue("0")
 				.setIconIdByAttr(R.attr.attr_icons8_two_fingers, R.drawable.icons8_two_fingers);
+		new BoolOption(this, mActivity.getString(R.string.options_app_tapzone_hilite), Settings.PROP_APP_TAP_ZONE_HILIGHT,
+				mActivity.getString(R.string.options_app_tapzone_hilite_add_info), "", true).setDefaultValue("0").
+				setIconIdByAttr(R.attr.attr_icons8_highlight_tap_zone, R.drawable.	icons8_highlight_tap_zone);
 		new BoolOption(this, getString(R.string.options_screen_force_eink), PROP_APP_SCREEN_FORCE_EINK,
 				getString(R.string.options_screen_force_eink_add_info), "", true).
 				setIconIdByAttr(R.attr.attr_icons8_eink, R.drawable.icons8_eink).
@@ -1355,6 +1380,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				setIconIdByAttr(R.attr.attr_icons8_anon, R.drawable.icons8_anon);
 		new BoolOption(this, mActivity.getString(R.string.show_hidden_dirs), Settings.PROP_APP_FILE_BROWSER_SHOW_HIDDEN_DIRS,
 				mActivity.getString(R.string.option_add_info_empty_text), "", true).noIcon();
+		new BoolOption(this, mActivity.getString(R.string.options_dic_auto_speak), Settings.PROP_APP_DICT_AUTO_SPEAK,
+				mActivity.getString(R.string.option_add_info_empty_text), "", true).
+				setIconIdByAttr(R.attr.attr_icons8_speaker_on, R.drawable.icons8_speaker_on);
+		new BoolOption(this,getString(R.string.device_page_turn_enable), PROP_APP_DEVICE_TURN_ENABLE,
+				getString(R.string.option_add_info_empty_text), "", true).
+				setIconIdByAttr(R.attr.attr_icons8_page_turn, R.drawable.icons8_page_turn);
 	}
 	
 	private void setupBrowserOptions(String filter)
@@ -1642,20 +1673,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			String faceName = mProperties.getProperty(PROP_FONT_FACE, "");
 			updateFontWeightValues(mFontWeightOption, faceName);
 		});
-		/*
-		mFontWeightOption.setOnChangeHandler(() -> {
-			// enable/disable font hinting option
-			String faceName = mProperties.getProperty(PROP_FONT_FACE, "");
-			int[] nativeWeights = Engine.getAvailableFontWeight(faceName);
-			if (null != nativeWeights && 0 != nativeWeights.length) {
-				ArrayList<Integer> nativeWeightsArray = new ArrayList<>();    // for search
-				for (int w : nativeWeights)
-					nativeWeightsArray.add(w);
-				//int base_weight = mProperties.getInt(PROP_FONT_BASE_WEIGHT, 400);
-				//mFontHintingOption.setEnabled(nativeWeightsArray.contains(base_weight));
-			}
-		});
-		 */
 		FallbackFontsOptions sbFFO = (FallbackFontsOptions) new FallbackFontsOptions(this.mActivity, OptionsDialog.this,
 				this, getString(R.string.options_font_fallback_faces), getString(R.string.option_add_info_empty_text), filter)
 			.setIconIdByAttr(R.attr.cr3_option_font_face_drawable, R.drawable.cr3_option_font_face);
@@ -1772,6 +1789,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				.setIconIdByAttr(R.attr.attr_icons8_send_to_action, R.drawable.icons8_send_to_action);
 		sbBookmarkSendToOption.updateFilterEnd();
 		mOptionsControls.add(sbBookmarkSendToOption);
+		mOptionsControls.add(OptionsDialog.getOption(Settings.PROP_APP_DEVICE_TURN_ENABLE, filter));
+		mOptionsControls.add(new DeviceTurnOption(this.mActivity,this, getString(R.string.device_page_turn), PROP_APP_DEVICE_TURN,
+				getString(R.string.option_add_info_empty_text), filter).setIconIdByAttr(R.attr.attr_icons8_page_turn, R.drawable.icons8_page_turn));
 		mOptionsApplication = new OptionsListView(getContext(), null);
 		mOptionsApplication.add(new LangOption(this.mActivity, this, filter).setIconIdByAttr(R.attr.attr_icons8_system_lang, R.drawable.icons8_system_lang));
 		if (!DeviceInfo.isForceHCTheme(false)) {
@@ -1783,6 +1803,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				getString(R.string.ui_font_scale_restart_app), filter).
 				add(mUIFontScale, mUIFontScaleTitles, mUIFontScaleAddInfos).setDefaultValue("10").
 					setIconIdByAttr(R.attr.attr_icons8_font_scale, R.drawable.icons8_font_scale));
+
+		mOptionsApplication.add(new ListOption(this, getString(R.string.start_behaviour), PROP_APP_START_BEHAVIOUR,
+				getString(R.string.option_add_info_empty_text), filter).
+				add(mStartBehaviour, mStartBehaviourTitles, mStartBehaviourAddInfos).setDefaultValue("0").
+				setIconIdByAttr(R.attr.cr3_browser_folder_root_drawable, R.drawable.icons8_home));
 
 		mOptionsApplication.add(getOption(PROP_APP_SCREEN_FORCE_EINK, filter));
 		mOptionsApplication.add(new ListOption(this, getString(R.string.save_pos_timeout),

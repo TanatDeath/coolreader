@@ -2258,14 +2258,36 @@ public class FileInfo implements Parcelable {
 					,Utils.cmp(f2.filename, f1.filename)
 			);
 		}),
-		TITLE_AUTHOR(R.string.mi_book_sort_order_title, (f1, f2) -> {
+		SERIES_AUTHOR(R.string.mi_book_sort_order_series, (f1, f2) -> {
 			if ( f1==null || f2==null )
 				return 0;
 			return firstNz(
 					cmpNotNullFirst(f1.series, f2.series)
 					,cmp(f1.getSeriesNumber(), f2.getSeriesNumber())
-					,cmpNotNullFirst(f1.title, f2.title)
 					,cmpNotNullFirst(Utils.formatAuthors(f1.authors), Utils.formatAuthors(f2.authors))
+					,cmpNotNullFirst(f1.title, f2.title)
+					,Utils.cmp(f1.filename, f2.filename)
+			);
+		}),
+		SERIES_AUTHOR_DESC(R.string.mi_book_sort_order_series_desc, (f1, f2) -> {
+			if ( f1==null || f2==null )
+				return 0;
+			return firstNz(
+					cmpNotNullFirst(f2.series, f1.series)
+					,cmp(f1.getSeriesNumber(), f2.getSeriesNumber())
+					,cmpNotNullFirst(Utils.formatAuthors(f2.authors), Utils.formatAuthors(f1.authors))
+					,cmpNotNullFirst(f2.title, f1.title)
+					,Utils.cmp(f2.filename, f1.filename)
+			);
+		}),
+		TITLE_AUTHOR(R.string.mi_book_sort_order_title, (f1, f2) -> {
+			if ( f1==null || f2==null )
+				return 0;
+			return firstNz(
+					cmpNotNullFirst(f1.title, f2.title)
+					,cmpNotNullFirst(Utils.formatAuthors(f1.authors), Utils.formatAuthors(f2.authors))
+					,cmpNotNullFirst(f1.series, f2.series)
+					,cmp(f1.getSeriesNumber(), f2.getSeriesNumber())
 					,Utils.cmp(f1.filename, f2.filename)
 					);
 		}),
@@ -2273,10 +2295,10 @@ public class FileInfo implements Parcelable {
 			if ( f1==null || f2==null )
 				return 0;
 			return firstNz(
-					cmpNotNullFirst(f2.series, f1.series)
-					,cmp(f2.getSeriesNumber(), f1.getSeriesNumber())
-					,cmpNotNullFirst(f2.title, f1.title)
+					cmpNotNullFirst(f2.title, f1.title)
 					,cmpNotNullFirst(Utils.formatAuthors(f2.authors), Utils.formatAuthors(f1.authors))
+					,cmpNotNullFirst(f2.series, f1.series)
+					,cmp(f2.getSeriesNumber(), f1.getSeriesNumber())
 					,Utils.cmp(f2.filename, f1.filename)
 			);
 		});

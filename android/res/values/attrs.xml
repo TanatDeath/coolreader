@@ -393,6 +393,12 @@
     <attr name="attr_icons8_send_to_action_more" format="reference" />
     <attr name="attr_icons8_speaker_koef" format="reference" />
     <attr name="attr_icons8_speaker_small" format="reference" />
+    <attr name="attr_icons8_speaker_small_on" format="reference" />
+    <attr name="attr_icons8_speaker_small_off" format="reference" />
+    <attr name="attr_icons8_speaker_on" format="reference" />
+    <attr name="attr_icons8_speaker_off" format="reference" />
+    <attr name="attr_icons8_page_turn" format="reference" />
+    <attr name="attr_icons8_page_turn_back" format="reference" />
     <attr name="attr_icons8_user_dic_panel" format="reference" />
     <attr name="attr_icons8_group" format="reference" />
     <attr name="attr_icons8_group2" format="reference" />
@@ -404,6 +410,7 @@
     <attr name="attr_icons8_save_small" format="reference" />
     <attr name="attr_icons8_font_scale" format="reference" />
     <attr name="attr_icons8_dic_list" format="reference" />
+    <attr name="attr_icons8_dic_panel" format="reference" />
     <attr name="attr_icons8_db_stats" format="reference" />
     <attr name="attr_icons8_eink_snow" format="reference" />
     <attr name="attr_icons8_eink_sett" format="reference" />

@@ -27,7 +27,7 @@ static bool langStartsWith(const lString32 lang_tag, const char * prefix) {
     const lChar32 * s1 = lang_tag.c_str();
     const lChar8 * s2 = prefix;
     for ( int i=0; i<prefix_len; i++ )
-        if (s1[i] != s2[i])
+        if (s1[i] != (lChar32)s2[i])
             return false;
     if ( lang_len == prefix_len ) // "en" starts with "en"
         return true;
@@ -257,8 +257,8 @@ HyphMethod * TextLangMan::getHyphMethodForLang( lString32 lang_tag ) {
 }
 
 // Return the (single and cached) TextLangCfg for the provided lang_tag
-TextLangCfg * TextLangMan::getTextLangCfg( lString32 lang_tag ) {
-    if ( !_embedded_langs_enabled ) {
+TextLangCfg * TextLangMan::getTextLangCfg( lString32 lang_tag, bool force ) {
+    if ( !_embedded_langs_enabled && !force ) {
         // Drop provided lang_tag: always return main lang TextLangCfg
         lang_tag = _main_lang;
     }

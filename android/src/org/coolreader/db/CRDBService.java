@@ -1031,6 +1031,19 @@ public class CRDBService extends BaseService {
 		});
 	}
 
+	public void getBookLastCalendarEntries(final Long book_fk, final long cnt,
+										   final CalendarStatsLoadingCallback callback,
+										   final Handler handler)
+	{
+		execTask(new Task("getBookLastCalendarEntries") {
+			@Override
+			public void work() {
+				ArrayList<CalendarStats> list = mainDB.getBookLastCalendarEntries(book_fk, cnt);
+				sendTask(handler, () -> callback.onCalendarStatsListLoaded(list));
+			}
+		});
+	}
+
 	// tags access code
 
 	public void saveTag(final String tag, final String oldTag, final ObjectCallback callback, final Handler handler) {
@@ -1408,6 +1421,11 @@ public class CRDBService extends BaseService {
 		public void getCalendarEntries(final long fromDate, final long toDate,
 									   final CalendarStatsLoadingCallback callback) {
 			getService().getCalendarEntries(fromDate, toDate, callback, new Handler());
+		}
+
+		public void getBookLastCalendarEntries(final Long book_fk, final long cnt,
+									   final CalendarStatsLoadingCallback callback) {
+			getService().getBookLastCalendarEntries(book_fk, cnt, callback, new Handler());
 		}
 
 		public void updateCalendarEntry(final Long book_fk,  final Long read_date, final Long time_spent_sec) {

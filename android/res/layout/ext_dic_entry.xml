@@ -50,7 +50,22 @@
 					android:text="@string/open"
 					android:background="@null"
 					/>
+			<ImageView
+					android:id="@+id/btn_speak"
+					style="@style/TextAppearance.Small"
+					android:singleLine="true"
+					android:layout_width="wrap_content"
+					android:minWidth="?android:attr/listPreferredItemHeightSmall"
+					android:layout_height="wrap_content"
+					android:textColor="?attr/colorIcon"
+					android:background="@null"
+					android:src="?attr/attr_icons8_speaker_small"
+					android:tag="tint"
+					android:focusable="true"
+					android:focusableInTouchMode="true"
+					android:layout_gravity="center_vertical"
+					android:layout_toLeftOf="@id/dic_more"
+					/>
 		</RelativeLayout>
-
 	</LinearLayout>
 </LinearLayout>

@@ -201,6 +201,12 @@
         <item name="cr3_browser_folder_drawable">@drawable/icons8_folder</item>
         <item name="cr3_button_tts_drawable">@drawable/icons8_speaker</item>
         <item name="attr_icons8_speaker_small">@drawable/icons8_speaker_small</item>
+        <item name="attr_icons8_speaker_small_on">@drawable/icons8_speaker_small_on</item>
+        <item name="attr_icons8_speaker_small_off">@drawable/icons8_speaker_small_off</item>
+        <item name="attr_icons8_speaker_on">@drawable/icons8_speaker_on</item>
+        <item name="attr_icons8_speaker_off">@drawable/icons8_speaker_off</item>
+        <item name="attr_icons8_page_turn">@drawable/icons8_page_turn</item>
+        <item name="attr_icons8_page_turn_back">@drawable/icons8_page_turn_back</item>
         <item name="cr3_browser_folder_recent_drawable">@drawable/icons8_folder_star</item>
         <item name="cr3_button_scroll_go_drawable">@drawable/icons8_scroll</item>
         <item name="cr3_btn_books_swap_drawable">@drawable/icons8_books_switch</item>
@@ -553,6 +559,7 @@
         <item name="attr_icons8_speaker_koef">@drawable/icons8_speaker_koef</item>
         <item name="attr_icons8_user_dic_panel">@drawable/icons8_user_dic_panel</item>
         <item name="attr_icons8_dic_list">@drawable/icons8_dic_list</item>
+        <item name="attr_icons8_dic_panel">@drawable/icons8_dic_panel</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
@@ -639,6 +646,12 @@
         <item name="cr3_browser_folder_drawable">@drawable/icons8_folder</item>
         <item name="cr3_button_tts_drawable">@drawable/icons8_speaker</item>
         <item name="attr_icons8_speaker_small">@drawable/icons8_speaker_small</item>
+        <item name="attr_icons8_speaker_small_on">@drawable/icons8_speaker_small_on</item>
+        <item name="attr_icons8_speaker_small_off">@drawable/icons8_speaker_small_off</item>
+        <item name="attr_icons8_speaker_on">@drawable/icons8_speaker_on</item>
+        <item name="attr_icons8_speaker_off">@drawable/icons8_speaker_off</item>
+        <item name="attr_icons8_page_turn">@drawable/icons8_page_turn</item>
+        <item name="attr_icons8_page_turn_back">@drawable/icons8_page_turn_back</item>
         <item name="cr3_browser_folder_recent_drawable">@drawable/icons8_folder_star</item>
         <item name="cr3_button_scroll_go_drawable">@drawable/icons8_scroll</item>
         <item name="cr3_btn_books_swap_drawable">@drawable/icons8_books_switch</item>
@@ -991,6 +1004,7 @@
         <item name="attr_icons8_speaker_koef">@drawable/icons8_speaker_koef</item>
         <item name="attr_icons8_user_dic_panel">@drawable/icons8_user_dic_panel</item>
         <item name="attr_icons8_dic_list">@drawable/icons8_dic_list</item>
+        <item name="attr_icons8_dic_panel">@drawable/icons8_dic_panel</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
@@ -1064,6 +1078,12 @@
         <item name="cr3_browser_folder_drawable">@drawable/icons8_folder</item>
         <item name="cr3_button_tts_drawable">@drawable/icons8_speaker</item>
         <item name="attr_icons8_speaker_small">@drawable/icons8_speaker_small</item>
+        <item name="attr_icons8_speaker_small_on">@drawable/icons8_speaker_small_on</item>
+        <item name="attr_icons8_speaker_small_off">@drawable/icons8_speaker_small_off</item>
+        <item name="attr_icons8_speaker_on">@drawable/icons8_speaker_on</item>
+        <item name="attr_icons8_speaker_off">@drawable/icons8_speaker_off</item>
+        <item name="attr_icons8_page_turn">@drawable/icons8_page_turn</item>
+        <item name="attr_icons8_page_turn_back">@drawable/icons8_page_turn_back</item>
         <item name="cr3_browser_folder_recent_drawable">@drawable/icons8_folder_star</item>
         <item name="cr3_button_scroll_go_drawable">@drawable/icons8_scroll</item>
         <item name="cr3_btn_books_swap_drawable">@drawable/icons8_books_switch</item>
@@ -1430,6 +1450,12 @@
         <item name="cr3_browser_folder_drawable">@drawable/icons8_folder</item>
         <item name="cr3_button_tts_drawable">@drawable/icons8_speaker</item>
         <item name="attr_icons8_speaker_small">@drawable/icons8_speaker_small</item>
+        <item name="attr_icons8_speaker_small_on">@drawable/icons8_speaker_small_on</item>
+        <item name="attr_icons8_speaker_small_off">@drawable/icons8_speaker_small_off</item>
+        <item name="attr_icons8_speaker_on">@drawable/icons8_speaker_on</item>
+        <item name="attr_icons8_speaker_off">@drawable/icons8_speaker_off</item>
+        <item name="attr_icons8_page_turn">@drawable/icons8_page_turn</item>
+        <item name="attr_icons8_page_turn_back">@drawable/icons8_page_turn_back</item>
         <item name="cr3_browser_folder_recent_drawable">@drawable/icons8_folder_star</item>
         <item name="cr3_button_scroll_go_drawable">@drawable/icons8_scroll</item>
         <item name="cr3_btn_books_swap_drawable">@drawable/icons8_books_switch</item>
@@ -2159,6 +2185,7 @@
         <item name="attr_icons8_speaker_koef">@drawable/icons8_speaker_koef</item>
         <item name="attr_icons8_user_dic_panel">@drawable/icons8_user_dic_panel</item>
         <item name="attr_icons8_dic_list">@drawable/icons8_dic_list</item>
+        <item name="attr_icons8_dic_panel">@drawable/icons8_dic_panel</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
@@ -2592,6 +2619,7 @@
         <item name="attr_icons8_speaker_koef">@drawable/icons8_speaker_koef</item>
         <item name="attr_icons8_user_dic_panel">@drawable/icons8_user_dic_panel</item>
         <item name="attr_icons8_dic_list">@drawable/icons8_dic_list</item>
+        <item name="attr_icons8_dic_panel">@drawable/icons8_dic_panel</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>

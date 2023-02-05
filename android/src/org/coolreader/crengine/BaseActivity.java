@@ -425,7 +425,7 @@ public class BaseActivity extends Activity implements Settings {
 	public boolean isSmartphone() {
 		return diagonalInches <= 6.8; //5.8;
 	}
-	
+
 	private int densityDpi = 160;
 	private float diagonalInches = 5;
 	private boolean isSquareScreen = false;

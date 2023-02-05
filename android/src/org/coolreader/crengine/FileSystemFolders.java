@@ -188,7 +188,7 @@ public class FileSystemFolders extends FileInfoChangeSource {
 
                 @Override
                 public void onFileInfoListLoaded(ArrayList<FileInfo> list, String prefix) {
-                    favoriteFolders = new ArrayList<FileInfo>(list);
+                    favoriteFolders = new ArrayList<>(list);
                     callback.onFileInfoListLoaded(favoriteFolders, prefix);
                     onChange(null,false);
                 }

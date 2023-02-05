@@ -67,7 +67,7 @@ public class ReadCalendarDlg extends BaseDialog {
 				StrUtils.parseDateLong(sdate01), StrUtils.parseDateLong(sdate), list -> {
 					long date = 0;
 					long seconds = 0;
-					for (CalendarStats cs :list) {
+					for (CalendarStats cs: list) {
 						cs.sameDate = true;
 						if (cs.readDate != date) cs.sameDate = false;
 						date = cs.readDate;

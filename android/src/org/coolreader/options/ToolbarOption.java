@@ -46,6 +46,24 @@ public class ToolbarOption extends SubmenuOption {
 			R.string.option_add_info_empty_text
 	};
 
+	static int [] mSelPanelRecentDics = new int [] {
+			0,
+			1,
+			2
+	};
+
+	static int [] mSelPanelRecentDicsTitles = new int [] {
+			R.string.sel_panel_recent_dics_0,
+			R.string.sel_panel_recent_dics_1,
+			R.string.sel_panel_recent_dics_2
+	};
+
+	static int [] mSelPanelRecentDicsAddInfos = new int [] {
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text
+	};
+
 	int[] mToolbarPositions = new int[] {
 			Settings.VIEWER_TOOLBAR_NONE, Settings.VIEWER_TOOLBAR_TOP, Settings.VIEWER_TOOLBAR_BOTTOM, Settings.VIEWER_TOOLBAR_LEFT, Settings.VIEWER_TOOLBAR_RIGHT, Settings.VIEWER_TOOLBAR_SHORT_SIDE, Settings.VIEWER_TOOLBAR_LONG_SIDE
 	};
@@ -109,6 +127,10 @@ public class ToolbarOption extends SubmenuOption {
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
 				add(mSelPanelSliders, mSelPanelSlidersTitles, mSelPanelSlidersAddInfos).setDefaultValue("0").
 				setIconIdByAttr(R.attr.attr_icons8_slider,R.drawable.icons8_slider));
+		listView.add(new ListOption(mOwner, mActivity.getString(R.string.sel_panel_recent_dics), Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_RECENT_DICS,
+				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+				add(mSelPanelRecentDics, mSelPanelRecentDicsTitles, mSelPanelRecentDicsAddInfos).setDefaultValue("0").
+				setIconIdByAttr(R.attr.attr_icons8_dic_panel,R.drawable.icons8_dic_panel));
 		listView.add(OptionsDialog.getOption(Settings.PROP_PAGE_VIEW_MODE_SEL_DONT_CHANGE, this.lastFilteredValue));
 		dlg.setView(listView);
 		dlg.show();
@@ -137,6 +159,12 @@ public class ToolbarOption extends SubmenuOption {
 		this.updateFilteredMark(mActivity.getString(R.string.sel_panel_sliders_2));
 		this.updateFilteredMark(mActivity.getString(R.string.sel_panel_sliders), Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_SLIDERS,
 				mActivity.getString(R.string.option_add_info_empty_text));
+		for (int i: mSelPanelSlidersTitles) if (i > 0) this.updateFilteredMark(mActivity.getString(i));
+		for (int i: mSelPanelSlidersAddInfos) if (i > 0) this.updateFilteredMark(mActivity.getString(i));
+		this.updateFilteredMark(mActivity.getString(R.string.sel_panel_recent_dics), Settings.PROP_APP_OPTIONS_SELECTION_TOOLBAR_RECENT_DICS,
+				mActivity.getString(R.string.option_add_info_empty_text));
+		for (int i: mSelPanelRecentDicsTitles) if (i > 0) this.updateFilteredMark(mActivity.getString(i));
+		for (int i: mSelPanelRecentDicsAddInfos) if (i > 0) this.updateFilteredMark(mActivity.getString(i));
 		this.updateFilteredMark(mActivity.getString(R.string.tts_page_mode_dont_change2), Settings.PROP_PAGE_VIEW_MODE_SEL_DONT_CHANGE,
 				mActivity.getString(R.string.tts_page_mode_dont_change_add_info));
 		return this.lastFiltered;

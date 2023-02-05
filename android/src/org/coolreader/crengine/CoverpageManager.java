@@ -247,8 +247,8 @@ public class CoverpageManager {
 		public BitmapCache(int maxSize) {
 			this.maxSize = maxSize;
 		}
-		private ArrayList<BitmapCacheItem> list = new ArrayList<BitmapCacheItem>();
-		private int maxSize;
+		private final ArrayList<BitmapCacheItem> list = new ArrayList<BitmapCacheItem>();
+		private final int maxSize;
 		private int find(ImageItem file) {
 			for (int i = 0; i < list.size(); i++) {
 				BitmapCacheItem item = list.get(i); 
@@ -320,7 +320,7 @@ public class CoverpageManager {
 			}
 		}
 	}
-	private BitmapCache mCache = new BitmapCache(32);
+	private final BitmapCache mCache = new BitmapCache(32);
 	
 	private FileInfoQueue mCheckFileCacheQueue = new FileInfoQueue(); 
 	private FileInfoQueue mScanFileQueue = new FileInfoQueue();
@@ -383,7 +383,7 @@ public class CoverpageManager {
 		}
 	}
 	
-	private Object LOCK = new Object();
+	private final Object LOCK = new Object();
 
 	private Runnable lastCheckCacheTask = null;
 	private Runnable lastScanFileTask = null;
@@ -708,7 +708,13 @@ public class CoverpageManager {
                                 Paint p = new Paint();
                                 p.setColor(getDominantColor(bitmap));
                                 canvas.drawRect(rc, p);
-                                canvas.drawBitmap(bitmap, null, dst, defPaint);
+                                try {
+									canvas.drawBitmap(bitmap, null, dst, defPaint);
+								} catch (Exception ignored) {
+									log.e("Exception thrown while drawing coverpage");
+									// Remove broken bitmap from cache
+									mCache.remove(book);
+								}
 								if (shadowSizePercent > 0) {
 									Rect shadowRect = new Rect(rc.left + shadowW, rc.top + shadowH, rc.right + shadowW, rc.bottom + shadowW);
 									drawShadow(canvas, rc, shadowRect);
@@ -731,7 +737,13 @@ public class CoverpageManager {
 						if ((bitmap != null) && (!isDefCover)) {
 							log.d("Image for " + book + " is found in cache, drawing...");
 							Rect dst = getBestCoverSize(rc, bitmap.getWidth(), bitmap.getHeight());
-							canvas.drawBitmap(bitmap, null, dst, defPaint);
+							try {
+								canvas.drawBitmap(bitmap, null, dst, defPaint);
+							} catch (Exception ignored) {
+								log.e("Exception thrown while drawing coverpage");
+								// Remove broken bitmap from cache
+								mCache.remove(book);
+							}
 							if (shadowSizePercent > 0) {
 								Rect shadowRect = new Rect(rc.left + shadowW, rc.top + shadowH, rc.right + shadowW, rc.bottom + shadowW);
 								drawShadow(canvas, rc, shadowRect);
@@ -983,11 +995,13 @@ public class CoverpageManager {
 		if (!isEInk)
 			c.drawColor(randomColor((title + author).hashCode()));
 		int margin = Dips.dpToPx(10);
-		StaticLayout mTextLayout = new StaticLayout(author, pBold, c.getWidth() - margin * 2, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
+		int wd = c.getWidth() - margin * 2;
+		if (wd < 0) wd = c.getWidth();
+		StaticLayout mTextLayout = new StaticLayout(author, pBold, wd, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
 		c.translate(margin, Dips.dpToPx(10));
 		mTextLayout.draw(c);
 
-		StaticLayout text2 = new StaticLayout(title, pNormal, c.getWidth() - margin * 2, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
+		StaticLayout text2 = new StaticLayout(title, pNormal, wd, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
 		c.translate(0, mTextLayout.getHeight() + (margin));
 		text2.draw(c);
 

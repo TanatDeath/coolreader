@@ -1499,6 +1499,19 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		}
 	}
 
+	public void showFavoriteFolders()
+	{
+		log.v("FavoriteFolders()");
+		final FileInfo favRoot = mScanner.getOPDSRoot();
+		Services.getFileSystemFolders().loadFavoriteFolders(mActivity.getDB());
+//		if (opdsRoot != null) {
+//			mActivity.getDB().loadOPDSCatalogs(catalogs -> {
+//				opdsRoot.setItems(catalogs);
+//				showDirectoryInternal(opdsRoot, null);
+//			});
+//		}
+	}
+
 	private FileInfo.SortOrder mSortOrder = FileInfo.DEF_SORT_ORDER; 
 	public void setSortOrder(FileInfo.SortOrder order) {
 		if (mSortOrder == order)
@@ -1521,10 +1534,12 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			FileInfo.SortOrder.FILENAME.resourceId,	
 			FileInfo.SortOrder.FILENAME_DESC.resourceId,	
 			FileInfo.SortOrder.AUTHOR_TITLE.resourceId,	
-			FileInfo.SortOrder.AUTHOR_TITLE_DESC.resourceId,	
-			FileInfo.SortOrder.TITLE_AUTHOR.resourceId,	
+			FileInfo.SortOrder.AUTHOR_TITLE_DESC.resourceId,
+			FileInfo.SortOrder.TITLE_AUTHOR.resourceId,
 			FileInfo.SortOrder.TITLE_AUTHOR_DESC.resourceId,
-			FileInfo.SortOrder.TIMESTAMP.resourceId,	
+			FileInfo.SortOrder.SERIES_AUTHOR.resourceId,
+			FileInfo.SortOrder.SERIES_AUTHOR_DESC.resourceId,
+			FileInfo.SortOrder.TIMESTAMP.resourceId,
 			FileInfo.SortOrder.TIMESTAMP_DESC.resourceId,	
 		};
 		String[] optionValues = {
@@ -1533,11 +1548,15 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			FileInfo.SortOrder.AUTHOR_TITLE.name(),	
 			FileInfo.SortOrder.AUTHOR_TITLE_DESC.name(),
 			FileInfo.SortOrder.TITLE_AUTHOR.name(),	
-			FileInfo.SortOrder.TITLE_AUTHOR_DESC.name(),	
+			FileInfo.SortOrder.TITLE_AUTHOR_DESC.name(),
+			FileInfo.SortOrder.SERIES_AUTHOR.name(),
+			FileInfo.SortOrder.SERIES_AUTHOR_DESC.name(),
 			FileInfo.SortOrder.TIMESTAMP.name(),	
 			FileInfo.SortOrder.TIMESTAMP_DESC.name(),	
 		};
 		int[] optionAddInfos = {
+				R.string.option_add_info_empty_text,
+				R.string.option_add_info_empty_text,
 				R.string.option_add_info_empty_text,
 				R.string.option_add_info_empty_text,
 				R.string.option_add_info_empty_text,
@@ -3267,7 +3286,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	{
 		BackgroundThread.ensureGUI();
 
-		if (dir.isOPDSRoot()) {
+		if (dir!=null && dir.isOPDSRoot()) {
 			boolean bOnlineCatalogsSortAZ = mActivity.settings().getBool(Settings.PROP_APP_ROOT_VIEW_OPDS_SECTION_SORT_AZ, false);
 			if (bOnlineCatalogsSortAZ) {
 				Comparator<FileInfo> compareByName = (o1, o2) -> o1.getFilename().compareToIgnoreCase(o2.getFilename());

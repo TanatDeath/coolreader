@@ -1613,6 +1613,37 @@ public class MainDB extends BaseDB {
 		return list;
 	}
 
+	public ArrayList<CalendarStats> getBookLastCalendarEntries(long book_fk, long cnt) {
+		ArrayList<CalendarStats> list = new ArrayList<>();
+		if (book_fk != 0) {
+			beginReading();
+			String sql = "";
+			sql = "select bc.id, bc.book_fk, bc.read_date as mdate, bc.time_spent_sec, b.title, b.id as book_id FROM " +
+					" book_calendar bc " +
+					" left join book b on b.id = bc.book_fk " +
+					" where bc.time_spent_sec > 120 and bc.book_fk = " + book_fk +
+					" order by bc.read_date desc, bc.time_spent_sec desc, b.title " +
+					" limit " + cnt;
+			Log.d("cr3db", "sql: " + sql);
+			try (Cursor rs = mDB.rawQuery(sql, null)) {
+				if (rs.moveToFirst()) {
+					do {
+						CalendarStats cs = new CalendarStats();
+						cs.id = rs.getLong(0);
+						cs.bookFk = rs.getLong(1);
+						cs.readDate = rs.getLong(2);
+						cs.timeSpentSec = rs.getLong(3);
+						cs.bookTitle = rs.getString(4);
+						cs.bookId = rs.getLong(5);
+						list.add(cs);
+					} while (rs.moveToNext());
+				}
+			}
+			endReading();
+		}
+		return list;
+	}
+
 	// fav folders
 
 	public ArrayList<FileInfo> loadFavoriteFolders() {

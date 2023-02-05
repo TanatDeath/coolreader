@@ -14,8 +14,10 @@ import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.CustomLog;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.FileInfo;
+import org.coolreader.crengine.GetTextListener;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
+import org.coolreader.crengine.TextSeekBarDrawable;
 import org.coolreader.options.OptionsDialog;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.ReaderCommand;
@@ -29,6 +31,7 @@ import org.coolreader.crengine.ViewMode;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -78,8 +81,8 @@ public class TTSToolbarDlg implements Settings {
 	private String mCurPageTextNext2;
 	private final ImageButton mPlayPauseButton;
 	private final ImageButton mPlayLockButton;
-	private final TextView mVolumeTextView;
-	private final TextView mSpeedTextView;
+	//private final TextView mVolumeTextView;
+	//private final TextView mSpeedTextView;
 	private final ImageView btnDecVolume;
 	private final ImageView btnIncVolume;
 	private final ImageView btnDecSpeed;
@@ -241,6 +244,7 @@ public class TTSToolbarDlg implements Settings {
 						L.e("couldn't save current position");
 					}
 				}
+				mReaderView.checkCalendarStats();
 				if ((isSpeaking) && (curTime - startTTSTime > 300000)) { // 5 min
 					if (mReaderView.getBookInfo().getFileInfo().getReadingState()!=FileInfo.STATE_READING) {
 						mReaderView.getBookInfo().getFileInfo().askedMarkReading = true;
@@ -362,6 +366,12 @@ public class TTSToolbarDlg implements Settings {
 				Utils.setSolidButtonEink((ImageButton) mPanel.findViewById(R.id.tts_forward));
 				Utils.setSolidButtonEink((ImageButton) mPanel.findViewById(R.id.tts_stop));
 				Utils.setSolidButtonEink((ImageButton) mPanel.findViewById(R.id.tts_options));
+				if (mLoadSpeed1 != null) Utils.setSolidButtonEink(mLoadSpeed1);
+				if (mLoadSpeed2 != null) Utils.setSolidButtonEink(mLoadSpeed2);
+				if (mLoadSpeed3 != null) Utils.setSolidButtonEink(mLoadSpeed3);
+				if (mLoadVol1 != null) Utils.setSolidButtonEink(mLoadVol1);
+				if (mLoadVol2 != null) Utils.setSolidButtonEink(mLoadVol2);
+				if (mLoadVol3 != null) Utils.setSolidButtonEink(mLoadVol3);
 			} else {
 				mPanel.findViewById(R.id.tts_play_pause).setBackground(c);
 				mPanel.findViewById(R.id.tts_play_lock).setBackground(c);
@@ -369,6 +379,12 @@ public class TTSToolbarDlg implements Settings {
 				mPanel.findViewById(R.id.tts_forward).setBackground(c);
 				mPanel.findViewById(R.id.tts_stop).setBackground(c);
 				mPanel.findViewById(R.id.tts_options).setBackground(c);
+				if (mLoadSpeed1 != null) mLoadSpeed1.setBackground(c);
+				if (mLoadSpeed2 != null) mLoadSpeed2.setBackground(c);
+				if (mLoadSpeed3 != null) mLoadSpeed3.setBackground(c);
+				if (mLoadVol1 != null) mLoadVol1.setBackground(c);
+				if (mLoadVol2 != null) mLoadVol2.setBackground(c);
+				if (mLoadVol3 != null) mLoadVol3.setBackground(c);
 			}
 		}
 	}
@@ -725,6 +741,12 @@ public class TTSToolbarDlg implements Settings {
 		});
 	}
 
+	private void setupSeekBar(SeekBar seekBar, int id, int value, Resources res,
+							  GetTextListener getTextListener) {
+		seekBar.setProgressDrawable(new TextSeekBarDrawable(res, id, value < seekBar.getMax() / 2,
+				mCoolReader, false, getTextListener));
+	}
+
 	private void updateSaveButtons() {
 		if (mSpeed1 == -1) mLoadSpeed1.setText("?");
 		else mLoadSpeed1.setText(String.format(Locale.getDefault(), "%.2f", speechRateFromPercent(mSpeed1)));
@@ -849,9 +871,9 @@ public class TTSToolbarDlg implements Settings {
 				}));
 
 		// setup speed && volume seek bars
-		mVolumeTextView = mPanel.findViewById(R.id.tts_lbl_volume);
-		mSpeedTextView = mPanel.findViewById(R.id.tts_lbl_speed);
-		mSpeedTextView.setText(String.format(Locale.getDefault(), "%s (x%.2f)", context.getString(R.string.tts_rate), speechRateFromPercent(50)));
+//		mVolumeTextView = mPanel.findViewById(R.id.tts_lbl_volume);
+//		mSpeedTextView = mPanel.findViewById(R.id.tts_lbl_speed);
+//		mSpeedTextView.setText(String.format(Locale.getDefault(), "%s (x%.2f)", context.getString(R.string.tts_rate), speechRateFromPercent(50)));
 
 		mSbSpeed = mPanel.findViewById(R.id.tts_sb_speed);
 		mSbVolume = mPanel.findViewById(R.id.tts_sb_volume);
@@ -879,13 +901,19 @@ public class TTSToolbarDlg implements Settings {
 			mCoolReader.setSetting(PROP_APP_TTS_SPEED, String.valueOf(mSbSpeed.getProgress()), true);
 		}));
 
+		Resources res = mCoolReader.getResources();
+		setupSeekBar(mSbSpeed, 0, themeColors.get(R.attr.colorIcon), res, () -> {
+			float rate = speechRateFromPercent(mSbSpeed.getProgress());
+			return String.format(Locale.getDefault(), "%.2f", rate);
+		});
+
 		mSbSpeed.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 			int mProgress;
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 				mProgress = progress;
 				float rate = speechRateFromPercent(progress);
-				mSpeedTextView.setText(String.format(Locale.getDefault(), "%s (x%.2f)", context.getString(R.string.tts_rate), rate));
+				//mSpeedTextView.setText(String.format(Locale.getDefault(), "%s (x%.2f)", context.getString(R.string.tts_rate), rate));
 			}
 
 			@Override
@@ -1189,6 +1217,10 @@ public class TTSToolbarDlg implements Settings {
 					"Got volumes (2), current: " + current + ", max = " + max);
 			updateSaveButtons();
 		}));
+		res = mCoolReader.getResources();
+		setupSeekBar(mSbVolume, 0, themeColors.get(R.attr.colorIcon), res,
+				() -> String.format(Locale.getDefault(), "%d%%",
+			Math.round(100.0 * ((double) mSbVolume.getProgress() / (double) mSbVolume.getMax()))));
 		mSbVolume.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress,
@@ -1196,14 +1228,14 @@ public class TTSToolbarDlg implements Settings {
 				if (mSbVolume.getMax() < 1)
 					return;
 				mTTSControl.bind(ttsbinder -> ttsbinder.setVolume(progress));
-				if (seekBar.getMax() == 0)
-					mVolumeTextView.setText("?");
-				else {
-					CustomLog.doLog(mLogFileRoot, "log_volume.log",
-							"Set volume to: " + progress + ", in percent = " + (100.0 * ((double) progress / (double) seekBar.getMax())));
-					mVolumeTextView.setText(String.format(Locale.getDefault(), "%s (%d%%)",
-							context.getString(R.string.tts_volume), Math.round(100.0 * ((double) progress / (double) seekBar.getMax()))));
-				}
+//				if (seekBar.getMax() == 0)
+//					mVolumeTextView.setText("?");
+//				else {
+//					CustomLog.doLog(mLogFileRoot, "log_volume.log",
+//							"Set volume to: " + progress + ", in percent = " + (100.0 * ((double) progress / (double) seekBar.getMax())));
+//					mVolumeTextView.setText(String.format(Locale.getDefault(), "%s (%d%%)",
+//							context.getString(R.string.tts_volume), Math.round(100.0 * ((double) progress / (double) seekBar.getMax()))));
+//				}
 			}
 
 			@Override
@@ -1214,6 +1246,7 @@ public class TTSToolbarDlg implements Settings {
 			public void onStopTrackingTouch(SeekBar seekBar) {
 			}
 		});
+		repaintButtons();
 		// And finally, setup status change handler
 		setupSpeechStatusHandler();
 	}

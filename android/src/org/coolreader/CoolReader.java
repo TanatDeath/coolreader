@@ -21,7 +21,6 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.hardware.Sensor;
@@ -123,6 +122,7 @@ import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.SomeButtonsToolbarDlg;
 import org.coolreader.db.BaseDB;
+import org.coolreader.db.CalendarStats;
 import org.coolreader.db.MainDB;
 import org.coolreader.dic.Dictionaries;
 import org.coolreader.dic.Dictionaries.DictionaryException;
@@ -170,6 +170,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 {
 	public static final Logger log = L.create("cr");
 
+	private int startBehaviour = 0; // 0 = open last reading book; 1 = main screen; 2 = reading folder
+
 	public Uri sdCardUri = null;
 
 	public DBXInputTokenDialog dbxInputTokenDialog = null;
@@ -193,10 +195,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public static String BOOK_READING_STATE_FINISHED = "[finished]";
 	public static String READ_ALOUD = "Read aloud";
 
-//	public ArrayList<String> getProfileNames() {
-//		return profileNames;
-//	}
-
 	public ResizeHistory getNewResizeHistory() {
 		ResizeHistory rh = new ResizeHistory();
     	return rh;
@@ -214,14 +212,120 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	DeviceOrientation deviceOrientation;
 	SensorManager mSensorManager;
 
+	public float mGravity[];
+
+	private long lastTurn = 0;
+	private boolean inTurnPosNow = false;
+	private boolean inTurnBackPosNow = false;
+
+	private void checkPageTurn(float[] gravity) {
+		if (!deviceTurnEnabled) return;
+		//log.i("CPGTRN: enabled");
+		double dCoord1 = gravity[0] * 100;
+		double dCoord2 = gravity[1] * 100;
+		double dCoord3 = gravity[2] * 100;
+		// will we check turn
+		if (!fixTurnCoord1) dCoord1 = 999;
+		if (!fixTurnCoord2) dCoord2 = 999;
+		if (!fixTurnCoord3) dCoord3 = 999;
+		//log.i("CPGTRN: fixes = " + fixTurnCoord1 + ", " +
+		//		fixTurnCoord2 + ", " + fixTurnCoord3);
+		boolean inTurn = false;
+		boolean inTurnBack = false;
+		double gap = 0.0;
+		if ((dCoord1 < 998.0) || (dCoord2 < 998.0) || (dCoord3 < 998.0)) {
+		//	log.i("CPGTRN: in fix");
+			inTurn = true;
+			if ((dCoord1 < 998.0) && (coord1Fix < 998.0)) {
+				gap = seekPrecision * 10.0;
+				if ((coord1Fix < dCoord1 - gap) || (coord1Fix > dCoord1 + gap)) inTurn = false;
+			}
+			if (inTurn) {
+				if ((dCoord2 < 998.0) && (coord2Fix < 998.0)) {
+					gap = Math.abs(dCoord2) * seekPrecision / 100.0;
+					if ((coord2Fix < dCoord2 - gap) || (coord2Fix > dCoord2 + gap)) inTurn = false;
+				}
+			}
+			if (inTurn) {
+				if ((dCoord3 < 998.0) && (coord3Fix < 998.0)) {
+					gap = Math.abs(dCoord3) * seekPrecision / 100.0;
+					if ((coord3Fix < dCoord3 - gap) || (coord3Fix > dCoord3 + gap)) inTurn = false;
+				}
+			}
+			//log.i("CPGTRN: in turn = " + inTurn);
+		}
+		long thisTime = System.currentTimeMillis();
+		if ((!inTurnPosNow) && (inTurn) && (thisTime - lastTurn > 1000)) { // we were not in turn, but we are now - so turn
+			//log.i("CPGTRN: turned");
+			inTurnPosNow = true;
+			inTurnBackPosNow = false;
+			lastTurn = System.currentTimeMillis();
+			if (mReaderView != null)
+				if (mCurrentFrame == getmReaderFrame())
+					mReaderView.onCommand(ReaderCommand.DCMD_PAGEDOWN, 1, null);
+			//tvTestArea.setText( "" + (Utils.parseInt(tvTestArea.getText().toString(), 1000) + 1));
+		}
+		if (!inTurn) inTurnPosNow = false;
+		if (!inTurn) { // if we are not in turn now - so check back turn
+			//log.i("CPGTRN: check back turn");
+			dCoord1 = gravity[0] * 100;
+			dCoord2 = gravity[1] * 100;
+			dCoord3 = gravity[2] * 100;
+			//log.i("CPGTRN: fixes back = " + fixTurnBackCoord1 + ", " +
+			//		fixTurnBackCoord2 + ", " + fixTurnBackCoord3);
+			if (!fixTurnBackCoord1) dCoord1 = 999;
+			if (!fixTurnBackCoord2) dCoord2 = 999;
+			if (!fixTurnBackCoord3) dCoord3 = 999;
+			if ((dCoord1 < 998.0) || (dCoord2 < 998.0) || (dCoord3 < 998.0)) {
+				//log.i("CPGTRN: in fix back");
+				inTurnBack = true;
+				if ((dCoord1 < 998.0) && (coord1FixBack < 998.0)) {
+					gap = seekPrecision * 10.0;
+					if ((coord1FixBack < dCoord1 - gap) || (coord1FixBack > dCoord1 + gap)) inTurnBack = false;
+				}
+				if (inTurnBack) {
+					if ((dCoord2 < 998.0) && (coord2FixBack < 998.0)) {
+						gap = Math.abs(dCoord2) * seekPrecision / 100.0;
+						if ((coord2FixBack < dCoord2 - gap) || (coord2FixBack > dCoord2 + gap)) inTurnBack = false;
+					}
+				}
+				if (inTurnBack) {
+					if ((dCoord3 < 998.0) && (coord3FixBack < 998.0)) {
+						gap = Math.abs(dCoord3) * seekPrecision / 100.0;
+						if ((coord3FixBack < dCoord3 - gap) || (coord3FixBack > dCoord3 + gap)) inTurnBack = false;
+					}
+				}
+				//log.i("CPGTRN: in turn back = " + inTurnBack);
+			}
+			thisTime = System.currentTimeMillis();
+			if ((!inTurnBackPosNow) && (inTurnBack) && (thisTime - lastTurn > 1000)) { // we were not in turn, but we are now - so turn
+				//log.i("CPGTRN: turned back");
+				inTurnPosNow = false;
+				inTurnBackPosNow = true;
+				lastTurn = System.currentTimeMillis();
+				if (mReaderView != null)
+					if (mCurrentFrame == getmReaderFrame())
+						mReaderView.onCommand(ReaderCommand.DCMD_PAGEUP, 1, null);
+			}
+			if (!inTurnBack) inTurnBackPosNow = false;
+		}
+	}
+
 	@Override
 	public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() != Sensor.TYPE_ACCELEROMETER)
 			return;
+		float[] gravity = event.values.clone();
+		if (gravity != null)
+			if (gravity.length == 3) checkPageTurn(gravity);
+		mGravity = gravity;
+//		String s = "";
+//		for (float f: gravity) s = s + "; " + f;
+//		log.i("accel service: " + s);
 		int ornt = deviceOrientation.getOrientation();
-		if (sensorPrevRot==-1) sensorPrevRot = ornt;
-		if (sensorCurRot==-1) sensorCurRot = ornt;
-        if (sensorCurRot!=ornt) {
+		if (sensorPrevRot == -1) sensorPrevRot = ornt;
+		if (sensorCurRot == -1) sensorCurRot = ornt;
+        if (sensorCurRot != ornt) {
             sensorPrevRot = sensorCurRot;
 			sensorCurRot = ornt;
 			if (mReaderView!=null) mReaderView.resized();
@@ -838,6 +942,21 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		}
 	}
 
+	private boolean deviceTurnEnabled = false;
+	private double coord1Fix = 999.0;
+	private double coord2Fix = 999.0;
+	private double coord3Fix = 999.0;
+	private double coord1FixBack = 999.0;
+	private double coord2FixBack = 999.0;
+	private double coord3FixBack = 999.0;
+	private boolean fixTurnCoord1 = false;
+	private boolean fixTurnCoord2 = false;
+	private boolean fixTurnCoord3 = false;
+	private boolean fixTurnBackCoord1 = false;
+	private boolean fixTurnBackCoord2 = false;
+	private boolean fixTurnBackCoord3 = false;
+	private double seekPrecision = 10.0;
+
 	@Override
 	public void applyAppSetting(String key, String value)
 	{
@@ -941,10 +1060,41 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			ttsEnginePackage = value;
 			if (null != mReaderView && mReaderView.isTTSActive()) {
 				// Set new TTS engine if running
-				initTTS(null, false);
+				initTTS(null /*, false*/);
 			}
 		} else if (key.equals(PROP_APP_FONT_SCALE)) {
 			adjustFontScale(getResources().getConfiguration(), ((float) Utils.parseInt(value, 10)) / 10F);
+		} else if (key.equals(PROP_APP_START_BEHAVIOUR)) {
+			startBehaviour = Utils.parseInt(value, 0);
+		} else if (key.startsWith(PROP_APP_DEVICE_TURN)) {
+			if (key.equals(Settings.PROP_APP_DEVICE_TURN_ENABLE))
+				deviceTurnEnabled = Utils.parseInt(value, 0) == 1? true: false;
+			if (key.equals(Settings.PROP_APP_DEVICE_TURN + ".coord_1"))
+				coord1Fix = Utils.parseInt(value, 999);
+			if (key.equals(Settings.PROP_APP_DEVICE_TURN + ".coord_2"))
+				coord2Fix = Utils.parseInt(value, 999);
+			if (key.equals(Settings.PROP_APP_DEVICE_TURN + ".coord_3"))
+				coord3Fix = Utils.parseInt(value, 999);
+			if (key.equals(Settings.PROP_APP_DEVICE_TURN + ".back_coord_1"))
+				coord1FixBack = Utils.parseInt(value, 999);
+			if (key.equals(Settings.PROP_APP_DEVICE_TURN + ".back_coord_2"))
+				coord2FixBack = Utils.parseInt(value, 999);
+			if (key.equals(Settings.PROP_APP_DEVICE_TURN + ".back_coord_3"))
+				coord3FixBack = Utils.parseInt(value, 999);
+			if (key.equals(Settings.PROP_APP_DEVICE_TURN + ".fix_turn_coord_1"))
+				fixTurnCoord1 = "1".equals(value);
+			if (key.equals(Settings.PROP_APP_DEVICE_TURN + ".fix_turn_coord_2"))
+				fixTurnCoord2 = "1".equals(value);
+			if (key.equals(Settings.PROP_APP_DEVICE_TURN + ".fix_turn_coord_3"))
+				fixTurnCoord3 = "1".equals(value);
+			if (key.equals(Settings.PROP_APP_DEVICE_TURN + ".fix_turn_back_coord_1"))
+				fixTurnBackCoord1 = "1".equals(value);
+			if (key.equals(Settings.PROP_APP_DEVICE_TURN + ".fix_turn_back_coord_2"))
+				fixTurnBackCoord2 = "1".equals(value);
+			if (key.equals(Settings.PROP_APP_DEVICE_TURN + ".fix_turn_back_coord_3"))
+				fixTurnBackCoord3 = "1".equals(value);
+			if (key.equals(Settings.PROP_APP_DEVICE_TURN + ".precision"))
+				seekPrecision = Utils.parseInt(value, 10);
 		}
 	}
 
@@ -1764,7 +1914,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			geoLastData.netwStart();
 		}
 
-        if(mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER).size()!=0){
+        if (mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER).size() != 0) {
             Sensor s = mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER).get(0);
             mSensorManager.registerListener(this,s, SensorManager.SENSOR_DELAY_NORMAL);
         }
@@ -1953,8 +2103,16 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		log.i("KnownReader.onStart() version=" + getVersion() + ", fileToLoadOnStart=" + fileToLoadOnStart);
 		super.onStart();
 		waitForCRDBService(() -> {
-			BaseDB db = Services.getHistory().getMainDB(getDB());
-			BaseDB cdb = Services.getHistory().getCoverDB(getDB());
+			BaseDB db = null;
+			BaseDB cdb = null;
+			try {
+				db = Services.getHistory().getMainDB(getDB());
+				cdb = Services.getHistory().getCoverDB(getDB());
+			} catch (RuntimeException re) {
+				startServices();
+			}
+			if (db == null) db = Services.getHistory().getMainDB(getDB());
+			if (cdb == null) cdb = Services.getHistory().getCoverDB(getDB());
 			String sMesg ="";
 			if (db !=null) {
 				if (!StrUtils.isEmptyStr(db.mOriginalDBFile)) {
@@ -3114,7 +3272,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	// TTS
 	private final static long INIT_TTS_TIMEOUT = 10000;		// 10 sec.
 
-	public void initTTS(TTSControlServiceAccessor.Callback callback, boolean quiet) {
+	public void initTTS(TTSControlServiceAccessor.Callback callback /*, boolean quiet*/) {
 		if (!phoneStateChangeHandlerInstalled) {
 			// TODO: Investigate the need to tracking state of the phone, while we already respect the audio focus.
 			boolean readPhoneStateIsAvailable;
@@ -3139,7 +3297,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
 		}
 
-		if (!quiet) showToast(getString(R.string.init_tts));
+		//if (!quiet) showToast(getString(R.string.init_tts));
 		if (null == ttsControlServiceAccessor)
 			ttsControlServiceAccessor = new TTSControlServiceAccessor(this);
 		ttsControlServiceAccessor.bind(ttsbinder -> {
@@ -3184,7 +3342,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				BackgroundThread.instance().executeGUI(() -> {
 					OptionsDialog.toastShowCnt++;
 					//if (OptionsDialog.toastShowCnt < 5) showToast(getString(R.string.settings_info));
-					if (ttsControlServiceAccessor == null) initTTS(null, true);
+					if (ttsControlServiceAccessor == null) initTTS(null/*, true*/);
 					//if (optionsDialog == null)
 					optionsDialog = new OptionsDialog(CoolReader.this);
 					optionsDialog.init(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles, null,
@@ -3204,7 +3362,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				final String[] mFontFaces = Engine.getFontFaceList();
 				final String[] mFontFacesFiles = Engine.getFontFaceAndFileNameList();
 				BackgroundThread.instance().executeGUI(() -> {
-					if (ttsControlServiceAccessor == null) initTTS(null, true);
+					if (ttsControlServiceAccessor == null) initTTS(null/*, true*/);
 					//if (optionsDialog == null)
 					optionsDialog = new OptionsDialog(CoolReader.this);
 					optionsDialog.init(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles,
@@ -3230,7 +3388,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 					OptionsDialog.toastShowCnt++;
 					//if (OptionsDialog.toastShowCnt < 5) showToast(getString(R.string.settings_info));
 				}
-				if (ttsControlServiceAccessor == null) initTTS(null, true);
+				if (ttsControlServiceAccessor == null) initTTS(null/*, true*/);
 				//if (optionsDialog == null)
 				optionsDialog = new OptionsDialog(CoolReader.this);
 				optionsDialog.init(CoolReader.this, mode, mReaderView, mFontFaces, mFontFacesFiles, tts,
@@ -4139,7 +4297,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 							Utils.formatTime(this,getReaderView().getRequestedResTime())+"): "+
 							getReaderView().getRequestedWidth()+" x "+getReaderView().getRequestedHeight()+
 							"; last set ("+Utils.formatTime(this,getReaderView().getLastsetResTime())+"): "+
-							+getReaderView().getLastsetWidth()+" x "+getReaderView().getLastsetHeight(),"text"));
+							+ getReaderView().getLastsetWidth()+" x "+getReaderView().getLastsetHeight() +
+						    "; density: " + getDensityDpi() + "; inches: " + (Math.round(getDiagonalInches() * 100) / 100.00),"text"));
 		itemsSys.add(new BookInfoEntry("system.device_model",DeviceInfo.MANUFACTURER + " / "+DeviceInfo.MODEL+" / "+
 				DeviceInfo.DEVICE+ " / "+DeviceInfo.PRODUCT + " / " + DeviceInfo.BRAND,"text"));
 		String sDevFlags = "";
@@ -4190,149 +4349,177 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			}
 		}
 		boolean finalReadingSameBook = readingSameBook;
-		execute(new Task() {
-			Bookmark bm;
-			@Override
-			public void work() {
-				if (getReaderView()!=null)
-					if (getReaderView().getDoc()!=null)
-						bm =  getReaderView().getDoc().getCurrentPageBookmark();
-				if ((bm != null) && (finalReadingSameBook)) {
-					PositionProperties prop = getReaderView().getDoc().getPositionProps(bm.getStartPos(), true);
-					itemsPos.add(new BookInfoEntry("section","section.position","section"));
-					if (prop.pageMode != 0) {
-						itemsPos.add(new BookInfoEntry("position.page","" + (prop.pageNumber+1) + " / " + prop.pageCount,"text"));
-					}
-					int percent = (int)(10000 * (long)prop.y / prop.fullHeight);
-					itemsPos.add(new BookInfoEntry("position.percent","" + (percent/100) + "." + (percent%100) + "%","text"));
-					String chapter = bm.getTitleText();
-					if (chapter != null && chapter.length() > 100)
-						chapter = chapter.substring(0, 100) + "...";
-					itemsPos.add(new BookInfoEntry("position.chapter",chapter,"text"));
-				}
-			}
-			public void done() {
-				FileInfo fi = bi.getFileInfo();
-				itemsBook.add(new BookInfoEntry("section","section.book","section"));
-				if (fi.getAuthors() != null || fi.title != null || fi.series != null || fi.publseries != null) {
-					if (!StrUtils.isEmptyStr(fi.getAuthors())) {
-						itemsBook.add(new BookInfoEntry("book.authors",
-								fi.getAuthors().replaceAll("\\|", "; "), "text"));
-						String[] list = fi.getAuthors().split("\\|");
-						for (String s: list) {
-							itemsBook.add(new BookInfoEntry(s, getString(R.string.mi_folder_authors_series), "author_series:"+s));
-							itemsBook.add(new BookInfoEntry(s, getString(R.string.mi_folder_authors_books), "author_books:"+s));
+		long book_fk = setBI.getFileInfo().id == null? 0: setBI.getFileInfo().id;
+		waitForCRDBService(() -> getDB().getBookLastCalendarEntries(book_fk, 10L,
+				list -> {
+					execute(new Task() {
+						Bookmark bm;
+						@Override
+						public void work() {
+							if (getReaderView()!=null)
+								if (getReaderView().getDoc()!=null)
+									bm =  getReaderView().getDoc().getCurrentPageBookmark();
+							if ((bm != null) && (finalReadingSameBook)) {
+								PositionProperties prop = getReaderView().getDoc().getPositionProps(bm.getStartPos(), true);
+								itemsPos.add(new BookInfoEntry("section", "section.position", "section"));
+								if (prop.pageMode != 0) {
+									itemsPos.add(new BookInfoEntry("position.page", "" + (prop.pageNumber + 1) + " / " + prop.pageCount, "text"));
+								}
+								int percent = (int) (10000 * (long) prop.y / prop.fullHeight);
+								itemsPos.add(new BookInfoEntry("position.percent", "" + (percent / 100) + "." + (percent % 100) + "%", "text"));
+								String chapter = bm.getTitleText();
+								if (chapter != null && chapter.length() > 100)
+									chapter = chapter.substring(0, 100) + "...";
+								itemsPos.add(new BookInfoEntry("position.chapter", chapter, "text"));
+								String calEntries = "";
+								for (CalendarStats cs: list) {
+									int minutes = (int) (cs.timeSpentSec / 60);
+									int hours = (int) (cs.timeSpentSec / 60 / 60);
+									String hm = "";
+									if (hours > 0) {
+										minutes = minutes - (hours * 60);
+										hm = hours + "h " + minutes + "m";
+									} else {
+										if (minutes != 0)
+											hm = minutes + "m";
+									}
+									long val = cs.readDate;
+									java.util.Date date = new java.util.Date(val);
+									SimpleDateFormat df2 = new SimpleDateFormat("yyyy.MM.dd");
+									String dateText = df2.format(date);
+									if (StrUtils.isEmptyStr(calEntries))
+										calEntries = dateText + " -> " + hm;
+									else
+										calEntries = calEntries + "; " + dateText + " -> " + hm;
+								}
+								if (StrUtils.isEmptyStr(calEntries))
+									itemsPos.add(new BookInfoEntry("position.calendar",
+											calEntries, "text"));
+							}
 						}
-					}
-					if (!StrUtils.isEmptyStr(fi.series)) {
-						itemsBook.add(new BookInfoEntry(fi.series, getString(R.string.mi_folder_series_authors), "series_authors:"+fi.series));
-						itemsBook.add(new BookInfoEntry(fi.series, getString(R.string.mi_folder_series_books), "series_books:"+fi.series));
-					}
-					if (
-					    (!StrUtils.isEmptyStr(fi.publseries)) &&
-						(!StrUtils.getNonEmptyStr(fi.publseries,true).equals(StrUtils.getNonEmptyStr(fi.series,true)))
-					) {
-						itemsBook.add(new BookInfoEntry(fi.publseries, getString(R.string.mi_folder_series_authors), "series_authors:"+fi.publseries));
-						itemsBook.add(new BookInfoEntry(fi.publseries, getString(R.string.mi_folder_series_books), "series_books:"+fi.publseries));
-					}
-					if (!StrUtils.isEmptyStr(fi.title)) itemsBook.add(new BookInfoEntry("book.title",fi.title,"text"));
-					if (fi.series != null) {
-						String s = fi.series;
-						if (fi.seriesNumber > 0)
-							s = s + " #" + fi.seriesNumber;
-						itemsBook.add(new BookInfoEntry("book.series",s,"text"));
-					}
-				}
-				if (!StrUtils.isEmptyStr(fi.getBookdate())) itemsBook.add(new BookInfoEntry("book.date",fi.getBookdate(),"text"));
-				itemsBook.add(new BookInfoEntry("book.status", Utils.formatReadingState(CoolReader.this, fi),"text"));
-				if (!StrUtils.isEmptyStr(fi.language)) {
-					itemsBook.add(new BookInfoEntry("book.language",fi.language,"text"));
-				}
-				//CR's implementation
+						public void done() {
+							FileInfo fi = bi.getFileInfo();
+							itemsBook.add(new BookInfoEntry("section","section.book","section"));
+							if (fi.getAuthors() != null || fi.title != null || fi.series != null || fi.publseries != null) {
+								if (!StrUtils.isEmptyStr(fi.getAuthors())) {
+									itemsBook.add(new BookInfoEntry("book.authors",
+											fi.getAuthors().replaceAll("\\|", "; "), "text"));
+									String[] list = fi.getAuthors().split("\\|");
+									for (String s: list) {
+										itemsBook.add(new BookInfoEntry(s, getString(R.string.mi_folder_authors_series), "author_series:"+s));
+										itemsBook.add(new BookInfoEntry(s, getString(R.string.mi_folder_authors_books), "author_books:"+s));
+									}
+								}
+								if (!StrUtils.isEmptyStr(fi.series)) {
+									itemsBook.add(new BookInfoEntry(fi.series, getString(R.string.mi_folder_series_authors), "series_authors:"+fi.series));
+									itemsBook.add(new BookInfoEntry(fi.series, getString(R.string.mi_folder_series_books), "series_books:"+fi.series));
+								}
+								if (
+										(!StrUtils.isEmptyStr(fi.publseries)) &&
+												(!StrUtils.getNonEmptyStr(fi.publseries,true).equals(StrUtils.getNonEmptyStr(fi.series,true)))
+								) {
+									itemsBook.add(new BookInfoEntry(fi.publseries, getString(R.string.mi_folder_series_authors), "series_authors:"+fi.publseries));
+									itemsBook.add(new BookInfoEntry(fi.publseries, getString(R.string.mi_folder_series_books), "series_books:"+fi.publseries));
+								}
+								if (!StrUtils.isEmptyStr(fi.title)) itemsBook.add(new BookInfoEntry("book.title",fi.title,"text"));
+								if (fi.series != null) {
+									String s = fi.series;
+									if (fi.seriesNumber > 0)
+										s = s + " #" + fi.seriesNumber;
+									itemsBook.add(new BookInfoEntry("book.series",s,"text"));
+								}
+							}
+							if (!StrUtils.isEmptyStr(fi.getBookdate())) itemsBook.add(new BookInfoEntry("book.date",fi.getBookdate(),"text"));
+							itemsBook.add(new BookInfoEntry("book.status", Utils.formatReadingState(CoolReader.this, fi),"text"));
+							if (!StrUtils.isEmptyStr(fi.language)) {
+								itemsBook.add(new BookInfoEntry("book.language",fi.language,"text"));
+							}
+							//CR's implementation
 //				if (fi.format == DocumentFormat.FB2) {
 //					if (fi.genres != null && fi.genres.length() > 0) {
 //						items.add("book.genres=" + fi.genres);
 //					}
 //				}
-				String genreText = Utils.getGenreText(CoolReader.this, fi, true);
-				if (!StrUtils.isEmptyStr(genreText))
-					itemsBook.add(new BookInfoEntry("book.genre", genreText,"text"));
-				String annot = "";
-				if (!StrUtils.isEmptyStr(fi.annotation)) {
-					annot = fi.annotation;
-				}
-				if (!StrUtils.isEmptyStr(fi.srclang)) {
-					itemsBook.add(new BookInfoEntry("book.srclang", fi.srclang,"text"));
-				}
-				if (!StrUtils.isEmptyStr(fi.translator)) {
-					itemsBook.add(new BookInfoEntry("book.translator", fi.translator,"text"));
-				}
-				itemsBook.add(new BookInfoEntry("book.symcount", ""+fi.symCount,"text"));
-				itemsBook.add(new BookInfoEntry("book.wordcount", ""+fi.wordCount,"text"));
-				String sLeft = getReadingTimeLeft(fi,true);
-				itemsBook.add(new BookInfoEntry("book.minleft", sLeft,"text"));
-				itemsBook.add(new BookInfoEntry("section", "section.book_document","section"));
-				if (!StrUtils.isEmptyStr(fi.docauthor)) {
-					itemsBook.add(new BookInfoEntry("book.docauthor", fi.docauthor,"text"));
-				}
-				if (!StrUtils.isEmptyStr(fi.docprogram)) {
-					itemsBook.add(new BookInfoEntry("book.docprogram", fi.docprogram,"text"));
-				}
-				if (!StrUtils.isEmptyStr(fi.getDocdate())) {
-					itemsBook.add(new BookInfoEntry("book.docdate", fi.getDocdate(),"text"));
-				}
-				//new BookInfoEntry("", ,"text"));
-				if (!StrUtils.isEmptyStr(fi.docsrcurl)) {
-					itemsBook.add(new BookInfoEntry("book.docsrcurl", fi.docsrcurl,"text"));
-				}
-				if (!StrUtils.isEmptyStr(fi.docsrcocr)) {
-					itemsBook.add(new BookInfoEntry("book.docsrcocr", fi.docsrcocr,"text"));
-				}
-				if (!StrUtils.isEmptyStr(fi.docversion)) {
-					itemsBook.add(new BookInfoEntry("book.docversion", fi.docversion,"text"));
-				}
-				bookInfoAddPublisher(fi, itemsBook);
-				itemsBook.add(new BookInfoEntry("section", "section.book_translation","section"));
-				String lfrom = "[empty]";
-				if (!StrUtils.isEmptyStr(fi.lang_from)) lfrom = fi.lang_from;
-				String lto = "[empty]";
-				if (!StrUtils.isEmptyStr(fi.lang_to)) lto = fi.lang_to;
-				itemsBook.add(new BookInfoEntry("book.translation", lfrom + " -> " + lto,"text"));
-				if (itemsPos.size()==1) itemsPos.clear();
-				if (itemsBook.size()==1) itemsBook.clear();
-				if (itemsFile.size()==1) itemsFile.clear();
-				if (itemsSys.size()==1) itemsSys.clear();
-				boolean bSection = true;
-				for (BookInfoEntry s: itemsPos) {
-					if ((bSection)&&(s.infoType.equals("section"))&&(itemsAll.size()>0))
-						itemsAll.remove(itemsAll.size()-1);
-					bSection=s.infoType.equals("section");
-					itemsAll.add(s);
-				}
-				for (BookInfoEntry s: itemsBook) {
-					if ((bSection)&&(s.infoType.equals("section"))&&(itemsAll.size()>0))
-						itemsAll.remove(itemsAll.size()-1);
-					bSection=s.infoType.equals("section");
-					itemsAll.add(s);
-				}
-				for (BookInfoEntry s: itemsFile) {
-					if ((bSection)&&(s.infoType.equals("section"))&&(itemsAll.size()>0))
-						itemsAll.remove(itemsAll.size()-1);
-					bSection=s.infoType.equals("section");
-					itemsAll.add(s);
-				}
-				for (BookInfoEntry s: itemsSys) {
-					if ((bSection)&&(s.infoType.equals("section"))&&(itemsAll.size()>0))
-						itemsAll.remove(itemsAll.size()-1);
-					bSection=s.infoType.equals("section");
-					itemsAll.add(s);
-				}
-				BookInfoDialog dlg = new BookInfoDialog(CoolReader.this, itemsAll, bi, annot,
-						actionType, null, null, currDir);
-				//PictureCameDialog dlg = new PictureCameDialog(CoolReader.this, null, "image/jpeg");
-				dlg.show();
-			}
-		});
+							String genreText = Utils.getGenreText(CoolReader.this, fi, true);
+							if (!StrUtils.isEmptyStr(genreText))
+								itemsBook.add(new BookInfoEntry("book.genre", genreText,"text"));
+							String annot = "";
+							if (!StrUtils.isEmptyStr(fi.annotation)) {
+								annot = fi.annotation;
+							}
+							if (!StrUtils.isEmptyStr(fi.srclang)) {
+								itemsBook.add(new BookInfoEntry("book.srclang", fi.srclang,"text"));
+							}
+							if (!StrUtils.isEmptyStr(fi.translator)) {
+								itemsBook.add(new BookInfoEntry("book.translator", fi.translator,"text"));
+							}
+							itemsBook.add(new BookInfoEntry("book.symcount", ""+fi.symCount,"text"));
+							itemsBook.add(new BookInfoEntry("book.wordcount", ""+fi.wordCount,"text"));
+							String sLeft = getReadingTimeLeft(fi,true);
+							itemsBook.add(new BookInfoEntry("book.minleft", sLeft,"text"));
+							itemsBook.add(new BookInfoEntry("section", "section.book_document","section"));
+							if (!StrUtils.isEmptyStr(fi.docauthor)) {
+								itemsBook.add(new BookInfoEntry("book.docauthor", fi.docauthor,"text"));
+							}
+							if (!StrUtils.isEmptyStr(fi.docprogram)) {
+								itemsBook.add(new BookInfoEntry("book.docprogram", fi.docprogram,"text"));
+							}
+							if (!StrUtils.isEmptyStr(fi.getDocdate())) {
+								itemsBook.add(new BookInfoEntry("book.docdate", fi.getDocdate(),"text"));
+							}
+							//new BookInfoEntry("", ,"text"));
+							if (!StrUtils.isEmptyStr(fi.docsrcurl)) {
+								itemsBook.add(new BookInfoEntry("book.docsrcurl", fi.docsrcurl,"text"));
+							}
+							if (!StrUtils.isEmptyStr(fi.docsrcocr)) {
+								itemsBook.add(new BookInfoEntry("book.docsrcocr", fi.docsrcocr,"text"));
+							}
+							if (!StrUtils.isEmptyStr(fi.docversion)) {
+								itemsBook.add(new BookInfoEntry("book.docversion", fi.docversion,"text"));
+							}
+							bookInfoAddPublisher(fi, itemsBook);
+							itemsBook.add(new BookInfoEntry("section", "section.book_translation","section"));
+							String lfrom = "[empty]";
+							if (!StrUtils.isEmptyStr(fi.lang_from)) lfrom = fi.lang_from;
+							String lto = "[empty]";
+							if (!StrUtils.isEmptyStr(fi.lang_to)) lto = fi.lang_to;
+							itemsBook.add(new BookInfoEntry("book.translation", lfrom + " -> " + lto,"text"));
+							if (itemsPos.size()==1) itemsPos.clear();
+							if (itemsBook.size()==1) itemsBook.clear();
+							if (itemsFile.size()==1) itemsFile.clear();
+							if (itemsSys.size()==1) itemsSys.clear();
+							boolean bSection = true;
+							for (BookInfoEntry s: itemsPos) {
+								if ((bSection)&&(s.infoType.equals("section"))&&(itemsAll.size()>0))
+									itemsAll.remove(itemsAll.size()-1);
+								bSection=s.infoType.equals("section");
+								itemsAll.add(s);
+							}
+							for (BookInfoEntry s: itemsBook) {
+								if ((bSection)&&(s.infoType.equals("section"))&&(itemsAll.size()>0))
+									itemsAll.remove(itemsAll.size()-1);
+								bSection=s.infoType.equals("section");
+								itemsAll.add(s);
+							}
+							for (BookInfoEntry s: itemsFile) {
+								if ((bSection)&&(s.infoType.equals("section"))&&(itemsAll.size()>0))
+									itemsAll.remove(itemsAll.size()-1);
+								bSection=s.infoType.equals("section");
+								itemsAll.add(s);
+							}
+							for (BookInfoEntry s: itemsSys) {
+								if ((bSection)&&(s.infoType.equals("section"))&&(itemsAll.size()>0))
+									itemsAll.remove(itemsAll.size()-1);
+								bSection=s.infoType.equals("section");
+								itemsAll.add(s);
+							}
+							BookInfoDialog dlg = new BookInfoDialog(CoolReader.this, itemsAll, bi, annot,
+									actionType, null, null, currDir);
+							//PictureCameDialog dlg = new PictureCameDialog(CoolReader.this, null, "image/jpeg");
+							dlg.show();
+						}
+					});
+				}));
 	}
 	
 	public void editOPDSCatalog(FileInfo opds) {
@@ -4554,7 +4741,21 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	 * Open location - book, root view, folder...
 	 */
 	public void showLastLocation() {
-		String location = getLastLocation();
+		String location = null;
+		if (startBehaviour == 2) {
+			checkIsShortcuts(FileInfo.STATE_READING_TAG);
+			return;
+		}
+		if (startBehaviour == 3) {
+			checkIsShortcuts(FileInfo.STATE_TO_READ_TAG);
+			return;
+		}
+		if (startBehaviour == 4) {
+			this.showRecentBooks();
+			return;
+		}
+		if (startBehaviour != 1)
+			location = getLastLocation();
 		if (location == null)
 			location = FileInfo.ROOT_DIR_TAG;
 		LAST_LOCATION = location;

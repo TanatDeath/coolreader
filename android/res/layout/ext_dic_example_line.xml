@@ -13,25 +13,42 @@
 	>
 
 	<LinearLayout android:id="@+id/ll_ext_dic_example_line"
-		android:orientation="vertical"
+		android:orientation="horizontal"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:layout_gravity="center_vertical|fill_horizontal"
 		android:baselineAligned="false">
 
+		<ImageView
+				android:id="@+id/btn_speak"
+				style="@style/TextAppearance.Small"
+				android:singleLine="true"
+				android:layout_width="wrap_content"
+				android:minWidth="?android:attr/listPreferredItemHeightSmall"
+				android:layout_height="wrap_content"
+				android:textColor="?attr/colorIcon"
+				android:background="@null"
+				android:src="?attr/attr_icons8_speaker_small"
+				android:tag="tint"
+				android:focusable="true"
+				android:focusableInTouchMode="true"
+				android:layout_gravity="center_vertical"
+				android:layout_marginLeft="25dp"
+				/>
 
 		<TextView android:id="@+id/ext_dic_example_line"
 				style="@style/TextAppearance.Small"
 				android:text=""
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
+				android:layout_weight="1"
 				android:singleLine="false"
 				android:ellipsize="end"
 				android:textColor="?attr/colorIcon"
 				android:textAppearance="?android:attr/textAppearanceMedium"
 				android:textStyle="italic"
 				android:maxLines="5"
-				android:layout_marginLeft="25dp"
+				android:layout_marginLeft="0dp"
 				android:layout_gravity="left" />
 
 	</LinearLayout>

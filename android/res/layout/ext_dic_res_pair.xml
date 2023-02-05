@@ -30,35 +30,78 @@
 			<TableRow
 					android:layout_weight="1"
 					>
-
-				<TextView android:id="@+id/ext_dic_res_pair1"
-						style="@style/TextAppearance.Small"
-						android:text=""
+				<LinearLayout
+						android:orientation="vertical"
 						android:layout_width="0dp"
 						android:layout_weight="1"
 						android:layout_height="wrap_content"
-						android:singleLine="false"
-						android:ellipsize="end"
-						android:textColor="?attr/colorIcon"
-						android:textAppearance="?android:attr/textAppearanceMedium"
-						android:textStyle=""
-						android:maxLines="10"
-						android:layout_marginLeft="5dp"
-						android:layout_gravity="left" />
-				<TextView android:id="@+id/ext_dic_res_pair2"
-						style="@style/TextAppearance.Small"
-						android:text=""
+						android:layout_gravity="center_vertical|fill_horizontal"
+						android:baselineAligned="false">
+					<TextView android:id="@+id/ext_dic_res_pair1"
+							style="@style/TextAppearance.Small"
+							android:text=""
+							android:layout_weight="1"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:singleLine="false"
+							android:ellipsize="end"
+							android:textColor="?attr/colorIcon"
+							android:textAppearance="?android:attr/textAppearanceMedium"
+							android:textStyle=""
+							android:maxLines="10"
+							android:layout_marginLeft="5dp"
+							android:layout_gravity="left" />
+					<ImageView
+							android:id="@+id/btn_speak1"
+							style="@style/TextAppearance.Small"
+							android:singleLine="true"
+							android:layout_width="wrap_content"
+							android:minWidth="?android:attr/listPreferredItemHeightSmall"
+							android:layout_height="wrap_content"
+							android:textColor="?attr/colorIcon"
+							android:background="@null"
+							android:src="?attr/attr_icons8_speaker_small"
+							android:tag="tint"
+							android:layout_marginLeft="5dp"
+							android:layout_gravity="center_vertical"
+							/>
+				</LinearLayout>
+				<LinearLayout
+						android:orientation="vertical"
 						android:layout_width="0dp"
 						android:layout_weight="1"
 						android:layout_height="wrap_content"
-						android:singleLine="false"
-						android:ellipsize="end"
-						android:textColor="?attr/colorIcon"
-						android:textAppearance="?android:attr/textAppearanceMedium"
-						android:textStyle=""
-						android:maxLines="10"
-						android:layout_marginLeft="20dp"
-						android:layout_gravity="left" />
+						android:layout_gravity="center_vertical|fill_horizontal"
+						android:baselineAligned="false">
+					<TextView android:id="@+id/ext_dic_res_pair2"
+							style="@style/TextAppearance.Small"
+							android:text=""
+							android:layout_weight="1"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:singleLine="false"
+							android:ellipsize="end"
+							android:textColor="?attr/colorIcon"
+							android:textAppearance="?android:attr/textAppearanceMedium"
+							android:textStyle=""
+							android:maxLines="10"
+							android:layout_marginLeft="5dp"
+							android:layout_gravity="left" />
+					<ImageView
+							android:id="@+id/btn_speak2"
+							style="@style/TextAppearance.Small"
+							android:singleLine="true"
+							android:layout_width="wrap_content"
+							android:minWidth="?android:attr/listPreferredItemHeightSmall"
+							android:layout_height="wrap_content"
+							android:textColor="?attr/colorIcon"
+							android:background="@null"
+							android:src="?attr/attr_icons8_speaker_small"
+							android:tag="tint"
+							android:layout_marginLeft="5dp"
+							android:layout_gravity="center_vertical"
+							/>
+				</LinearLayout>
 			</TableRow>
 		</TableLayout>
 

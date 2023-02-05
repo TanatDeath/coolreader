@@ -4937,6 +4937,8 @@ public:
         LVContainerRef container = _document->getContainer();
         if (!container.isNull()) {
             LVStreamRef cssStream = container->OpenStream(cssFile.c_str(), LVOM_READ);
+            if (cssStream.isNull())
+                cssStream = container->OpenStream(DecodeHTMLUrlString(cssFile).c_str(), LVOM_READ);
             if (!cssStream.isNull()) {
                 lString32 css;
                 css << LVReadTextFile(cssStream);
@@ -5464,16 +5466,7 @@ void lxmlDocBase::serializeMaps( SerialBuf & buf )
 
     int start = buf.pos();
     buf.putMagic( node_by_id_map_magic );
-    lUInt32 cnt = 0;
-    {
-        LVHashTable<lUInt32,lInt32>::iterator ii = _idNodeMap.forwardIterator();
-        for ( LVHashTable<lUInt32,lInt32>::pair * p = ii.next(); p!=NULL; p = ii.next() ) {
-            cnt++;
-        }
-    }
-    // TODO: investigate why length() doesn't work as count
-    if ( (int)cnt!=_idNodeMap.length() )
-        CRLog::error("_idNodeMap.length=%d doesn't match real item count %d", _idNodeMap.length(), cnt);
+    lUInt32 cnt = _idNodeMap.length();
     buf << cnt;
     if (cnt > 0)
     {
@@ -11673,7 +11666,6 @@ bool ldomXRange::getRectEx( lvRect & rect, bool & isSingleLine )
 void ldomXRange::getSegmentRects( LVArray<lvRect> & rects )
 {
     bool go_on = true;
-    int lcount = 1;
     lvRect lineStartRect = lvRect();
     lvRect nodeStartRect = lvRect();
     lvRect curCharRect = lvRect();
@@ -20236,7 +20228,7 @@ bool LVPageMap::deserialize( ldomDocument * doc, SerialBuf & buf )
     if ( buf.error() )
         return false;
     _page_info_valid = (bool)pageInfoValid;
-    for ( int i=0; i<childCount; i++ ) {
+    for ( lUInt32 i=0; i<childCount; i++ ) {
         LVPageMapItem * item = new LVPageMapItem(doc);
         if ( !item->deserialize( doc, buf ) ) {
             delete item;

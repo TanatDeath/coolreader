@@ -332,9 +332,7 @@ public class UserDicPanel extends LinearLayout implements Settings {
 			// check the text rafting
 			boolean bRafting = false;
 			for (int i = iLen - 1; i > 0; i--) {
-				String s1 = sPrevPage.substring(sPrevPage.length()-i, sPrevPage.length()).trim();
-				String s2 = sPageText.substring(0,i).trim();
-				if (sPrevPage.substring(sPrevPage.length()-i, sPrevPage.length()).trim().equals(
+				if (sPrevPage.substring(sPrevPage.length()-i).trim().equals(
 						sPageText.substring(0,i).trim()
 				)) bRafting = true;
 			}

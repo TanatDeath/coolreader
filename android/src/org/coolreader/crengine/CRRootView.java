@@ -316,6 +316,7 @@ public class CRRootView extends ViewGroup {
 				});
 			}
 			mRecentBooksScroll.addView(view);
+			addTextViewSpacing(mRecentBooksScroll);
 		}
 		mRecentBooksScroll.invalidate();
 	}
@@ -468,6 +469,7 @@ public class CRRootView extends ViewGroup {
 				});
 			}
 			mOnlineCatalogsScroll.addView(view);
+			addTextViewSpacing(mOnlineCatalogsScroll);
 		}
 		mOnlineCatalogsScroll.invalidate();
 		if (readSetting) {
@@ -487,6 +489,20 @@ public class CRRootView extends ViewGroup {
 			mImgSortAZ.setImageDrawable(d);
 			mActivity.tintViewIcons(mImgSortAZ);
 		}
+	}
+
+	private void addTextViewSpacing(ViewGroup v) {
+		LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+				ViewGroup.LayoutParams.WRAP_CONTENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT);
+		llp.setMargins(4, 4, 4, 4);
+		TextView tv = new TextView(mActivity);
+		tv.setText(" ");
+		tv.setPadding(5, 1, 1, 1);
+		tv.setLayoutParams(llp);
+		//tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
+		//tv.setTextColor(mActivity.getTextColor(colorIcon));
+		v.addView(tv);
 	}
 
 	private void updateFilesystems(List<FileInfo> dirs) {
@@ -580,6 +596,7 @@ public class CRRootView extends ViewGroup {
 				return true;
 			});
 			mFilesystemScroll.addView(viewDBX);
+			addTextViewSpacing(mFilesystemScroll);
 
 			View viewYandex = inflater.inflate(R.layout.root_item_library_h, null);
 			ImageView iconYandex = viewYandex.findViewById(R.id.item_icon);
@@ -588,6 +605,7 @@ public class CRRootView extends ViewGroup {
 					R.attr.attr_icons8_yandex, R.drawable.icons8_yandex_logo));
 			mActivity.tintViewIcons(iconYandex,true);
 			labelYandex.setText(R.string.open_book_from_y_short);
+			addTextViewSpacing(mFilesystemScroll);
 			labelYandex.setTextColor(mActivity.getTextColor(colorIcon));
 			labelYandex.setMaxWidth(coverWidth * 25 / 10);
 			viewYandex.setOnClickListener(v -> {
@@ -610,6 +628,7 @@ public class CRRootView extends ViewGroup {
 				}
 			});
 			mFilesystemScroll.addView(viewYandex);
+			addTextViewSpacing(mFilesystemScroll);
 
 			for (final FileInfo item : dirs) {
 				if (item == null)
@@ -617,12 +636,13 @@ public class CRRootView extends ViewGroup {
 				view = inflater.inflate(R.layout.root_item_library_h, null);
 				icon = view.findViewById(R.id.item_icon);
 				label = view.findViewById(R.id.item_name);
-				if (item.getType() == FileInfo.TYPE_DOWNLOAD_DIR)
+				if (item.getType() == FileInfo.TYPE_DOWNLOAD_DIR) {
 					setImageResourceSmall(icon, Utils.resolveResourceIdByAttr(mActivity, R.attr.folder_big_bookmark_drawable, R.drawable.folder_bookmark));
-				else if (item.getType() == FileInfo.TYPE_FS_ROOT)
+				} else if (item.getType() == FileInfo.TYPE_FS_ROOT) {
 					setImageResourceSmall(icon, Utils.resolveResourceIdByAttr(mActivity, R.attr.media_flash_microsd_drawable, R.drawable.media_flash_sd_mmc));
-				else
+				} else {
 					setImageResourceSmall(icon, Utils.resolveResourceIdByAttr(mActivity, R.attr.folder_big_drawable, R.drawable.folder_blue));
+				}
                 mActivity.tintViewIcons(icon,true);
 				String labText = "";
 
@@ -674,6 +694,7 @@ public class CRRootView extends ViewGroup {
 					return false;
 				});
 				mFilesystemScroll.addView(view);
+				addTextViewSpacing(mFilesystemScroll);
 				++idx;
 			}
 			mFilesystemScroll.invalidate();
@@ -819,6 +840,7 @@ public class CRRootView extends ViewGroup {
 					return true;
 				});
 			mLibraryScroll.addView(view);
+			addTextViewSpacing(mLibraryScroll);
 		}
 		mLibraryScroll.invalidate();
 		bLibraryHidden = false;
