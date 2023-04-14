@@ -1035,7 +1035,11 @@ public class CRRootView extends ViewGroup {
 			ReadCalendarDlg dlgCalendar = new ReadCalendarDlg(mActivity);
 			dlgCalendar.show();
 		});
-
+		TextView tvRecentBooks = view.findViewById(R.id.recent_books_tv);
+		tvRecentBooks.setPaintFlags(tvRecentBooks.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+		tvRecentBooks.setOnClickListener(v -> {
+			mActivity.showRecentBooks();
+		});
         btnStateToRead  = view.findViewById(R.id.book_state_toread);
         btnStateToRead.setOnClickListener(v -> {
 			FileInfo dir = new FileInfo();

@@ -168,13 +168,6 @@ public class TranslationDirectionDialog extends BaseDialog {
 						tv_lcid_cp.setText(arrS[5]);
 					}
 				}
-				TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-						{R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-				int colorGrayC = a.getColor(0, Color.GRAY);
-				int colorIcon = a.getColor(1, Color.GRAY);
-				a.recycle();
-				int colorGrayCT = Color.argb(30, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC));
-				int colorGrayCT2 = Color.argb(200, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC));
 				Button btnFrom = view.findViewById(R.id.transl_item_lanf_from);
 				btnFrom.setBackgroundColor(colorGrayCT2);
 				final String[] sArrS = arrS;
@@ -224,13 +217,6 @@ public class TranslationDirectionDialog extends BaseDialog {
 						tv_from.setText(sText);
 					}
 				}
-				TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-						{R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-				int colorGrayC = a.getColor(0, Color.GRAY);
-				int colorIcon = a.getColor(1, Color.GRAY);
-				a.recycle();
-				int colorGrayCT = Color.argb(30, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC));
-				int colorGrayCT2 = Color.argb(200, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC));
 				Button btnFrom = view.findViewById(R.id.transl_item_lanf_select);
 				btnFrom.setBackgroundColor(colorGrayCT2);
 				if (arrS != null) {
@@ -483,14 +469,6 @@ public class TranslationDirectionDialog extends BaseDialog {
 				});
 			}
 		}
-		int colorGrayC;
-		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-		colorGrayC = a.getColor(0, Color.GRAY);
-		int colorIcon = a.getColor(1, Color.GRAY);
-		a.recycle();
-		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		TableLayout tl = (TableLayout) view;
 		FlowLayout ll = new FlowLayout(mCoolReader);
 //		LinearLayout.LayoutParams llp0 = new LinearLayout.LayoutParams(

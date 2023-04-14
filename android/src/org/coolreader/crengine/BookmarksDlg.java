@@ -1,20 +1,6 @@
 package org.coolreader.crengine;
 
-import java.util.ArrayList;
-
-import org.coolreader.CoolReader;
-import org.coolreader.R;
-import org.coolreader.dic.DictsDlg;
-import org.coolreader.options.OptionsDialog;
-import org.coolreader.readerview.ReaderView;
-import org.coolreader.userdic.UserDicDlg;
-import org.coolreader.utils.FileUtils;
-import org.coolreader.utils.StrUtils;
-import org.coolreader.utils.Utils;
-
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -34,11 +20,22 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class BookmarksDlg  extends BaseDialog {
+import org.coolreader.CoolReader;
+import org.coolreader.R;
+import org.coolreader.readerview.ReaderView;
+import org.coolreader.userdic.UserDicDlg;
+import org.coolreader.utils.FileUtils;
+import org.coolreader.utils.StrUtils;
+import org.coolreader.utils.Utils;
+
+import java.util.ArrayList;
+
+public class BookmarksDlg extends BaseDialog {
 	CoolReader mCoolReader;
 	ReaderView mReaderView;
 	private LayoutInflater mInflater;
 	BookInfo mBookInfo;
+	boolean mNotOpenedBook;
 	BookmarkList mList;
 	BookmarksDlg mThis;
 	boolean mOnlyChoose;
@@ -78,15 +75,15 @@ public class BookmarksDlg  extends BaseDialog {
 		
 		public int getItemViewType(int position) {
 			Bookmark bm = (Bookmark)getItem(position);
-			if ( bm==null )
+			if (bm == null)
 				return ITEM_POSITION;
-			switch ( bm.getType() ) {
+			switch (bm.getType()) {
 			case Bookmark.TYPE_COMMENT:
 				return ITEM_COMMENT;
 			case Bookmark.TYPE_CORRECTION:
 				return ITEM_CORRECTION;
 			default:
-				if ( bm.getShortcut()>0 )
+				if (bm.getShortcut() > 0)
 					return ITEM_SHORTCUT;
 				return ITEM_POSITION;
 			}
@@ -118,11 +115,6 @@ public class BookmarksDlg  extends BaseDialog {
 			} else {
 				view = (View)convertView;
 			}
-			int colorIcon;
-			TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-					{R.attr.colorIcon});
-			colorIcon = a.getColor(0, Color.GRAY);
-			a.recycle();
 			View colorCell = view.findViewById(R.id.color_cell);
 			TextView labelView = view.findViewById(R.id.bookmark_item_shortcut);
 			if (labelView!=null) labelView.setTextColor(mActivity.getTextColor(colorIcon));
@@ -243,7 +235,8 @@ public class BookmarksDlg  extends BaseDialog {
 			setOnItemLongClickListener((arg0, arg1, position, arg3) -> {
 				selectedItem = position;
 				selectedItemLong = position;
-				openContextMenu(BookmarkList.this);
+				if (!mNotOpenedBook)
+					openContextMenu(BookmarkList.this);
 				return true;
 			});
 		}
@@ -254,41 +247,46 @@ public class BookmarksDlg  extends BaseDialog {
 		
 		@Override
 		public boolean performItemClick(View view, int position, long id) {
-			if ( mShortcutMode ) {
-				Bookmark b = mBookInfo.findShortcutBookmark(position+1);
-				if ( b==null ) {
-					mReaderView.addBookmark(position+1);
-					mThis.dismiss();
-					return true;
-				}
-				selectedItem = position;
-				openContextMenu(this);
+			//asdf
+			if (mNotOpenedBook) {
+				mActivity.loadDocumentExt(mBookInfo.getFileInfo(),
+						(Bookmark) mAdapter.getItem(position));
+				dismiss();
 			} else {
-				Bookmark bm = (Bookmark)mAdapter.getItem(position);
-				if ( bm!=null ) {
-					chosenBmk = bm;
-					chosenBmkIsSet = true;
-					if (!mOnlyChoose) mReaderView.goToBookmark(bm);
-					if (mObj != null) {
-						if (mObj instanceof BookmarkEditDialog) {
-						    BookmarkEditDialog bed = ((BookmarkEditDialog) mObj);
-                            if (bed.isShowing()) {
-						        bed.BookmarkChooseCallback(bm);
-                            }
-                        }
-                    }
-					dismiss();
+				if (mShortcutMode) {
+					Bookmark b = mBookInfo.findShortcutBookmark(position + 1);
+					if (b == null) {
+						mReaderView.addBookmark(position + 1);
+						mThis.dismiss();
+						return true;
+					}
+					selectedItem = position;
+					openContextMenu(this);
+				} else {
+					Bookmark bm = (Bookmark) mAdapter.getItem(position);
+					if (bm != null) {
+						chosenBmk = bm;
+						chosenBmkIsSet = true;
+						if (!mOnlyChoose) mReaderView.goToBookmark(bm);
+						if (mObj != null) {
+							if (mObj instanceof BookmarkEditDialog) {
+								BookmarkEditDialog bed = ((BookmarkEditDialog) mObj);
+								if (bed.isShowing()) {
+									bed.BookmarkChooseCallback(bm);
+								}
+							}
+						}
+						dismiss();
+					}
 				}
 			}
 			return true;
 		}
-		
-		
 	}
 	
 	final static int SHORTCUT_COUNT = 10;
 	
-	public BookmarksDlg(CoolReader activity, ReaderView readerView, final boolean bOnlyChoose, final Object obj )
+	public BookmarksDlg(CoolReader activity, ReaderView readerView, BookInfo bi, final boolean bOnlyChoose, final Object obj)
 	{
 		super(activity, bOnlyChoose? activity.getResources().getString(R.string.win_title_bookmarks_choose):
 				activity.getResources().getString(R.string.win_title_bookmarks), true, false);
@@ -296,7 +294,15 @@ public class BookmarksDlg  extends BaseDialog {
         mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
 		mReaderView = readerView;
-		mBookInfo = mReaderView.getBookInfo();
+		mBookInfo = bi;
+		mNotOpenedBook = false;
+		if (mBookInfo != null) {
+			mNotOpenedBook = true;
+			mActivity.getDB().loadBookInfo(mBookInfo.getFileInfo(), bookInfo -> {
+				mBookInfo.setBookmarks(bookInfo.getAllBookmarks());
+			});
+		} else
+			mBookInfo = mReaderView.getBookInfo();
 		mOnlyChoose = bOnlyChoose;
 		mObj = obj;
 		setPositiveButtonImage(Utils.resolveResourceIdByAttr(activity, R.attr.cr3_button_add_drawable, R.drawable.cr3_button_add), R.string.mi_bookmark_add);
@@ -307,11 +313,6 @@ public class BookmarksDlg  extends BaseDialog {
 			UserDicDlg dlg = new UserDicDlg(activity,0);
 			dlg.show();
 		});
-		int colorGrayC;
-		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2Contrast});
-		colorGrayC = a.getColor(0, Color.GRAY);
-		a.recycle();
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 
@@ -485,13 +486,15 @@ public class BookmarksDlg  extends BaseDialog {
 		String bookmarkText = "";
 		if (bm != null)
 			bookmarkText = bm.getPosText();
-		if (bookmarkText == null || bookmarkText.length() == 0)
+		if (bookmarkText == null || bookmarkText.length() == 0) {
 			if (bm != null)
 				bookmarkText = bm.getTitleText();
-		if (bookmarkText != null && bookmarkText.length() > 0)
-		    menu.setHeaderTitle(getContext().getString(R.string.context_menu_title_bookmark) + ": " + bookmarkText);
-		else
-		    menu.setHeaderTitle(getContext().getString(R.string.context_menu_title_bookmark));
+		}
+		if (bookmarkText != null && bookmarkText.length() > 0) {
+			menu.setHeaderTitle(getContext().getString(R.string.context_menu_title_bookmark) + ": " + bookmarkText);
+		} else {
+			menu.setHeaderTitle(getContext().getString(R.string.context_menu_title_bookmark));
+		}
 	    for ( int i=0; i<menu.size(); i++ ) {
 	    	MenuItem menuItem = menu.getItem(i);
 	    	if (menuItem.getItemId() == R.id.bookmark_shortcut_goto || menuItem.getItemId() == R.id.bookmark_goto

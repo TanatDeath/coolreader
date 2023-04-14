@@ -133,8 +133,6 @@ public class BookInfoEditDialog extends BaseDialog {
 	}
 
 	private void addTagButton(BookTag bookTag, boolean isEditButton) {
-		int colorIcon = themeColors.get(R.attr.colorIcon);
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		//LinearLayout dicButton = new LinearLayout(mActivity);
 		View buttonView = mInflater.inflate(R.layout.tag_flow_item, null);
 		LinearLayout dicButton = buttonView.findViewById(R.id.tag_flow_item_body);
@@ -466,6 +464,15 @@ public class BookInfoEditDialog extends BaseDialog {
 		btnStateFinished.setTextColor(colorGray);
 		a.recycle();
 		tvProfile = mainView.findViewById(R.id.profile);
+		Button btnBmk = mainView.findViewById(R.id.btn_bookmarks);
+		btnBmk.setTextColor(mActivity.getTextColor(colorIcon));
+		btnBmk.setBackgroundColor(colorGrayC);
+		btnBmk.setOnClickListener(v -> {
+			BookmarksDlg dlg = new BookmarksDlg(mActivity, mActivity.getReaderView(),
+					mBookInfo, false, null);
+			dlg.show();
+			dismiss();
+		});
 		tvFileName = mainView.findViewById(R.id.file_name);
 		edTitle = mainView.findViewById(R.id.book_title);
 		edLanguage = mainView.findViewById(R.id.book_language);

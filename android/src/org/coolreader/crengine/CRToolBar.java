@@ -320,7 +320,7 @@ public class CRToolBar extends ViewGroup {
 		buttonWidth = buttonHeight = sz - BUTTON_SPACING;
 		if (isMultiline)
 			buttonHeight = sz / 2;
-		for (int i=0; i<actionsMore.size(); i++) {
+		for (int i=0; i < actionsMore.size(); i++) {
 			ReaderAction item = actionsMore.get(i);
 			int iconId = item.iconId;
 			if (iconId == 0) {
@@ -338,7 +338,7 @@ public class CRToolBar extends ViewGroup {
 				buttonHeight = h;
 			}
 		}
-		if (isMultiline) {
+		if ((isMultiline) && (!iconActions.isEmpty())) {
 			LinearLayout item = inflateItem(iconActions.get(0));
 			itemHeight = item.getMeasuredHeight() + BUTTON_SPACING;
 		}

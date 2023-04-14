@@ -613,14 +613,6 @@ public class OpenBookFromCloudDlg extends BaseDialog {
 		lblFolder.setText(mYNDList.getFolderText());
 		rgScope.removeView(btnWhole);
 		rgScope.removeView(btnFolder);
-		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-		int colorGray = a.getColor(0, Color.GRAY);
-		int colorGrayC = a.getColor(1, Color.GRAY);
-		int colorIcon = a.getColor(2, Color.GRAY);
-		a.recycle();
-		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		btnSaveOpenedBook.setBackgroundColor(colorGrayCT2);
 		btnSaveOpenedBook.setTextColor(mActivity.getTextColor(colorIcon));
 		btnSaveOpenedBook.setOnClickListener(v -> {

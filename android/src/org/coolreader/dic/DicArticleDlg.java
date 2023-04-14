@@ -39,9 +39,6 @@ public class DicArticleDlg extends BaseDialog {
 
 	public static final Logger log = L.create("dad");
 
-	boolean isEInk = false;
-	HashMap<Integer, Integer> themeColors;
-
 	@Override
 	protected void onPositiveButtonClick()
 	{
@@ -118,8 +115,6 @@ public class DicArticleDlg extends BaseDialog {
 		setCancelable(true);
 		this.mCoolReader = coolReader;
 		mTranslLine = tl;
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(mCoolReader, isEInk);
 		mInflater = LayoutInflater.from(getContext());
 		mDialogView = mInflater.inflate(R.layout.dic_article_dialog, null);
 		if (position == -1) {

@@ -28,9 +28,6 @@ import java.util.HashMap;
 
 public class GotoPageDialog extends BaseDialog {
 
-	HashMap<Integer, Integer> themeColors = null;
-	boolean isEInk;
-
 	public interface GotoPageHandler {
 		boolean validate(String s, boolean isPercent) throws Exception;
 		void onOk(String s, boolean isPercent) throws Exception;
@@ -191,8 +188,6 @@ public class GotoPageDialog extends BaseDialog {
 	public GotoPageDialog(BaseActivity activity, final String title, final String prompt, boolean isNumberEdit, int minValue, int maxValue, int currentValue, final GotoPageHandler handler )
 	{
 		super(activity, title, true, false);
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors((CoolReader) activity, isEInk);
 		this.arrFound = null;
 		this.handler = handler;
 		this.minValue = minValue;
@@ -267,8 +262,7 @@ public class GotoPageDialog extends BaseDialog {
 		inputPerc = layout.findViewById(R.id.input_field_perc);
 		inputPerc.addTextChangedListener(watcherPerc);
 		input.addTextChangedListener(watcher);
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-        TextView promptView = layout.findViewById(R.id.lbl_prompt);
+		TextView promptView = layout.findViewById(R.id.lbl_prompt);
         if (promptView != null) {
         	promptView.setText(prompt);
         }

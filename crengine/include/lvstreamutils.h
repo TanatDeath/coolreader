@@ -143,12 +143,16 @@ void LVRemovePathDelimiter( lString8 & pathName );
 lChar32 LVDetectPathDelimiter( lString32 pathName );
 /// returns path delimiter character
 char LVDetectPathDelimiter( lString8 pathName );
+/// Converts the directory path to an absolute path
+lString32 LVGetAbsolutePath(lString32 pathName);
 /// returns true if absolute path is specified
 bool LVIsAbsolutePath( lString32 pathName );
 /// returns full path to file identified by pathName, with base directory == basePath
 lString32 LVMakeRelativeFilename( lString32 basePath, lString32 pathName );
 // resolve relative links
 lString32 LVCombinePaths( lString32 basePath, lString32 newPath );
+/// returns current working directory
+lString32 LVGetCurrentDirectory();
 
 /// tries to split full path name into archive name and file name inside archive using separator "@/" or "@\"
 bool LVSplitArcName(lString32 fullPathName, lString32 & arcPathName, lString32 & arcItemPathName);

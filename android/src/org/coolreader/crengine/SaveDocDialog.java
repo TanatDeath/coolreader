@@ -36,7 +36,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback {
 
@@ -50,9 +49,6 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 	private CoolReader mActivity;
 	private int mWindowSize;
 	private LayoutInflater mInflater;
-
-	boolean isEInk = false;
-	HashMap<Integer, Integer> themeColors;
 
 	ArrayList<FolderControls> mFolders = new ArrayList<>();
 	FolderControls selectedFolder;
@@ -137,10 +133,6 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 		activity.getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
 		this.mWindowSize = outMetrics.widthPixels < outMetrics.heightPixels ? outMetrics.widthPixels : outMetrics.heightPixels;
 		this.mActivity = activity;
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(mActivity, isEInk);
-		colorIcon = themeColors.get(R.attr.colorIcon);
-		colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		colorGrayCT= Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		if(getWindow().getAttributes().softInputMode== WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED) {
@@ -418,10 +410,6 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 		bookStateToRead.setCompoundDrawablesWithIntrinsicBounds(img2, null, null, null);
 		bookStateReading.setCompoundDrawablesWithIntrinsicBounds(img3, null, null, null);
 		bookStateFinished.setCompoundDrawablesWithIntrinsicBounds(img4, null, null, null);
-		int colorBlue = themeColors.get(R.attr.colorThemeBlue);
-		int colorGreen = themeColors.get(R.attr.colorThemeGreen);
-		int colorGray = themeColors.get(R.attr.colorThemeGray);
-		int colorIcon = themeColors.get(R.attr.colorIcon);
 		bookStateNew.setTextColor(colorIcon);
 		bookStateNew.setOnClickListener(v -> {
 			mChosenState = FileInfo.STATE_NEW;

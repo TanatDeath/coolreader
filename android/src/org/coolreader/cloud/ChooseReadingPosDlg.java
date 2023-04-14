@@ -52,9 +52,6 @@ public class ChooseReadingPosDlg extends BaseDialog {
 
 	public List<CloudFileInfo> mReadingPosList;
 
-	boolean isEInk = false;
-	HashMap<Integer, Integer> themeColors;
-
 	public int cloudMode;
 
 	public final static int ITEM_POSITION=0;
@@ -199,18 +196,6 @@ public class ChooseReadingPosDlg extends BaseDialog {
 	}
 
 	private void paintButtons() {
-		int colorGrayC;
-		int colorBlue;
-		int colorIcon;
-		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeBlue, R.attr.colorIcon});
-		colorGrayC = a.getColor(0, Color.GRAY);
-		colorBlue = a.getColor(1, Color.BLUE);
-		colorIcon = a.getColor(2, Color.GRAY);
-		a.recycle();
-		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		if (isEInk) colorGrayCT=Color.WHITE;
-		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		mCoolReader.tintViewIcons(btnThisDevice, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(btnDateSort, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(btnPercentSort, PorterDuff.Mode.CLEAR,true);
@@ -378,8 +363,6 @@ public class ChooseReadingPosDlg extends BaseDialog {
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(this.mActivity, isEInk);
 		mReadingPosList = new ArrayList<>();
 		for (File f: mMatchingFiles) {
 			if (f.getName().endsWith(".json")) {
@@ -433,8 +416,6 @@ public class ChooseReadingPosDlg extends BaseDialog {
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(this.mActivity, isEInk);
 		mReadingPosList = mYMatchingFiles.fileList;
 		View frame = mInflater.inflate(R.layout.conf_list_dialog, null);
 		initAddButtons(frame);

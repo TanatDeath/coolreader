@@ -26,8 +26,6 @@ public class BookSearchDialog extends BaseDialog {
 	final EditText filenameEdit;
 	final TextView statusText;
 	public final SearchCallback callback;
-	boolean isEInk = false;
-	HashMap<Integer, Integer> themeColors;
 
 	private int searchTaskId = 0;
 	private boolean searchActive = false;
@@ -36,8 +34,6 @@ public class BookSearchDialog extends BaseDialog {
 	public BookSearchDialog(CoolReader activity, SearchCallback callback)
 	{
 		super(activity, activity.getString( R.string.dlg_book_search), true, false);
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(activity, isEInk);
 		mCoolReader = activity;
 		this.callback = callback;
 		setTitle(mCoolReader.getString( R.string.dlg_book_search));
@@ -47,7 +43,6 @@ public class BookSearchDialog extends BaseDialog {
 		titleEdit = view.findViewById(R.id.search_text_title);
 		seriesEdit = view.findViewById(R.id.search_text_series);
 		filenameEdit = view.findViewById(R.id.search_text_filename);
-		int colorIcon = themeColors.get(R.attr.colorIcon);
 		int colorIcon128 = Color.argb(128,Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon));
 		authorEdit.setHintTextColor(colorIcon128);
 		titleEdit.setHintTextColor(colorIcon128);

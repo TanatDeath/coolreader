@@ -41,7 +41,6 @@ import android.os.storage.StorageVolume;
 import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
@@ -791,6 +790,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		log.i("CoolReader.onCreate() entered");
 		super.onCreate(savedInstanceState);
 
+		themeColors = Utils.getThemeColors(this, isEInk);
+
 		isFirstStart = true;
 		justCreated = true;
 		activityIsRunning = false;
@@ -938,7 +939,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	protected void onScreenRotationChanged(int rotation) {
 		screenRotation = rotation;
 		if (null != mReaderView) {
-			mReaderView.doEngineCommand(ReaderCommand.DCMD_SET_ROTATION_INFO_FOR_AA, rotation);
+			//mReaderView.doEngineCommand(ReaderCommand.DCMD_SET_ROTATION_INFO_FOR_AA, rotation);
+			runOnUiThread(() -> mReaderView.doEngineCommand(ReaderCommand.DCMD_SET_ROTATION_INFO_FOR_AA, rotation));
 		}
 	}
 
@@ -1441,6 +1443,16 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			errDialog.setOnDismissListener(dialog -> showRootWindow());
 			errDialog.show();
 		}, 500), true);
+	}
+
+	public void loadDocumentExt(final FileInfo fi, final Bookmark bmk) {
+		loadDocument(fi, null, () -> BackgroundThread.instance().postGUI(() -> {
+			// if document not loaded show error & then root window
+			ErrorDialog errDialog = new ErrorDialog(CoolReader.this, CoolReader.this.getString(R.string.error),
+					CoolReader.this.getString(R.string.cant_open_file, fi.pathname));
+			errDialog.setOnDismissListener(dialog -> showRootWindow());
+			errDialog.show();
+		}, 500), true, bmk);
 	}
 
 	public void loadDocumentFromStreamExt(final InputStream is, final String path) {
@@ -2446,8 +2458,6 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		log.d("nativeHeapAlloc=" + Debug.getNativeHeapAllocatedSize() + ", nativeHeapSize=" + Debug.getNativeHeapSize() + ", info: " + dumpFields(infoFields, info));
 	}
 
-
-
 	@Override
 	public void setCurrentTheme(InterfaceTheme theme) {
 		super.setCurrentTheme(theme);
@@ -2853,11 +2863,20 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 
 	public static final String OPEN_FILE_PARAM = "FILE_TO_OPEN";
-	public void loadDocument(final String item, final Object fileLink, final Runnable doneCallback, final Runnable errorCallback, final boolean forceSync)
+
+	public void loadDocument(final String item, final Object fileLink, final Runnable doneCallback, final Runnable errorCallback,
+							 final boolean forceSync) {
+		loadDocument(item, fileLink, doneCallback, errorCallback, forceSync, null);
+	}
+	public void loadDocument(final String item, final Object fileLink, final Runnable doneCallback, final Runnable errorCallback,
+							 final boolean forceSync, final Bookmark bmk)
 	{
 		runInReader(() -> mReaderView.loadDocument(item, fileLink, forceSync ? () -> {
 			if (null != doneCallback)
 				doneCallback.run();
+			if (bmk != null) {
+				mReaderView.goToBookmark(bmk);
+			}
 			if (BuildConfig.GSUITE_AVAILABLE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 				// Save last opened document on cloud
 				if (mGoogleDriveSyncOpts.Enabled && null != mGoogleDriveSync) {
@@ -2936,6 +2955,14 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		Object link = item.documentFile;
 		if (link == null) link = "";
 		loadDocument(item.getPathName(), link, doneCallback, errorCallback, forceSync);
+	}
+
+	public void loadDocument(FileInfo item, Runnable doneCallback, Runnable errorCallback, boolean forceSync,
+							 Bookmark bmk) {
+		log.d("Activities.loadDocument(" + item.pathname + ")");
+		Object link = item.documentFile;
+		if (link == null) link = "";
+		loadDocument(item.getPathName(), link, doneCallback, errorCallback, forceSync, bmk);
 	}
 
 	/**
@@ -3586,7 +3613,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public void showBookmarksDialog(final boolean bOnlyChoose, final Object obj)
 	{
 		BackgroundThread.instance().executeGUI(() -> {
-			BookmarksDlg dlg = new BookmarksDlg(CoolReader.this, mReaderView, bOnlyChoose, obj);
+			BookmarksDlg dlg = new BookmarksDlg(CoolReader.this, mReaderView, null, bOnlyChoose, obj);
 			dlg.show();
 		});
 	}

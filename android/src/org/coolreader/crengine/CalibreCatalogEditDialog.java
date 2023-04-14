@@ -33,8 +33,6 @@ public class CalibreCatalogEditDialog extends BaseDialog implements FolderSelect
 	private final EditText edtRemoteFolderYD;
 	private final ImageButton btnTestCatalog;
 	private final ImageButton btnChooseCatalog;
-	boolean isEInk;
-	HashMap<Integer, Integer> themeColors;
 	private final Runnable mOnUpdate;
 	private boolean mIsCloud;
 	private String mInitialPath;
@@ -54,7 +52,6 @@ public class CalibreCatalogEditDialog extends BaseDialog implements FolderSelect
 	}
 
 	private void paintScopeButtons() {
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		mCoolReader.tintViewIcons(btnIsLocal, PorterDuff.Mode.CLEAR,true);
@@ -75,8 +72,6 @@ public class CalibreCatalogEditDialog extends BaseDialog implements FolderSelect
 				: R.string.dlg_calibre_catalog_edit_title), true,
 				false);
 		mCoolReader = activity;
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(activity, isEInk);
 		mItem = item;
 		mOnUpdate = onUpdate;
 		mIsCloud = !isLocal;

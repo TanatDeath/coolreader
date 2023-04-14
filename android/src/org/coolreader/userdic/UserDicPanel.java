@@ -359,9 +359,11 @@ public class UserDicPanel extends LinearLayout implements Settings {
 		}
 
 		public void updateUserDicWords() {
-			//if (1 == 1) return;
 			this.wc = 0;
 			this.arrUdeWords.clear();
+			// found error in logs, so lets cleanup
+			if (mCoolReader.getReaderView() == null) return;
+			if (mCoolReader.getReaderView().getDoc() == null) return;
 			int curPage = mCoolReader.getReaderView().getDoc().getCurPage();
 			String sCurPage = getCurPageText();
 			Iterator it = mCoolReader.getmUserDic().entrySet().iterator();

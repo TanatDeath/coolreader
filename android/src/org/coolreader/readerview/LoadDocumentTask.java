@@ -9,6 +9,7 @@ import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.DeviceInfo;
+import org.coolreader.crengine.DocView;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.ReaderCommand;
 import org.coolreader.crengine.Services;
@@ -151,8 +152,28 @@ public class LoadDocumentTask extends Task {
 			if (mReaderView.internalDX == 0 || mReaderView.internalDY == 0) {
 				mReaderView.internalDX = mReaderView.surface.getWidth();
 				mReaderView.internalDY = mReaderView.surface.getHeight();
-				log.d("LoadDocument task: no size defined, resizing using widget size");
-				mReaderView.doc.resize(mReaderView.internalDX, mReaderView.internalDY);
+				log.d("RESIZE: (1) LoadDocument task: no size defined, resizing using widget size: "
+					+ mReaderView.internalDX + "," + mReaderView.internalDY);
+				mReaderView.doc.resize(mReaderView, mReaderView.internalDX, mReaderView.internalDY);
+				if ((mReaderView.internalDX == 100) && (mReaderView.internalDY == 100))
+					BackgroundThread.instance().postGUI(() -> {
+						if (DocView.wasIdleUpdate)
+							if (mReaderView.surface != null)
+								if (
+									(mReaderView.surface.getWidth() != 100) ||
+									(mReaderView.surface.getHeight() != 100)
+								) {
+									if (mReaderView.internalDX == 100)
+										mReaderView.internalDX = mReaderView.surface.getWidth();
+									if (mReaderView.internalDY == 100)
+										mReaderView.internalDY = mReaderView.surface.getHeight();
+									mReaderView.doc.resize(mReaderView,
+											mReaderView.surface.getWidth(),
+											mReaderView.surface.getHeight());
+									log.d("RESIZE (7): additionally resized (" +
+											mReaderView.internalDX + "," + mReaderView.internalDY + ")");
+								}
+					}, 1000);
 			}
 			mReaderView.preparePageImage(0);
 			log.v("updating loaded book info");

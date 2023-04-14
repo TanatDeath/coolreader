@@ -151,10 +151,6 @@ public class DBXInputTokenDialog extends BaseDialog {
 			tokenDelete.setVisibility(View.VISIBLE);
 			tokenDeleteTxt.setVisibility(View.VISIBLE);
 		}
-		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-		int colorGrayC = a.getColor(1, Color.GRAY);
-		a.recycle();
 		tokenDelete.setBackgroundColor(colorGrayC);
 
 		tokenDelete.setOnClickListener(v -> {

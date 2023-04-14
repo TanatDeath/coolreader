@@ -304,7 +304,7 @@ public class CRDBService extends BaseService {
 
 	public void findInOfflineDictDic(String searchStr, String langFrom, String langTo,
 					 boolean extended, final ObjectCallback callback, final Handler handler) {
-		execTask(new Task("findInStarDictDic") {
+		execTask(new Task("findInOfflineDictDic") {
 			@Override
 			public void work() {
 				DicStruct ds = mainDB.findInOfflineDictDic(searchStr, langFrom, langTo, extended);

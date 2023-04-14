@@ -32,6 +32,7 @@ public class OfflineDicInfo {
 	public boolean dslExists;
 	public boolean annExists;
 	public boolean idxExists;
+	public boolean abrvExists;
 	@Expose
 	public boolean dicEnabled = true;
 	@Expose
@@ -58,6 +59,8 @@ public class OfflineDicInfo {
 		annExists = new File(dicPath + "/" + dicNameWOExt + ".ann").exists();
 		dslExists = new File(dicPath + "/" + dicNameWOExt + ".dsl").exists();
 		dslDzExists = new File(dicPath + "/" + dicNameWOExt + ".dsl.dz").exists();
+		abrvExists = new File(dicPath + "/" + dicNameWOExt + "_abrv.dsl").exists() ||
+			new File(dicPath + "/" + dicNameWOExt + "_abrv.dsl.dz").exists();
 	}
 
 }

@@ -75,9 +75,6 @@ public class ExternalDocCameDialog extends BaseDialog {
 	private Button btnSave;
 	private Button btnMove;
 
-	boolean isEInk = false;
-	HashMap<Integer, Integer> themeColors;
-
 	public static final Logger log = L.create("edcd");
 
 	public String extractSuggestedName(String sText) {
@@ -204,8 +201,6 @@ public class ExternalDocCameDialog extends BaseDialog {
 		mLogFileRoot = activity.getSettingsFileF(0).getParent() + "/";
 		this.stype = stype;
 		this.uri = null;
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(mActivity, isEInk);
 		if (obj instanceof Uri) this.uri = (Uri) obj;
 		if (obj instanceof String) sUri = (String) obj;
 		if(getWindow().getAttributes().softInputMode==WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED) {
@@ -302,7 +297,6 @@ public class ExternalDocCameDialog extends BaseDialog {
 
 	private void switchHTML(boolean isHTML) {
 		bThisIsHTML = isHTML;
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		if (btnAsHTML!=null) {
@@ -442,7 +436,6 @@ public class ExternalDocCameDialog extends BaseDialog {
         mInflater = LayoutInflater.from(getContext());
         ViewGroup view = (ViewGroup)mInflater.inflate(R.layout.external_doc_came_dialog, null);
         
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		tvExtPath = view.findViewById(R.id.ext_path);
 		sExistingName = "";
 		String sBaseName = "";

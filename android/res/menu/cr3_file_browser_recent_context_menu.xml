@@ -3,6 +3,7 @@
   xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:title="@string/mi_book_open" android:titleCondensed="@string/mi_book_open" android:id="@+id/book_open"></item>
     <item android:title="@string/mi_book_info" android:titleCondensed="@string/mi_book_info" android:id="@+id/book_info"></item>
+    <item android:title="@string/action_bookmarks" android:titleCondensed="@string/action_bookmarks" android:id="@+id/bookmarks"></item>
     <item android:title="@string/mi_book_edit" android:titleCondensed="@string/mi_book_edit" android:id="@+id/book_edit"></item>
     <item android:title="@string/edit_tags" android:titleCondensed="@string/edit_tags" android:id="@+id/book_tags"></item>
     <item android:title="@string/mi_book_recent_goto" android:titleCondensed="@string/mi_book_recent_goto" android:id="@+id/book_recent_goto"></item>

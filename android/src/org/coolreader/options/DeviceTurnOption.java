@@ -19,20 +19,11 @@ import java.util.List;
 public class DeviceTurnOption extends SubmenuOption {
 
 	final BaseActivity mActivity;
-	final ReaderView mReaderView;
-	int screenWidth;
 
-	public DeviceTurnOption(BaseActivity activity, OptionOwner owner, String label, String property, String addInfo, String filter ) {
+	public DeviceTurnOption(BaseActivity activity, OptionOwner owner, String label, String property, String addInfo, String filter) {
 		super(owner, label, property, addInfo, filter);
 		mActivity = activity;
-		mReaderView = ((CoolReader) mActivity).getmReaderView();
-		screenWidth = mActivity.getWindowManager().getDefaultDisplay().getWidth();
 		this.mProperties = owner.getProperties();
-		List<ReaderAction> actions = ReaderAction.getAvailActions(true);
-		for (ReaderAction a : actions) {
-			Log.i("TAG", "TapZoneOption: " + a.id);
-			this.updateFilteredMark(a.id, a.getNameText(activity), mActivity.getString(a.addInfoR));
-		}
 	}
 
 	View grid;

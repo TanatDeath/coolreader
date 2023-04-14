@@ -131,7 +131,7 @@ public class Scanner extends FileInfoChangeSource {
 	{
 		boolean rrescan = rescan;
 		Set<String> knownItems = null;
-		if ( baseDir.isListed ) {
+		if (baseDir.isListed) {
 			if (rrescan) {
 				baseDir.clear();
 			} else {
@@ -181,15 +181,17 @@ public class Scanner extends FileInfoChangeSource {
 						}
 						// warning: CR code does not contain fb3.zip condition
 						boolean isArc = false;
-						if (mZipScan == 0) isArc = pathName.toLowerCase().endsWith(".zip") && (!pathName.toLowerCase().endsWith("fb3.zip"));
+						// plotn 20230410 - it seems that fb3 was somehow changed...
+						if (mZipScan == 0) isArc = pathName.toLowerCase().endsWith(".zip"); //&& (!pathName.toLowerCase().endsWith("fb3.zip"));
 							else
-								if (mZipScan == 1) isArc = FileUtils.isArchive(f) && (!pathName.toLowerCase().endsWith("fb3.zip"));
+								if (mZipScan == 1) isArc = FileUtils.isArchive(f); // && (!pathName.toLowerCase().endsWith("fb3.zip"));
 								else
-									if (mZipScan == 2) isArc = Engine.isArchive(pathName) && (!pathName.toLowerCase().endsWith("fb3.zip"));
+									if (mZipScan == 2) isArc = Engine.isArchive(pathName); // && (!pathName.toLowerCase().endsWith("fb3.zip"));
 						FileInfo item = !rrescan ? mFileList.get(pathName) : null;
 						boolean isNew = false;
 						if (item == null) {
 							item = new FileInfo(f);
+							item.isArchive = isArc;
 							if (scanzip && isArc) {
 								item = scanZip(item);
 								if (item == null)
@@ -208,6 +210,11 @@ public class Scanner extends FileInfoChangeSource {
 									mFileList.put(pathName, item);
 								}
 								continue;
+							} else {
+								// fix for archives - maybe it should be done in proper way
+								if (isArc && (!scanzip)) {
+									knownItems.remove(pathName);
+								}
 							}
 							isNew = true;
 						}

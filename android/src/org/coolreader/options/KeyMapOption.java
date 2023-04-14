@@ -51,11 +51,11 @@ public class KeyMapOption extends SubmenuOption {
 				drawableAttrId_double, fallbackIconId_double);
 	}
 
-	private void addKey( OptionsListView list, int keyCode, String keyName, EnumSet<OptionsDialog.KeyActionFlag> keyFlags) {
+	private void addKey(OptionsListView list, int keyCode, String keyName, EnumSet<OptionsDialog.KeyActionFlag> keyFlags) {
 		addKey(list, keyCode, keyName, keyFlags, 0, 0, 0, 0, 0, 0);
 	}
 
-	private void addKey( OptionsListView list, int keyCode, String keyName, EnumSet<OptionsDialog.KeyActionFlag> keyFlags,
+	private void addKey(OptionsListView list, int keyCode, String keyName, EnumSet<OptionsDialog.KeyActionFlag> keyFlags,
 						 int drawableAttrId, int fallbackIconId,
 						 int drawableAttrId_long, int fallbackIconId_long,
 						 int drawableAttrId_double, int fallbackIconId_double) {

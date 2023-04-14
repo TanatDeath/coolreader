@@ -28,8 +28,6 @@ public class AskSomeValuesDialog extends BaseDialog {
 	private ArrayList<TextView> textViews = new ArrayList<TextView>();
 	private ArrayList<EditText> editTexts = new ArrayList<EditText>();
 	public final ValuesEnteredCallback callback;
-	boolean isEInk = false;
-	HashMap<Integer, Integer> themeColors = null;
 
 	public AskSomeValuesDialog(CoolReader activity, String sTitle, String sSomeText,
 							   ArrayList<String[]> askValues, ValuesEnteredCallback callback)
@@ -39,15 +37,9 @@ public class AskSomeValuesDialog extends BaseDialog {
 		setTitle(sTitle);
 		this.callback = callback;
 		mInflater = LayoutInflater.from(getContext());
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors((CoolReader) activity, isEInk);
 		View view = mInflater.inflate(R.layout.ask_some_values_dialog, null);
-		TextView someText = (TextView) view.findViewById(R.id.some_text);
+		TextView someText = view.findViewById(R.id.some_text);
 		someText.setText(sSomeText);
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-		int colorGrayCT= Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		int colorIcon = themeColors.get(R.attr.colorIcon);
-		int colorIcon128 = Color.argb(128,Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon));
 		textViews.clear();
 		editTexts.clear();
 		for (int i = 1; i<=10; i++) {

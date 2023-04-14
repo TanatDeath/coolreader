@@ -23,10 +23,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class BrowserViewLayout extends ViewGroup {
-	private CoolReader activity;
+	private CoolReader mCoolReader;
 	private FileBrowser contentView;
 	private View titleView;
 	private View filterView;
@@ -50,9 +49,6 @@ public class BrowserViewLayout extends ViewGroup {
 	private boolean bStateReading = true;
 	private boolean bStateFinished = true;
 
-	boolean isEInk = false;
-	HashMap<Integer, Integer> themeColors;
-
 	private boolean newBooks = true;
 
 	private void setNewOrPopChecked(Button btn) {
@@ -68,7 +64,7 @@ public class BrowserViewLayout extends ViewGroup {
 			}
 		}
 		int colorGrayC;
-		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
+		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.colorThemeGray2Contrast});
 		colorGrayC = a.getColor(0, Color.GRAY);
 		a.recycle();
@@ -76,68 +72,68 @@ public class BrowserViewLayout extends ViewGroup {
 
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 
-		activity.tintViewIcons(btnNew, PorterDuff.Mode.CLEAR,true);
-		activity.tintViewIcons(btnPop, PorterDuff.Mode.CLEAR,true);
+		mCoolReader.tintViewIcons(btnNew, PorterDuff.Mode.CLEAR,true);
+		mCoolReader.tintViewIcons(btnPop, PorterDuff.Mode.CLEAR,true);
 		btnNew.setBackgroundColor(colorGrayCT);
 		btnPop.setBackgroundColor(colorGrayCT);
 		if (newBooks) {
 			btnNew.setBackgroundColor(colorGrayCT2);
-			activity.tintViewIcons(btnNew,true);
+			mCoolReader.tintViewIcons(btnNew,true);
 			contentView.saveParams.newOrPop = 0;
-			if (btn != null) ((CoolReader)activity).showBrowser(FileInfo.LITRES_TAG, contentView.saveParams);
+			if (btn != null) ((CoolReader) mCoolReader).showBrowser(FileInfo.LITRES_TAG, contentView.saveParams);
 		}
 		if (!newBooks) {
 			btnPop.setBackgroundColor(colorGrayCT2);
-			activity.tintViewIcons(btnPop,true);
+			mCoolReader.tintViewIcons(btnPop,true);
 			contentView.saveParams.newOrPop = 1;
-			if (btn != null) ((CoolReader)activity).showBrowser(FileInfo.LITRES_TAG, contentView.saveParams);
+			if (btn != null) ((CoolReader) mCoolReader).showBrowser(FileInfo.LITRES_TAG, contentView.saveParams);
 		}
 	}
 
 	private void paintStateButtons() {
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+		int colorGrayC = mCoolReader.themeColors.get(R.attr.colorThemeGray2Contrast);
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		activity.tintViewIcons(btnStateDir, PorterDuff.Mode.CLEAR,true);
-		activity.tintViewIcons(btnStateNoMark, PorterDuff.Mode.CLEAR,true);
-		activity.tintViewIcons(btnStateToRead, PorterDuff.Mode.CLEAR,true);
-		activity.tintViewIcons(btnStateReading, PorterDuff.Mode.CLEAR,true);
-		activity.tintViewIcons(btnStateFinished, PorterDuff.Mode.CLEAR,true);
-		if (isEInk) colorGrayCT = Color.WHITE;
+		mCoolReader.tintViewIcons(btnStateDir, PorterDuff.Mode.CLEAR,true);
+		mCoolReader.tintViewIcons(btnStateNoMark, PorterDuff.Mode.CLEAR,true);
+		mCoolReader.tintViewIcons(btnStateToRead, PorterDuff.Mode.CLEAR,true);
+		mCoolReader.tintViewIcons(btnStateReading, PorterDuff.Mode.CLEAR,true);
+		mCoolReader.tintViewIcons(btnStateFinished, PorterDuff.Mode.CLEAR,true);
+		if (mCoolReader.isEInk) colorGrayCT = Color.WHITE;
 		if (bStateDir) {
 			btnStateDir.setBackgroundColor(colorGrayCT2);
-			activity.tintViewIcons(btnStateDir,true);
-			if (isEInk) Utils.setSolidButtonEink(btnStateDir);
+			mCoolReader.tintViewIcons(btnStateDir,true);
+			if (mCoolReader.isEInk) Utils.setSolidButtonEink(btnStateDir);
 		} else btnStateDir.setBackgroundColor(colorGrayCT);
 		if (bStateNoMark) {
 			btnStateNoMark.setBackgroundColor(colorGrayCT2);
-			activity.tintViewIcons(btnStateNoMark,true);
-			if (isEInk) Utils.setSolidButtonEink(btnStateNoMark);
+			mCoolReader.tintViewIcons(btnStateNoMark,true);
+			if (mCoolReader.isEInk) Utils.setSolidButtonEink(btnStateNoMark);
 		} else btnStateNoMark.setBackgroundColor(colorGrayCT);
 		if (bStateToRead) {
 			btnStateToRead.setBackgroundColor(colorGrayCT2);
-			activity.tintViewIcons(btnStateToRead,true);
-			if (isEInk) Utils.setSolidButtonEink(btnStateToRead);
+			mCoolReader.tintViewIcons(btnStateToRead,true);
+			if (mCoolReader.isEInk) Utils.setSolidButtonEink(btnStateToRead);
 		}  else btnStateToRead.setBackgroundColor(colorGrayCT);
 		if (bStateReading) {
 			btnStateReading.setBackgroundColor(colorGrayCT2);
-			activity.tintViewIcons(btnStateReading,true);
-			if (isEInk) Utils.setSolidButtonEink(btnStateReading);
+			mCoolReader.tintViewIcons(btnStateReading,true);
+			if (mCoolReader.isEInk) Utils.setSolidButtonEink(btnStateReading);
 		} else btnStateReading.setBackgroundColor(colorGrayCT);
 		if (bStateFinished) {
 			btnStateFinished.setBackgroundColor(colorGrayCT2);
-			activity.tintViewIcons(btnStateFinished,true);
-			if (isEInk) Utils.setSolidButtonEink(btnStateFinished);
+			mCoolReader.tintViewIcons(btnStateFinished,true);
+			if (mCoolReader.isEInk) Utils.setSolidButtonEink(btnStateFinished);
 		} else btnStateFinished.setBackgroundColor(colorGrayCT);
 	}
 
 	private void refreshCurrentDir() {
-		activity.showDirectory(dir, "");
+		mCoolReader.showDirectory(dir, "");
 	}
 
 	public BrowserViewLayout(BaseActivity context, FileBrowser contentView, CRToolBar toolbar, View titleView) {
 		super(context);
-		this.activity = (CoolReader) context;
+		this.mCoolReader = (CoolReader) context;
 		this.contentView = contentView;
 		this.titleView = titleView;
 		this.titleView.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
@@ -146,14 +142,12 @@ public class BrowserViewLayout extends ViewGroup {
 		this.addView(titleView);
 		this.addView(toolbarView);
 		this.addView(contentView);
-		bStateDir = activity.settings().getBool(Settings.PROP_APP_SHOW_FILES_DIR, true);
-		bStateNoMark = activity.settings().getBool(Settings.PROP_APP_SHOW_FILES_NO_MARK, true);
-		bStateToRead = activity.settings().getBool(Settings.PROP_APP_SHOW_FILES_TO_READ, true);
-		bStateReading = activity.settings().getBool(Settings.PROP_APP_SHOW_FILES_READING, true);
-		bStateFinished = activity.settings().getBool(Settings.PROP_APP_SHOW_FILES_FINISHED, true);
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors((CoolReader) activity, isEInk);
-		LayoutInflater inflater = LayoutInflater.from(activity);
+		bStateDir = mCoolReader.settings().getBool(Settings.PROP_APP_SHOW_FILES_DIR, true);
+		bStateNoMark = mCoolReader.settings().getBool(Settings.PROP_APP_SHOW_FILES_NO_MARK, true);
+		bStateToRead = mCoolReader.settings().getBool(Settings.PROP_APP_SHOW_FILES_TO_READ, true);
+		bStateReading = mCoolReader.settings().getBool(Settings.PROP_APP_SHOW_FILES_READING, true);
+		bStateFinished = mCoolReader.settings().getBool(Settings.PROP_APP_SHOW_FILES_FINISHED, true);
+		LayoutInflater inflater = LayoutInflater.from(mCoolReader);
 		bottomBar = (LinearLayout) inflater.inflate(R.layout.browser_bottom_bar, null);
 		bottomBar1Btn = (LinearLayout) inflater.inflate(R.layout.browser_bottom_bar_1btn, null);
 		bottomBarLitres = (LinearLayout) inflater.inflate(R.layout.browser_bottom_bar_litres, null);
@@ -179,7 +173,7 @@ public class BrowserViewLayout extends ViewGroup {
 					int firstVisiblePosition = contentView.mListView.getFirstVisiblePosition();
 					int lastVisiblePosition = contentView.mListView.getLastVisiblePosition();
 					int diff = lastVisiblePosition - firstVisiblePosition;
-					if (isEInk)
+					if (mCoolReader.isEInk)
 						contentView.mListView.setSelection(firstVisiblePosition - ((diff / 4) * 3));
 					else
 						contentView.mListView.smoothScrollToPosition(firstVisiblePosition - ((diff / 4) * 3));
@@ -192,7 +186,7 @@ public class BrowserViewLayout extends ViewGroup {
 					int firstVisiblePosition = contentView.mListView.getFirstVisiblePosition();
 					int lastVisiblePosition = contentView.mListView.getLastVisiblePosition();
 					int diff = lastVisiblePosition - firstVisiblePosition;
-					if (isEInk)
+					if (mCoolReader.isEInk)
 						contentView.mListView.setSelection(lastVisiblePosition+ ((diff/4) * 3));
 					else
 						contentView.mListView.smoothScrollToPosition(lastVisiblePosition+ ((diff/4) * 3));
@@ -213,12 +207,12 @@ public class BrowserViewLayout extends ViewGroup {
 		contentView.setFocusableInTouchMode(false);
 		setFocusable(true);
 		setFocusableInTouchMode(true);
-		activity.tintViewIcons(contentView);
-		activity.tintViewIcons(toolbarView);
-		activity.tintViewIcons(titleView);
-		activity.tintViewIcons(bottomBar);
-		activity.tintViewIcons(bottomBar1Btn);
-		activity.tintViewIcons(bottomBarLitres);
+		mCoolReader.tintViewIcons(contentView);
+		mCoolReader.tintViewIcons(toolbarView);
+		mCoolReader.tintViewIcons(titleView);
+		mCoolReader.tintViewIcons(bottomBar);
+		mCoolReader.tintViewIcons(bottomBar1Btn);
+		mCoolReader.tintViewIcons(bottomBarLitres);
 	}
 	
 	private String browserTitle = "";
@@ -227,7 +221,7 @@ public class BrowserViewLayout extends ViewGroup {
 
 	private void switchFilter(boolean filt) {
 		final LinearLayout ll_path = titleView.findViewById(R.id.ll_path);
-		LayoutInflater inflater = LayoutInflater.from(activity);
+		LayoutInflater inflater = LayoutInflater.from(mCoolReader);
 		if (filt) {
 			filterIsShown = true;
 			ll_path.removeAllViews();
@@ -252,10 +246,10 @@ public class BrowserViewLayout extends ViewGroup {
 			filter_edit.requestFocus();
 			BackgroundThread.instance().postGUI(() -> BackgroundThread.instance()
 					.postBackground(() -> BackgroundThread.instance()
-							.postGUI(() -> KeyboardUtils.showKeyboard(activity))), 200);
+							.postGUI(() -> KeyboardUtils.showKeyboard(mCoolReader))), 200);
 		} else {
 			filterIsShown = false;
-			KeyboardUtils.hideKeyboard(activity, filterView);
+			KeyboardUtils.hideKeyboard(mCoolReader, filterView);
 			if (filterView!=null) ll_path.removeView(filterView);
 			ll_path.removeAllViews();
 			for (TextView tv : arrLblPaths) {
@@ -282,45 +276,45 @@ public class BrowserViewLayout extends ViewGroup {
 		btnStateDir.setOnClickListener(v -> {
 			bStateDir = !bStateDir;
 			paintStateButtons();
-			Properties props = new Properties(activity.settings());
+			Properties props = new Properties(mCoolReader.settings());
 			props.setProperty(Settings.PROP_APP_SHOW_FILES_DIR, bStateDir?"1":"0");
-			activity.setSettings(props, -1, true);
+			mCoolReader.setSettings(props, -1, true);
 			refreshCurrentDir();
 		});
 		btnStateNoMark  = titleView.findViewById(R.id.book_state_nomark);
 		btnStateNoMark.setOnClickListener(v -> {
 			bStateNoMark = !bStateNoMark;
 			paintStateButtons();
-			Properties props = new Properties(activity.settings());
+			Properties props = new Properties(mCoolReader.settings());
 			props.setProperty(Settings.PROP_APP_SHOW_FILES_NO_MARK, bStateNoMark?"1":"0");
-			activity.setSettings(props, -1, true);
+			mCoolReader.setSettings(props, -1, true);
 			refreshCurrentDir();
 		});
 		btnStateToRead  = titleView.findViewById(R.id.book_state_toread);
 		btnStateToRead.setOnClickListener(v -> {
 			bStateToRead = !bStateToRead;
 			paintStateButtons();
-			Properties props = new Properties(activity.settings());
+			Properties props = new Properties(mCoolReader.settings());
 			props.setProperty(Settings.PROP_APP_SHOW_FILES_TO_READ, bStateToRead?"1":"0");
-			activity.setSettings(props, -1, true);
+			mCoolReader.setSettings(props, -1, true);
 			refreshCurrentDir();
 		});
 		btnStateReading  = titleView.findViewById(R.id.book_state_reading);
 		btnStateReading.setOnClickListener(v -> {
 			bStateReading = !bStateReading;
 			paintStateButtons();
-			Properties props = new Properties(activity.settings());
+			Properties props = new Properties(mCoolReader.settings());
 			props.setProperty(Settings.PROP_APP_SHOW_FILES_READING, bStateReading?"1":"0");
-			activity.setSettings(props, -1, true);
+			mCoolReader.setSettings(props, -1, true);
 			refreshCurrentDir();
 		});
 		btnStateFinished = titleView.findViewById(R.id.book_state_finished);
 		btnStateFinished.setOnClickListener(v -> {
 			bStateFinished = !bStateFinished;
 			paintStateButtons();
-			Properties props = new Properties(activity.settings());
+			Properties props = new Properties(mCoolReader.settings());
 			props.setProperty(Settings.PROP_APP_SHOW_FILES_FINISHED, bStateFinished?"1":"0");
-			activity.setSettings(props, -1, true);
+			mCoolReader.setSettings(props, -1, true);
 			refreshCurrentDir();
 		});
 		Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
@@ -335,14 +329,14 @@ public class BrowserViewLayout extends ViewGroup {
 		btnStateReading.setCompoundDrawablesWithIntrinsicBounds(img4, null, null, null);
 		btnStateFinished.setCompoundDrawablesWithIntrinsicBounds(img5, null, null, null);
 
-		int colorIcon = themeColors.get(R.attr.colorIcon);
-		int colorBlue = themeColors.get(R.attr.colorThemeBlue);
-		int colorGreen = themeColors.get(R.attr.colorThemeGreen);
-		int colorGray = themeColors.get(R.attr.colorThemeGray);
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+		int colorIcon = mCoolReader.themeColors.get(R.attr.colorIcon);
+		int colorBlue = mCoolReader.themeColors.get(R.attr.colorThemeBlue);
+		int colorGreen = mCoolReader.themeColors.get(R.attr.colorThemeGreen);
+		int colorGray = mCoolReader.themeColors.get(R.attr.colorThemeGray);
+		int colorGrayC = mCoolReader.themeColors.get(R.attr.colorThemeGray2Contrast);
 
-		btnStateDir.setTextColor(activity.getTextColor(colorIcon));
-		btnStateNoMark.setTextColor(activity.getTextColor(colorIcon));
+		btnStateDir.setTextColor(mCoolReader.getTextColor(colorIcon));
+		btnStateNoMark.setTextColor(mCoolReader.getTextColor(colorIcon));
 		int colorGrayCT=Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 //		btnStateDir.setBackgroundColor(colorGrayCT);
 //		btnStateNoMark.setBackgroundColor(colorGrayCT);
@@ -377,18 +371,18 @@ public class BrowserViewLayout extends ViewGroup {
 				i++;
 				if (dir2!=null) dir2 = dir2.parent;
 				tv.setText("");
-				tv.setTextColor(activity.getTextColor(colorIcon));
+				tv.setTextColor(mCoolReader.getTextColor(colorIcon));
 				if ((dir2 != null)&&(!dir2.isRootDir())) {
 					tv.setPaintFlags(tv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 					final FileInfo dir3 = dir2;
-					tv.setText(FileInfo.getDisplayName(activity, String.valueOf(dir2.getFilename())));
-					tv.setOnClickListener(v -> activity.showDirectory(dir3, ""));
+					tv.setText(FileInfo.getDisplayName(mCoolReader, String.valueOf(dir2.getFilename())));
+					tv.setOnClickListener(v -> mCoolReader.showDirectory(dir3, ""));
 				} else
 					if (i==1) {
 						if (this.dir != null)
 							if (this.dir.isOPDSDir()) {
 								tv.setPaintFlags(0);
-								tv.setText(activity.getString(R.string.downloaded_from_catalog) +
+								tv.setText(mCoolReader.getString(R.string.downloaded_from_catalog) +
 										" " + this.dir.book_downloaded);
 								tv.setOnClickListener(v -> {
 								});
@@ -396,39 +390,39 @@ public class BrowserViewLayout extends ViewGroup {
 					}
 			}
 		ImageButton btnQpNext = (ImageButton)titleView.findViewById(R.id.btn_qp_next1);
-		if (DeviceInfo.isEinkScreen(activity.getScreenForceEink()))
+		if (DeviceInfo.isEinkScreen(mCoolReader.getScreenForceEink()))
 			if (btnQpNext != null)
 				btnQpNext.setOnClickListener(v -> {
 					int firstVisiblePosition = contentView.mListView.getFirstVisiblePosition();
 					int lastVisiblePosition = contentView.mListView.getLastVisiblePosition();
 					int diff = lastVisiblePosition - firstVisiblePosition;
-					if (isEInk)
+					if (mCoolReader.isEInk)
 						contentView.mListView.setSelection(lastVisiblePosition+ ((diff/4) * 3));
 					else
 						contentView.mListView.smoothScrollToPosition(lastVisiblePosition+ ((diff/4) * 3));
 				});
-		activity.tintViewIcons(btnQpNext,true);
+		mCoolReader.tintViewIcons(btnQpNext,true);
 		ImageButton btnQpPrev = (ImageButton)titleView.findViewById(R.id.btn_qp_prev1);
-		if (DeviceInfo.isEinkScreen(activity.getScreenForceEink()))
+		if (DeviceInfo.isEinkScreen(mCoolReader.getScreenForceEink()))
 			if (btnQpPrev != null)
 				btnQpPrev.setOnClickListener(v -> {
 					int firstVisiblePosition = contentView.mListView.getFirstVisiblePosition();
 					int lastVisiblePosition = contentView.mListView.getLastVisiblePosition();
 					int diff = lastVisiblePosition - firstVisiblePosition;
-					if (isEInk)
+					if (mCoolReader.isEInk)
 						contentView.mListView.setSelection(firstVisiblePosition-((diff/4) * 3));
 					else
 						contentView.mListView.smoothScrollToPosition(firstVisiblePosition-((diff/4) * 3));
 				});
-		activity.tintViewIcons(btnQpPrev,true);
+		mCoolReader.tintViewIcons(btnQpPrev,true);
 		LinearLayout llButtons = titleView.findViewById(R.id.llButtons);
-		if (!DeviceInfo.isEinkScreen(activity.getScreenForceEink())) {
+		if (!DeviceInfo.isEinkScreen(mCoolReader.getScreenForceEink())) {
 			llButtons.removeView(btnQpNext);
 			llButtons.removeView(btnQpPrev);
 		}
 		if (titleView.findViewById(R.id.btn_filter) != null) {
 			((ImageButton) titleView.findViewById(R.id.btn_filter)).setOnClickListener(v -> switchFilter(!filterIsShown));
-			activity.tintViewIcons(titleView.findViewById(R.id.btn_filter), true);
+			mCoolReader.tintViewIcons(titleView.findViewById(R.id.btn_filter), true);
 		}
 	}
 
@@ -439,13 +433,13 @@ public class BrowserViewLayout extends ViewGroup {
 		if (bottomBar1Btn != null)
 			progressBar = bottomBar1Btn.findViewById(R.id.progress_b);
 		//progressBar.setVisibility(View.VISIBLE);
-		progressBar.setVisibility((enable && (!isEInk)) ? View.VISIBLE : View.GONE);
+		progressBar.setVisibility((enable && (!mCoolReader.isEInk)) ? View.VISIBLE : View.GONE);
 	}
 
 	public void onThemeChanged(InterfaceTheme theme) {
 		//titleView.setBackgroundResource(theme.getBrowserStatusBackground());
 		//toolbarView.setButtonAlpha(theme.getToolbarButtonAlpha());
-		LayoutInflater inflater = LayoutInflater.from(activity);// activity.getLayoutInflater();
+		LayoutInflater inflater = LayoutInflater.from(mCoolReader);// activity.getLayoutInflater();
 		removeView(titleView);
 		titleView = inflater.inflate(R.layout.browser_status_bar, null);
 		addView(titleView);
@@ -468,7 +462,7 @@ public class BrowserViewLayout extends ViewGroup {
 		int full_t = t;
 		int full_b = b;
 
-		int marg = activity.settings().getInt(Settings.PROP_GLOBAL_MARGIN, 0);
+		int marg = mCoolReader.settings().getInt(Settings.PROP_GLOBAL_MARGIN, 0);
 		l = l + marg;
 		r = r - marg;
 		t = t + marg;
@@ -484,7 +478,7 @@ public class BrowserViewLayout extends ViewGroup {
 			contentView.layout(l + tbWidth, t + titleHeight, r, b);
 			//bottomBar.layout(l + tbWidth, t + titleHeight + contentHeight, r, b);
 			bottomBar.layout(l + tbWidth, b - bottomHeight, r, b);
-			toolbarView.setBackgroundResource(activity.getCurrentTheme().getBrowserToolbarBackground(true));
+			toolbarView.setBackgroundResource(mCoolReader.getCurrentTheme().getBrowserToolbarBackground(true));
 		} else {
 			int tbHeight = toolbarView.getMeasuredHeight();
 			toolbarView.layout(l, t, r, t + tbHeight);
@@ -492,7 +486,7 @@ public class BrowserViewLayout extends ViewGroup {
 			contentView.layout(l, t + titleHeight + tbHeight, r, b);
 			//bottomBar.layout(l, t + titleHeight + tbHeight + contentHeight, r, b);
 			bottomBar.layout(l, b - bottomHeight, r, b);
-			toolbarView.setBackgroundResource(activity.getCurrentTheme().getBrowserToolbarBackground(false));
+			toolbarView.setBackgroundResource(mCoolReader.getCurrentTheme().getBrowserToolbarBackground(false));
 		}
 	}
 
@@ -592,7 +586,7 @@ public class BrowserViewLayout extends ViewGroup {
 			long duration = Utils.timeInterval(menuDownTs);
 			L.v("BrowserViewLayout.onKeyUp(" + keyCode + ") duration = " + duration);
 			if (duration > 700 && duration < 10000)
-				activity.showBrowserOptionsDialog();
+				mCoolReader.showBrowserOptionsDialog();
 			else
 				toolbarView.showOverflowMenu();
 			return true;
@@ -601,7 +595,7 @@ public class BrowserViewLayout extends ViewGroup {
 			long duration = Utils.timeInterval(backDownTs);
 			L.v("BrowserViewLayout.onKeyUp(" + keyCode + ") duration = " + duration);
 			if (duration > 700 && duration < 10000) {
-				activity.finish();
+				mCoolReader.finish();
 			} else {
 				contentView.showParentDirectory();
 			}

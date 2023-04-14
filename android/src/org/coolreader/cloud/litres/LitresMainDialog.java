@@ -294,15 +294,6 @@ public class LitresMainDialog extends BaseDialog {
 		}
 		if ((curFindMode == SM_STARTSWITH) && (curViewType == VT_SEARCH_COLLECTIONS))
 			curFindMode = SM_CONTAINS;
-		int colorGrayC;
-		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2Contrast});
-		colorGrayC = a.getColor(0, Color.GRAY);
-		a.recycle();
-		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		if (isEInk) colorGrayCT = Color.WHITE;
-		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-
 		mCoolReader.tintViewIcons(mBtnContains, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(mBtnStartsWith, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(mBtnStrict, PorterDuff.Mode.CLEAR,true);
@@ -336,15 +327,6 @@ public class LitresMainDialog extends BaseDialog {
 
 			}
 		}
-		int colorGrayC;
-		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2Contrast});
-		colorGrayC = a.getColor(0, Color.GRAY);
-		a.recycle();
-		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		if (isEInk) colorGrayCT = Color.WHITE;
-		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-
 		mCoolReader.tintViewIcons(mBtnSearchPersonsModOnlyAuthors, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(mBtnSearchPersonsModAnyPerson, PorterDuff.Mode.CLEAR,true);
 		mBtnSearchPersonsModOnlyAuthors.setBackgroundColor(colorGrayCT);
@@ -450,10 +432,6 @@ public class LitresMainDialog extends BaseDialog {
 		super(activity, activity.getString( R.string.litres_main), true, false);
 		mCoolReader = activity;
 		LitresConfig.init(mCoolReader);
-		TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-		int colorGrayC = a.getColor(1, Color.GRAY);
-		a.recycle();
 		setTitle(mCoolReader.getString(R.string.litres_main));
 		mInflater = LayoutInflater.from(getContext());
 		View view = mInflater.inflate(R.layout.litres_main_dialog, null);

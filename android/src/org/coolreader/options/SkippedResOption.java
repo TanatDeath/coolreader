@@ -8,11 +8,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 
-import org.coolreader.CoolReader;
 import org.coolreader.R;
-import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.ResizeHistory;

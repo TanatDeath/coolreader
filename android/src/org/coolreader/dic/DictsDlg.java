@@ -62,12 +62,10 @@ public class DictsDlg extends BaseDialog {
 	private EditText edtLangFrom;
 	private EditText edtLangTo;
 	private FlowLayout flQuickTransl;
-	boolean isEInk = false;
 	boolean bDictType0 = true;
 	boolean bDictType1 = true;
 	boolean bDictType2 = false;
 	boolean bDontClose = false;
-	HashMap<Integer, Integer> themeColors;
 
 	List<Dictionaries.DictInfo> dictInfoList;
 
@@ -151,9 +149,9 @@ public class DictsDlg extends BaseDialog {
 						titleTextView.setText(b.name);
 					else
 						titleTextView.setText(b.name + ": " + sAdd);
-					if (b.isOnline) titleTextView.setTextColor(themeColors.get(R.attr.colorThemeGreen));
-					if (b.internal == 4) titleTextView.setTextColor(themeColors.get(R.attr.colorThemeBlue));
-					else if ((!b.isOnline) && (b.internal != 4)) titleTextView.setTextColor(themeColors.get(R.attr.colorIcon));
+					if (b.isOnline) titleTextView.setTextColor(colorGreen);
+					if (b.internal == 4) titleTextView.setTextColor(colorBlue);
+					else if ((!b.isOnline) && (b.internal != 4)) titleTextView.setTextColor(colorIcon);
 				}
 				if (b.dicIcon!=0)
 					ivIcon.setImageDrawable(mCoolReader.getResources().getDrawable(b.dicIcon));
@@ -231,9 +229,6 @@ public class DictsDlg extends BaseDialog {
 	}
 
 	private void paintDictTypeButtons() {
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-		int colorGrayCT= Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		mCoolReader.tintViewIcons(btnDictType0, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(btnDictType1, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(btnDictType2, PorterDuff.Mode.CLEAR,true);
@@ -284,8 +279,6 @@ public class DictsDlg extends BaseDialog {
 			dicButton.setText(button);
 			int newTextSize = mCoolReader.settings().getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
 			dicButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, newTextSize);
-			int colorIcon = themeColors.get(R.attr.colorIcon);
-			int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 			dicButton.setTextColor(mActivity.getTextColor(colorIcon));
 			dicButton.setBackgroundColor(Color.argb(255, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
 			dicButton.setPadding(10, 10, 10, 10);
@@ -328,8 +321,6 @@ public class DictsDlg extends BaseDialog {
 		mCoolReader = activity;
 		mReaderView = readerView;
 		mCallerView = view;
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(activity, isEInk);
 		View frame = mInflater.inflate(R.layout.dict_dialog, null);
 		ImageButton btnMinus1 = frame.findViewById(R.id.dict_dlg_minus1_btn);
 		ImageButton btnMinus2 = frame.findViewById(R.id.dict_dlg_minus2_btn);

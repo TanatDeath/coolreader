@@ -100,7 +100,7 @@ bool LVZipDecodeStream::rewind()
     zUninit();
     // stream
     m_stream->SetPos( 0 );
-    
+
     m_CRC = 0;
     memset( &m_zstream, 0, sizeof(m_zstream) );
     // inbuf
@@ -134,7 +134,7 @@ int LVZipDecodeStream::decodeNext()
     // reserve space for output
     if (m_decodedpos > ARC_OUTBUF_SIZE/2 || (m_zstream.avail_out < ARC_OUTBUF_SIZE / 4 && m_outbytesleft > 0) )
     {
-        
+
         int outpos = (int)(m_zstream.next_out - m_outbuf);
         if ( m_decodedpos > ARC_OUTBUF_SIZE/2 || outpos > ARC_OUTBUF_SIZE*2/4 || m_zstream.avail_out==0 || m_inbytesleft==0 )
         {

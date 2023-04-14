@@ -11,8 +11,8 @@ android {
         multiDexEnabled true
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
-        versionCode 202301301
-        versionName "2023.01.30.1"
+        versionCode 202304091
+        versionName "2023.04.09.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -332,6 +332,7 @@ dependencies {
     implementation 'io.github.dictzip:dictzip:0.13.0'
     // for dsl4j
     implementation 'io.github.eb4j:dsl4j:0.5.3'
+    implementation 'com.ibm.icu:icu4j:51.1'
 //    implementation 'commons-io:commons-io:2.11.0'
 //    implementation 'io.github.eb4j:dsl4j:0.4.5-31-78c49a1bb9-SNAPSHOT'
 //    implementation 'com.google.protobuf:protobuf-java:3.19.4'

@@ -48,9 +48,6 @@ public class ChooseBookmarksDlg extends BaseDialog {
 	private File[] mMatchingFiles;
 	private YNDListFiles mYMatchingFiles;
 
-	boolean isEInk = false;
-	HashMap<Integer, Integer> themeColors;
-
 	public int cloudMode;
 
 	public List<CloudFileInfo> mBookmarksList;
@@ -193,16 +190,6 @@ public class ChooseBookmarksDlg extends BaseDialog {
 	}
 
 	private void paintButtons() {
-		int colorGrayC;
-		int colorIcon;
-		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeBlue, R.attr.colorIcon});
-		colorGrayC = a.getColor(0, Color.GRAY);
-		colorIcon = a.getColor(2, Color.GRAY);
-		a.recycle();
-		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		if (isEInk) colorGrayCT=Color.WHITE;
-		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		mCoolReader.tintViewIcons(btnThisDevice, PorterDuff.Mode.CLEAR,true);
 		if (!bHideThisDevice) {
 			btnThisDevice.setBackgroundColor(colorGrayCT2);
@@ -299,8 +286,6 @@ public class ChooseBookmarksDlg extends BaseDialog {
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(this.mActivity, isEInk);
 		mBookmarksList = new ArrayList<CloudFileInfo>();
 		for (File f: matchingFiles) {
 			if (f.getName().endsWith(".json")) {
@@ -337,8 +322,6 @@ public class ChooseBookmarksDlg extends BaseDialog {
 		//mThis = this; // for inner classes
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(this.mActivity, isEInk);
 		mBookmarksList = matchingFiles.fileList;
 		Comparator<CloudFileInfo> compareByDate = (o1, o2) -> -(o1.created.compareTo(o2.created));
 		Collections.sort(mBookmarksList, compareByDate);

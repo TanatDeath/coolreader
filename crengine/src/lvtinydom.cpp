@@ -5192,6 +5192,10 @@ bool ldomDocument::render( LVRendPageList * pages, LVDocViewCallback * callback,
 //        CRLog::trace("reusing existing format data...");
 //    }
 
+    if ( !_rendered ) {
+        // We have loaded the document and applied styles: drop this cache
+        _styleSheetCache.clear();
+    }
     bool was_just_rendered_from_cache = _just_rendered_from_cache; // cleared by checkRenderContext()
     if ( !checkRenderContext() ) {
         if ( _nodeDisplayStyleHashInitial == NODE_DISPLAY_STYLE_HASH_UNINITIALIZED ) { // happen when just loaded

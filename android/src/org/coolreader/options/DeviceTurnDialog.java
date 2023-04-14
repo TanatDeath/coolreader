@@ -50,16 +50,12 @@ public class DeviceTurnDialog extends BaseDialog {
     private float[] mGravity;
     private float[] mGravityFix;
     private float[] mGravityFixBack;
-    boolean isEInk = false;
-    HashMap<Integer, Integer> themeColors;
     private final Properties mProperties;
 
     public DeviceTurnDialog(String dlgName, BaseActivity activity, Properties properties,
                             String title, View grid, boolean showNegativeButton, boolean windowed) {
         super(dlgName, activity, title, showNegativeButton, windowed);
         mProperties = properties;
-        isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-        themeColors = Utils.getThemeColors(mActivity, isEInk);
         mGrid = grid;
         tvCoord1 = mGrid.findViewById(R.id.tv_device_turn_coord1);
         tvCoord2 = mGrid.findViewById(R.id.tv_device_turn_coord2);
@@ -97,7 +93,6 @@ public class DeviceTurnDialog extends BaseDialog {
         seekPrecision = mGrid.findViewById(R.id.seek_precision);
         seekPrecision.setProgress(Utils.parseInt(mProperties.getProperty(Settings.PROP_APP_DEVICE_TURN + ".precision"), 10));
         tvTestArea = mGrid.findViewById(R.id.tv_test_area);
-        int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
         btnFixTurn = mGrid.findViewById(R.id.fix_turn);
         btnFixTurnBack = mGrid.findViewById(R.id.fix_turn_back);
         btnFixTurn.setBackgroundColor(colorGrayC);

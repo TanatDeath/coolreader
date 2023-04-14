@@ -54,8 +54,6 @@ public class UserDicDlg extends BaseDialog {
 	final Button btnAll2;
 	final ImageButton searchButton;
 	final EditText selEdit;
-	HashMap<Integer, Integer> themeColors;
-	boolean isEInk = false;
 
 	private ArrayList<UserDicEntry> mUserDic = new ArrayList<>();
 	public static ArrayList<DicSearchHistoryEntry> mDicSearchHistoryAll = new ArrayList<>();
@@ -68,10 +66,6 @@ public class UserDicDlg extends BaseDialog {
 	}
 
 	private void paintScopeButtons() {
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		int colorGrayE=Color.argb(100,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		mCoolReader.tintViewIcons(btnPage2, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(btnBook2, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(btnAll2, PorterDuff.Mode.CLEAR,true);
@@ -341,10 +335,6 @@ public class UserDicDlg extends BaseDialog {
 	}
 
 	private void setChecked(ImageButton btn) {
-		int colorIcon = themeColors.get(R.attr.colorIcon);
-		int colorIconL = themeColors.get(R.attr.colorIconL);
-		int colorGray = themeColors.get(R.attr.colorThemeGray2);
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		rb_descr.setText(btn.getContentDescription()+" ");
 		btnPage2.setEnabled(true);
 		btnPage2.setTextColor(mActivity.getTextColor(colorIcon));
@@ -448,8 +438,6 @@ public class UserDicDlg extends BaseDialog {
 		super(activity, activity.getResources().getString(R.string.win_title_user_dic), false, true);
 		mInflater = LayoutInflater.from(getContext());
 		mCoolReader = activity;
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(activity, isEInk);
 		mUserDic.clear();
 		for (UserDicEntry ude: activity.getmReaderFrame().getUserDicPanel().getArrUdeWords()) {
 			if (ude.getIs_citation()==openPage)

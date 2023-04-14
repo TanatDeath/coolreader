@@ -4,6 +4,7 @@ package org.coolreader.crengine;
 import android.graphics.Bitmap;
 
 import org.coolreader.CoolReader;
+import org.coolreader.readerview.ReaderView;
 
 public class DocView {
 
@@ -12,6 +13,8 @@ public class DocView {
 	public static final int SWAP_DONE = 0;
 	public static final int SWAP_TIMEOUT = 1;
 	public static final int SWAP_ERROR = 2;
+
+	public static boolean wasIdleUpdate = false;
 
 	private final Object mutex;
 
@@ -277,7 +280,8 @@ public class DocView {
 	 * @param dx
 	 * @param dy
 	 */
-	public void resize(int dx, int dy) {
+	public void resize(ReaderView readerView, int dx, int dy) {
+		wasIdleUpdate = ((dx == 100) && (dy == 100));
 		synchronized(mutex) {
 			log.d("DocView.resize(" + dx + ", "+ dy + ")");
 			resizeInternal(dx, dy);

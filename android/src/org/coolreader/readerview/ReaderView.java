@@ -560,7 +560,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private KeyEvent trackedKeyEvent = null;
 	private ReaderAction actionToRepeat = null;
 	private boolean repeatActionActive = false;
-	private SparseArray<Long> keyDownTimestampMap = new SparseArray<Long>();
+	private SparseArray<Long> keyDownTimestampMap = new SparseArray<>();
 
 	public int translateKeyCode(int keyCode) {
 		if (DeviceInfo.REVERT_LANDSCAPE_VOLUME_KEYS && (mActivity.getScreenOrientation() & 1) != 0) {
@@ -2808,7 +2808,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	public void doEngineCommand(final ReaderCommand cmd, final int param)
 	{
-		doEngineCommand( cmd, param, null );
+		doEngineCommand(cmd, param, null);
 	}
 
 	public void doEngineCommand(final ReaderCommand cmd, final int param, final Runnable doneHandler)
@@ -3834,11 +3834,53 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (requestedWidth > 0 && requestedHeight > 0) {
 				internalDX = requestedWidth;
 				internalDY = requestedHeight;
-				doc.resize(internalDX, internalDY);
+				log.d("RESIZE: (2): "
+						+ internalDX + "," + internalDY);
+				doc.resize(ReaderView.this, internalDX, internalDY);
+				if ((internalDX == 100) && (internalDY == 100))
+					BackgroundThread.instance().postGUI(() -> {
+						if (DocView.wasIdleUpdate)
+							if (ReaderView.this.surface != null)
+								if (
+										(ReaderView.this.surface.getWidth() != 100) ||
+												(ReaderView.this.surface.getHeight() != 100)
+								) {
+									if (internalDX == 100)
+										internalDX = ReaderView.this.surface.getWidth();
+									if (internalDY == 100)
+										internalDY = ReaderView.this.surface.getHeight();
+									doc.resize(ReaderView.this,
+											ReaderView.this.surface.getWidth(),
+											ReaderView.this.surface.getHeight());
+									log.d("RESIZE (8): additionally resized (" +
+											ReaderView.this.internalDX + "," + ReaderView.this.internalDY + ")");
+								}
+					}, 1000);
 			} else {
 				internalDX = surface.getWidth();
 				internalDY = surface.getHeight();
-				doc.resize(internalDX, internalDY);
+				log.d("RESIZE: (3): "
+						+ internalDX + "," + internalDY);
+				doc.resize(ReaderView.this, internalDX, internalDY);
+				if ((internalDX == 100) && (internalDY == 100))
+					BackgroundThread.instance().postGUI(() -> {
+						if (DocView.wasIdleUpdate)
+							if (ReaderView.this.surface != null)
+								if (
+										(ReaderView.this.surface.getWidth() != 100) ||
+												(ReaderView.this.surface.getHeight() != 100)
+								) {
+									if (internalDX == 100)
+										internalDX = ReaderView.this.surface.getWidth();
+									if (internalDY == 100)
+										internalDY = ReaderView.this.surface.getHeight();
+									doc.resize(ReaderView.this,
+											ReaderView.this.surface.getWidth(),
+											ReaderView.this.surface.getHeight());
+									log.d("RESIZE (9): additionally resized (" +
+											ReaderView.this.internalDX + "," + ReaderView.this.internalDY + ")");
+								}
+					}, 1000);
 			}
 		}
 
@@ -4006,17 +4048,18 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 //	}
 
 	void requestResize(int width, int height) {
+		log.v("requestResize(" + width + ", " + height + ")");
 		boolean bNeed = (width != lastsetWidth) || (height != lastsetHeight);
 		// check if orientation was switched
 		boolean bSwitched = false;
 		if (
 				(
-						((width>height) && (lastsetWidth<lastsetHeight))
-								||
-								((width<height) && (lastsetWidth>lastsetHeight))
+					((width>height) && (lastsetWidth<lastsetHeight))
+					||
+					((width<height) && (lastsetWidth>lastsetHeight))
 				) &&
-						(width != lastsetWidth) &&
-						(height != lastsetHeight)
+					(width != lastsetWidth) &&
+					(height != lastsetHeight)
 		) bSwitched = true;
 		Iterator it = mActivity.getmBaseDialog().entrySet().iterator();
 		while (it.hasNext()) {
@@ -4114,6 +4157,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 
 	void checkSize() {
 		boolean changed = (requestedWidth != internalDX) || (requestedHeight != internalDY);
+		log.d("checkSize() : did not change");
 		if (!changed)
 			return;
 		//NB: buggins method of active dialog tracking - possibly not needed for me. Disabled
@@ -4155,8 +4199,46 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					}
 					internalDX = requestedWidth;
 					internalDY = requestedHeight;
-					log.d("ResizeTask: resizeInternal(" + internalDX + "," + internalDY + ")");
-					doc.resize(internalDX, internalDY);
+					log.d("RESIZE (4): ResizeTask: resizeInternal(" + internalDX + "," + internalDY + ")");
+					if ((internalDX == 100) && (internalDY == 100))
+						BackgroundThread.instance().postGUI(() -> {
+							if (DocView.wasIdleUpdate)
+								if (ReaderView.this.surface != null)
+									if (
+											(ReaderView.this.surface.getWidth() != 100) ||
+													(ReaderView.this.surface.getHeight() != 100)
+									) {
+										if (internalDX == 100)
+											internalDX = ReaderView.this.surface.getWidth();
+										if (internalDY == 100)
+											internalDY = ReaderView.this.surface.getHeight();
+										doc.resize(ReaderView.this,
+												ReaderView.this.surface.getWidth(),
+												ReaderView.this.surface.getHeight());
+										log.d("RESIZE (9): additionally resized (" +
+											ReaderView.this.internalDX + "," + ReaderView.this.internalDY + ")");
+									}
+						}, 1000);
+					doc.resize(ReaderView.this, internalDX, internalDY);
+					if ((internalDX == 100) && (internalDY == 100))
+						BackgroundThread.instance().postGUI(() -> {
+							if (DocView.wasIdleUpdate)
+								if (ReaderView.this.surface != null)
+									if (
+											(ReaderView.this.surface.getWidth() != 100) ||
+													(ReaderView.this.surface.getHeight() != 100)
+									) {
+										if (internalDX == 100)
+											internalDX = ReaderView.this.surface.getWidth();
+										if (internalDY == 100)
+											internalDY = ReaderView.this.surface.getHeight();
+										doc.resize(ReaderView.this,
+												ReaderView.this.surface.getWidth(),
+												ReaderView.this.surface.getHeight());
+										log.d("RESIZE (10): additionally resized (" +
+												ReaderView.this.internalDX + "," + ReaderView.this.internalDY + ")");
+									}
+						}, 1000);
 				}
 				public void done() {
 					clearImageCache();
@@ -5902,8 +5984,27 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (internalDX == 0 && internalDY == 0) {
 				internalDX = requestedWidth;
 				internalDY = requestedHeight;
-				log.d("OnLoadFileEnd: resizeInternal(" + internalDX + "," + internalDY + ")");
-				doc.resize(internalDX, internalDY);
+				log.d("RESIZE (5): OnLoadFileEnd: resizeInternal(" + internalDX + "," + internalDY + ")");
+				doc.resize(ReaderView.this, internalDX, internalDY);
+				if ((internalDX == 100) && (internalDY == 100))
+					BackgroundThread.instance().postGUI(() -> {
+						if (DocView.wasIdleUpdate)
+							if (ReaderView.this.surface != null)
+								if (
+									(ReaderView.this.surface.getWidth() != 100) ||
+					 			    (ReaderView.this.surface.getHeight() != 100)
+								) {
+									if (internalDX == 100)
+										internalDX = ReaderView.this.surface.getWidth();
+									if (internalDY == 100)
+										internalDY = ReaderView.this.surface.getHeight();
+									doc.resize(ReaderView.this,
+											ReaderView.this.surface.getWidth(),
+											ReaderView.this.surface.getHeight());
+									log.d("RESIZE (11): additionally resized (" +
+											ReaderView.this.internalDX + "," + ReaderView.this.internalDY + ")");
+								}
+					}, 1000);
 			}
 		}
 
@@ -6474,9 +6575,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		Long keyDownTs = keyDownTimestampMap.get(keyCode);
 		if (keyDownTs != null && System.currentTimeMillis()-keyDownTs >= LONG_KEYPRESS_TIME)
 			isLongPress = true;
-		ReaderAction action = ReaderAction.findForKey( keyCode, mSettings );
-		ReaderAction longAction = ReaderAction.findForLongKey( keyCode, mSettings );
-		ReaderAction dblAction = ReaderAction.findForDoubleKey( keyCode, mSettings );
+		ReaderAction action = ReaderAction.findForKey(keyCode, mSettings);
+		ReaderAction longAction = ReaderAction.findForLongKey(keyCode, mSettings);
+		ReaderAction dblAction = ReaderAction.findForDoubleKey(keyCode, mSettings);
 		stopTracking();
 
 /*		if ( keyCode>=KeyEvent.KEYCODE_0 && keyCode<=KeyEvent.KEYCODE_9 && tracked ) {
@@ -6605,8 +6706,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		surface.setFocusableInTouchMode(true);
 		// set initial size to exclude java.lang.IllegalArgumentException in Bitmap.createBitmap(0, 0)
 		// surface.getWidth() at this point return 0
+		log.d("RESIZE (6): surface.getWidth() = " + surface.getWidth());
 		requestResize(600, 800);
-		requestedWidth = 100;
+		requestedWidth = 100; //asdf
 		requestedHeight = 100;
 
 		BackgroundThread.instance().postBackground(() -> {

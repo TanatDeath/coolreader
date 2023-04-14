@@ -100,6 +100,9 @@ public class BaseActivity extends Activity implements Settings {
 
 	public int iCutoutMode = 0; // for cutout screens
 
+	public boolean isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
+	public HashMap<Integer, Integer> themeColors = null;
+
 	public CoolReader asCoolReader() {
 		return (CoolReader) this;
 	}
@@ -254,7 +257,6 @@ public class BaseActivity extends Activity implements Settings {
 		setLanguage(lang);
 		setCurrentTheme(theme);
 
-		
 		setScreenBacklightDuration(props.getInt(ReaderView.PROP_APP_SCREEN_BACKLIGHT_LOCK, 3));
 
 		setFullscreen(props.getBool(ReaderView.PROP_APP_FULLSCREEN, DeviceInfo.isEinkScreen(getScreenForceEink())));

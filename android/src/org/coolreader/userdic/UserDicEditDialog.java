@@ -68,9 +68,6 @@ public class UserDicEditDialog extends BaseDialog {
 	}
 
 	private void paintScopeButtons() {
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		mCoolReader.tintViewIcons(btnIsUd, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(btnIsCite, PorterDuff.Mode.CLEAR,true);
 		if (getCheckedFromTag(btnIsUd.getTag())) {
@@ -115,8 +112,6 @@ public class UserDicEditDialog extends BaseDialog {
 		udLang = view.findViewById(R.id.ud_lang);
 		udLang.setText(ude.getLanguage());
 		btnTranslMore = view.findViewById(R.id.btn_transl_more);
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		btnTranslMore.setBackgroundColor(colorGrayCT);
 		Utils.setSolidButton1(btnTranslMore);
 		if (isEInk) Utils.setSolidButtonEink(btnTranslMore);

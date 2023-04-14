@@ -34,9 +34,6 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 	private View mLicenseTab;
 	private View mDonationTab;
 
-	boolean isEInk = false;
-	HashMap<Integer, Integer> themeColors;
-
 	private boolean isPackageInstalled( String packageName ) {
 		try {
 			mActivity.getPackageManager().getApplicationInfo(packageName, 0);
@@ -56,8 +53,6 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 	}
 	
 	private void setupDonationButton( final Button btn, final String packageName ) {
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-		int colorIcon = themeColors.get(R.attr.colorIcon);
 		if ( isPackageInstalled(packageName)) {
 			btn.setEnabled(false);
 			btn.setText(R.string.dlg_about_donation_installed);
@@ -71,8 +66,6 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 	}
 
 	private void setupInAppDonationButton( final Button btn, final double amount ) {
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-		int colorIcon = themeColors.get(R.attr.colorIcon);
 		btn.setText("$" + amount);
 		btn.setBackgroundColor(colorGrayC);
 		btn.setTextColor(this.mActivity.getTextColor(colorIcon));
@@ -96,8 +89,6 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 	{
 		super(activity);
 		mActivity = activity;
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(mActivity, isEInk);
 		//boolean isFork = !mActivity.getPackageName().equals(CoolReader.class.getPackage().getName());
 		boolean isFork = true;
 		setTitle(R.string.dlg_about);

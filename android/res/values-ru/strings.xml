@@ -1984,6 +1984,7 @@
     <string name="cannot_delete_temp_dic_file">Невозможно удалить временный файл словаря. Удалите его вручную</string>
     <string name="unpack_dic">Распаковка словаря</string>
     <string name="dic_index_create">Создание индекса словаря</string>
+    <string name="cnange_encoding">Смена кодировки</string>
     <string name="storage_internal">Внутреннее хранилище</string>
     <string name="storage_sd_card">SD карта</string>
     <string name="root_directory">Корневая папка</string>
@@ -2066,5 +2067,8 @@
     <string name="start_behaviour_3">Показать список \'К прочтению\'</string>
     <string name="start_behaviour_4">Показать список \'последние\'</string>
     <string name="start_behaviour_5">Корневая папка</string>
+    <string name="options_hardware_keys">Аппаратные кнопки (дополнительные)</string>
+    <string name="options_hardware_keys_add_info">Позволяет сконфигурировать дополнительные аппаратные кнопки (если они есть (на таких устройствах, как BlackBerry, Uniherz Titan) или если подключена физическая клавиатура)</string>
+    <string name="cannot_rename_file">невозможно переименовать файл</string>
 </resources>
 

@@ -35,7 +35,7 @@ protected:
     int m_read_buffer_pos;
     bool m_eof;
 
-    void checkEof();
+    void checkEof(int bytes_needed);
 
     inline lChar32 ReadCharFromBuffer()
     {

@@ -35,9 +35,6 @@ public class ReadCalendarDlg extends BaseDialog {
 
 	public static final Logger log = L.create("rcd");
 
-	boolean isEInk = false;
-	HashMap<Integer, Integer> themeColors;
-
 	@Override
 	protected void onPositiveButtonClick() {
 		cancel();
@@ -108,15 +105,11 @@ public class ReadCalendarDlg extends BaseDialog {
 	private void whenCreate(CoolReader coolReader) {
 		setCancelable(true);
 		this.mCoolReader = coolReader;
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(mCoolReader, isEInk);
 		mInflater = LayoutInflater.from(getContext());
 		mDialogView = mInflater.inflate(R.layout.calendar_stats_dialog, null);
 		mBody = mDialogView.findViewById(R.id.calendar_stats_list);
 		Button btnPrev = mDialogView.findViewById(R.id.btn_calendar_stats_prev);
 		Button btnNext = mDialogView.findViewById(R.id.btn_calendar_stats_next);
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-		int colorGrayCT = Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		btnPrev.setBackgroundColor(colorGrayC);
 		btnNext.setBackgroundColor(colorGrayC);
 		if (isEInk) Utils.setSolidButtonEink(btnPrev);

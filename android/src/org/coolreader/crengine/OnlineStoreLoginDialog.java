@@ -51,15 +51,6 @@ public class OnlineStoreLoginDialog extends BaseDialog {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		int colorGray;
-		int colorGrayC;
-		int colorIcon;
-		TypedArray a = this.mActivity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon});
-		colorGray = a.getColor(0, Color.GRAY);
-		colorGrayC = a.getColor(1, Color.GRAY);
-		colorIcon = a.getColor(2, Color.GRAY);
-		a.recycle();
 		int colorGrayCT= colorGrayC;// Color.argb(128,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 
 		mInflater = LayoutInflater.from(getContext());

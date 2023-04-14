@@ -1,4 +1,4 @@
-package org.coolreader.dic;
+	package org.coolreader.dic;
 
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,10 +29,8 @@ import com.google.gson.GsonBuilder;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BackgroundThread;
-import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.BaseListView;
-import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
@@ -48,11 +45,20 @@ import org.dict.zip.RandomAccessInputStream;
 import org.dict.zip.RandomAccessOutputStream;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 
 import io.github.eb4j.dsl.DslDictionary;
@@ -68,9 +74,6 @@ public class OfflineDicsDlg extends BaseDialog {
 	public static ProgressDialog progressDlg;
 
 	public static final Logger log = L.create("odd");
-
-	boolean isEInk = false;
-	HashMap<Integer, Integer> themeColors;
 
 	@Override
 	protected void onPositiveButtonClick()
@@ -145,9 +148,6 @@ public class OfflineDicsDlg extends BaseDialog {
 		}
 
 		private void paintFormatButtons() {
-//			int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-//			int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-//			int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 //			int colorGrayE=Color.argb(100,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 //			mCoolReader.tintViewIcons(btnPage2, PorterDuff.Mode.CLEAR,true);
 //			mCoolReader.tintViewIcons(btnBook2, PorterDuff.Mode.CLEAR,true);
@@ -226,7 +226,6 @@ public class OfflineDicsDlg extends BaseDialog {
 				tvVersion.setText(sdi.dicVersion + "; " + wcnt);
 			tvDesc.setText(sdi.dicDescription);
 			btnConvert.setText(R.string.convert_dic);
-			int colorGray = themeColors.get(R.attr.colorThemeGray2);
 			btnConvert.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
 			if (isEInk) Utils.setSolidButtonEink(btnConvert);
 			btnConvert.setPadding(10, 20, 10, 20);
@@ -304,9 +303,6 @@ public class OfflineDicsDlg extends BaseDialog {
 			} else {
 				btnConvert.setPaintFlags(btnConvert.getPaintFlags() & (~ Paint.UNDERLINE_TEXT_FLAG));
 			}
-			int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-			int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-			int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 			int colorGrayE=Color.argb(100,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 			mCoolReader.tintViewIcons(btnAsHtml, PorterDuff.Mode.CLEAR,true);
 			mCoolReader.tintViewIcons(btnAsText, PorterDuff.Mode.CLEAR,true);
@@ -391,23 +387,128 @@ public class OfflineDicsDlg extends BaseDialog {
 
 	@RequiresApi(api = Build.VERSION_CODES.O)
 	private void convertLingvoDslDic(OfflineDicInfo sdi, Button btnConvert) {
+		if ((!sdi.dslExists) && (sdi.dslDzExists)) {
+			progressDlg = ProgressDialog.show(mCoolReader,
+					mCoolReader.getString(R.string.unpack_dic),
+					mCoolReader.getString(R.string.unpack_dic),
+					true, false, null);
+			BackgroundThread.instance().postGUI(() -> {
+				String s = doUnzip(sdi);
+				if (progressDlg.isShowing()) progressDlg.dismiss();
+				sdi.fillMarks();
+				convertLingvoDslDicInternal(sdi, btnConvert);
+			});
+		} else
+			convertLingvoDslDicInternal(sdi, btnConvert);
+	}
+
+	private void convertLingvoDslFileEncoding(OfflineDicInfo sdi, String enc, boolean abrv,
+			Button btnConvert) {
+		try {
+			Reader in = new InputStreamReader(new FileInputStream(
+					sdi.dicPath + "/" + sdi.dicNameWOExt + (abrv? "_abrv": "") + ".dsl.original"),
+					enc);
+			//StandardCharsets.UTF_16);
+			Writer out = new OutputStreamWriter(new FileOutputStream(
+					sdi.dicPath + "/" + sdi.dicNameWOExt + (abrv? "_abrv": "") + ".dsl"),
+					StandardCharsets.UTF_8);
+			char cbuf[] = new char[2048];
+			int len;
+			while ((len = in.read(cbuf, 0, cbuf.length)) != -1) {
+				out.write(cbuf, 0, len);
+			}
+		} catch (IOException e) {
+			BackgroundThread.instance().postGUI(() -> {
+				ArrayList<String> sButtons = new ArrayList<>();
+				sButtons.add(0,"*" + mActivity.getString(R.string.unhandled_error) + ": " +
+						e.getMessage());
+				SomeButtonsToolbarDlg.showDialog(mCoolReader, btnConvert, 0, true,
+						"", sButtons, null, (o22, btnPressed) -> {});
+				mActivity.showToast(mActivity.getString(R.string.unhandled_error));
+				log.e("Lingvo DSL encoding change problem: " + e.getMessage());
+			});
+		}
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.O)
+	private void convertLingvoDslDicInternal(OfflineDicInfo sdi, Button btnConvert) {
+		String enc = FileUtils.fileGuessEncoding(sdi.dicPath + "/" + sdi.dicNameWOExt + ".dsl");
+		if ((!"UTF-8".equals(enc)) && (enc != null)) {
+			if (StrUtils.isEmptyStr(enc)) enc = "???";
+			progressDlg = ProgressDialog.show(mCoolReader,
+					mCoolReader.getString(R.string.cnange_encoding),
+					mCoolReader.getString(R.string.cnange_encoding) + " (" + enc + " -> UTF-8)",
+					true, false, null);
+			File f = new File(sdi.dicPath + "/" + sdi.dicNameWOExt + ".dsl");
+			if (f.renameTo(new File(sdi.dicPath + "/" +
+					sdi.dicNameWOExt + ".dsl.original"))) {
+				convertLingvoDslFileEncoding(sdi, enc, false, btnConvert);
+				if (sdi.abrvExists) {
+					File dzFile = new File(sdi.dicPath + "/" + sdi.dicNameWOExt + "_abrv.dsl");
+					if (dzFile.exists()) {
+						if (dzFile.renameTo(new File(sdi.dicPath + "/" +
+								sdi.dicNameWOExt + "_abrv.dsl.original"))) {
+							convertLingvoDslFileEncoding(sdi, enc, true, btnConvert);
+						} else {
+							BackgroundThread.instance().postGUI(() -> {
+								ArrayList<String> sButtons = new ArrayList<>();
+								sButtons.add(0,"*" + mActivity.getString(R.string.unhandled_error) + ": " +
+										mActivity.getString(R.string.cannot_rename_file) +
+										" - " + sdi.dicNameWOExt + "_abrv.dsl"
+								);
+								SomeButtonsToolbarDlg.showDialog(mCoolReader, btnConvert, 0, true,
+										"", sButtons, null, (o22, btnPressed) -> {});
+								mActivity.showToast(mActivity.getString(R.string.unhandled_error) + ": " +
+										mActivity.getString(R.string.cannot_rename_file) +
+										" - " + sdi.dicNameWOExt + "_abrv.dsl");
+								log.e("Lingvo DSL file rename problem: " +
+										": cannot rename file - " + sdi.dicNameWOExt + "_abrv.dsl");
+							});
+							if (progressDlg != null)
+								if (progressDlg.isShowing()) progressDlg.dismiss();
+							return;
+						}
+					}
+				}
+			} else {
+				BackgroundThread.instance().postGUI(() -> {
+					ArrayList<String> sButtons = new ArrayList<>();
+					sButtons.add(0,"*" + mActivity.getString(R.string.unhandled_error) + ": " +
+							mActivity.getString(R.string.cannot_rename_file) +
+							" - " + sdi.dicNameWOExt + ".dsl"
+					);
+					SomeButtonsToolbarDlg.showDialog(mCoolReader, btnConvert, 0, true,
+						"", sButtons, null, (o22, btnPressed) -> {});
+					mActivity.showToast(mActivity.getString(R.string.unhandled_error) + ": " +
+							mActivity.getString(R.string.cannot_rename_file) +
+							" - " + sdi.dicNameWOExt + ".dsl");
+					log.e("Lingvo DSL file rename problem: " +
+						": cannot rename file - " + sdi.dicNameWOExt + ".dsl");
+				});
+				if (progressDlg != null)
+					if (progressDlg.isShowing()) progressDlg.dismiss();
+				return;
+			}
+			if (progressDlg != null)
+				if (progressDlg.isShowing()) progressDlg.dismiss();
+		}
 		ArrayList<String> sButtons = new ArrayList<>();
 		sButtons.add(mActivity.getString(R.string.ok));
 		progressDlg = ProgressDialog.show(mCoolReader,
-			mCoolReader.getString(R.string.dic_index_create),
-			mCoolReader.getString(R.string.dic_index_create),
-			true, false, null);
+				mCoolReader.getString(R.string.dic_index_create),
+				mCoolReader.getString(R.string.dic_index_create),
+				true, false, null);
 		BackgroundThread.instance().postGUI(() -> {
 			DslDictionary dslDictionary = null;
 			try {
-				if (sdi.dslDzExists)
+				if (sdi.dslExists)
 					dslDictionary = DslDictionary.loadDictionary(
-							Paths.get(sdi.dicPath + "/" + sdi.dicNameWOExt + ".dsl.dz"),
+							Paths.get(sdi.dicPath + "/" + sdi.dicNameWOExt + ".dsl"),
 							Paths.get(sdi.dicPath + "/" + sdi.dicNameWOExt + ".idx")
 					);
 				else
 					dslDictionary = DslDictionary.loadDictionary(
-							Paths.get(sdi.dicPath + "/" + sdi.dicNameWOExt + ".dsl"),
+							Paths.get(sdi.dicPath + "/" + sdi.dicNameWOExt + ".dsl.dz"),
 							Paths.get(sdi.dicPath + "/" + sdi.dicNameWOExt + ".idx")
 					);
 				btnConvert.setText(R.string.converted_dic);
@@ -520,15 +621,39 @@ public class OfflineDicsDlg extends BaseDialog {
 
 	public static String doUnzip(OfflineDicInfo odi) {
 		try {
-			File dzFile = new File(odi.dicPath + "/" + odi.dicNameWOExt + ".dict.dz");
+			File dzFile = null;
+			String ext = ".dict";
+			if (odi.dictDzExists)
+				dzFile = new File(odi.dicPath + "/" + odi.dicNameWOExt + ".dict.dz");
+			if (odi.dslDzExists) {
+				dzFile = new File(odi.dicPath + "/" + odi.dicNameWOExt + ".dsl.dz");
+				ext = ".dsl";
+			}
 			try (DictZipInputStream din = new DictZipInputStream(new RandomAccessInputStream(new
 					RandomAccessFile(dzFile, "r")));
-				 OutputStream unzipOut = new RandomAccessOutputStream(odi.dicPath + "/" + odi.dicNameWOExt + ".dict", "rw")) {
+				 OutputStream unzipOut = new RandomAccessOutputStream(odi.dicPath + "/" +
+						 odi.dicNameWOExt + ext, "rw")) {
 				byte[] buf = new byte[BUF_LEN];
 				din.seek(0);
 				int len;
 				while ((len = din.read(buf, 0, BUF_LEN)) > 0) {
 					unzipOut.write(buf, 0, len);
+				}
+			}
+			if (odi.abrvExists) {
+				dzFile = new File(odi.dicPath + "/" + odi.dicNameWOExt + "_abrv.dsl.dz");
+				if (dzFile.exists()) {
+					try (DictZipInputStream din = new DictZipInputStream(new RandomAccessInputStream(new
+							RandomAccessFile(dzFile, "r")));
+						 OutputStream unzipOut = new RandomAccessOutputStream(odi.dicPath + "/" +
+								 odi.dicNameWOExt + "_abrv" + ext, "rw")) {
+						byte[] buf = new byte[BUF_LEN];
+						din.seek(0);
+						int len;
+						while ((len = din.read(buf, 0, BUF_LEN)) > 0) {
+							unzipOut.write(buf, 0, len);
+						}
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -576,6 +701,7 @@ public class OfflineDicsDlg extends BaseDialog {
 				boolean isStarDictFile = starDictExists && (fileExt.equals("dict") || fileExt.equals("dict.dz"));
 				boolean onlyDB = fileExt.equals("db") && (!starDictExists);
 				boolean isLingvoDSL = (dslExists || dslDzExists) && (fileExt.equals("dsl") || fileExt.equals("dsl.dz"));
+				boolean isLingvoDSL_abrv = isLingvoDSL && dicNameWOExt.endsWith("_abrv");
 				// if this file is not db or it is db, but no src file exists (dict or dictDz)
 				if (isStarDictFile || onlyDB) {
 					OfflineDicInfo sdi = new OfflineDicInfo();
@@ -586,11 +712,11 @@ public class OfflineDicsDlg extends BaseDialog {
 					File ifo = new File(sdi.dicPath + "/" + sdi.dicNameWOExt + ".ifo");
 					sdi.dicEnabled = sdi.dbExists;
 					if (sdi.ifoExists) {
-						List<String> allLines = FileUtils.readLinesFromFile(ifo.getAbsolutePath());
+						List<String> allLines = Arrays.asList(FileUtils.readFileAsStringGuessEncoding(ifo.getAbsolutePath()).split("\n"));
 						for (String s : allLines) {
 							if (s.indexOf("=") > 0) {
 								String s1 = s.substring(0, s.indexOf("="));
-								String s2 = s.substring(s.indexOf("=") + 1, s.length());
+								String s2 = s.substring(s.indexOf("=") + 1);
 								if (s1.equals("bookname")) sdi.dicName = s2;
 								if (s1.equals("date")) sdi.dicDate = StrUtils.parseDate(s2);
 								if (s1.equals("description")) sdi.dicDescription = s2;
@@ -607,16 +733,18 @@ public class OfflineDicsDlg extends BaseDialog {
 					dics.add(sdi);
 				}
 				// Lingvo DSL
-				if (isLingvoDSL) {
+				if ((isLingvoDSL) && (!isLingvoDSL_abrv)) {
 					OfflineDicInfo sdi = new OfflineDicInfo();
 					sdi.dicNameWOExt = dicNameWOExt;
 					sdi.dicName = dicNameWOExt;
 					sdi.dicPath = dicPath;
+					sdi.abrvExists = new File(sdi.dicPath + "/" + sdi.dicNameWOExt + "_abrv.dsl").exists();
+					sdi.abrvExists = sdi.abrvExists || new File(sdi.dicPath + "/" + sdi.dicNameWOExt + "_abrv.dsl.dz").exists();
 					sdi.fillMarks();
 					File ann = new File(sdi.dicPath + "/" + sdi.dicNameWOExt + ".ann");
 					sdi.dicEnabled = sdi.idxExists;
 					if (sdi.annExists) {
-						List<String> allLines = FileUtils.readLinesFromFile(ann.getAbsolutePath());
+						List<String> allLines = Arrays.asList(FileUtils.readFileAsStringGuessEncoding(ann.getAbsolutePath()).split("\n"));
 						for (String s : allLines) {
 							if (!StrUtils.isEmptyStr(s)) {
 								if (StrUtils.isEmptyStr(sdi.dicDescription))
@@ -677,12 +805,9 @@ public class OfflineDicsDlg extends BaseDialog {
 	public OfflineDicsDlg(CoolReader coolReader)
 	{
 		super(coolReader, coolReader.getResources().getString(R.string.offline_dics), true, true);
-		Log.i("ASDF", "OfflineDicsDlg: " + this.getClass().getName());
-        setCancelable(true);
+		setCancelable(true);
 		this.mCoolReader = coolReader;
 		this.mScanControl = new Scanner.ScanControl();
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(mCoolReader, isEInk);
 		mDics = fillOfflineDics();
         mInflater = LayoutInflater.from(getContext());
         mDialogView = mInflater.inflate(R.layout.offline_dicts_dialog, null);

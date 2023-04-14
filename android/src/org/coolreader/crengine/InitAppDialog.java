@@ -21,9 +21,6 @@ public class InitAppDialog extends BaseDialog {
 
 	public static ProgressDialog progressDlg;
 
-	boolean isEInk = false;
-	HashMap<Integer, Integer> themeColors;
-
 	private final CoolReader mCoolReader;
 	private final LayoutInflater mInflater;
 	private final ViewGroup mDialog;
@@ -40,8 +37,6 @@ public class InitAppDialog extends BaseDialog {
 	{
 		super(activity, activity.getString(R.string.init_app), false, false);
 		mCoolReader = activity;
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(mCoolReader, isEInk);
 		setTitle(mCoolReader.getString(R.string.init_app));
 		mInflater = LayoutInflater.from(getContext());
 		View view = mInflater.inflate(R.layout.init_app_dialog, null);
@@ -78,7 +73,6 @@ public class InitAppDialog extends BaseDialog {
 	}
 
 	private void buttonPressed(Button btn) {
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		if (isEInk) colorGrayCT = Color.WHITE;
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));

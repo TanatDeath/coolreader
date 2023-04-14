@@ -35,9 +35,6 @@ public class ScanLibraryDialog extends BaseDialog {
 
 	public static ProgressDialog progressDlg;
 
-	boolean isEInk = false;
-	HashMap<Integer, Integer> themeColors;
-
 	private final CoolReader mActivity;
 	private final LayoutInflater mInflater;
 	private final TableLayout tlScanLibrary;
@@ -112,11 +109,6 @@ public class ScanLibraryDialog extends BaseDialog {
 	}
 
 	private void buttonPressed(Button btn) {
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		if (isEInk) colorGrayCT = Color.WHITE;
-		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-
 		mActivity.tintViewIcons(mBtnScanWholeDevice, PorterDuff.Mode.CLEAR,true);
 		for (Button btnCard: cardButtons) {
 			mActivity.tintViewIcons(btnCard, PorterDuff.Mode.CLEAR,true);
@@ -377,8 +369,6 @@ public class ScanLibraryDialog extends BaseDialog {
 					cardButton.setText(mActivity.getString(R.string.scan_internal_storage)+": "+fi.pathname);
 				cardButton.setContentDescription(fi.pathname);
 				cardButtonsSelected.put(cardButton.getContentDescription().toString(),false);
-				int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-				int colorIcon = themeColors.get(R.attr.colorIcon);
 				cardButton.setBackgroundColor(colorGrayC);
 				Drawable img = getContext().getResources().getDrawable(R.drawable.icons8_toc_item_normal);
 				Drawable img1 = img.getConstantState().newDrawable().mutate();
@@ -436,8 +426,6 @@ public class ScanLibraryDialog extends BaseDialog {
 
 	public void showFoldersPopup() {
 		BackgroundThread.instance().executeGUI(() -> {
-			int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-			int colorGray = themeColors.get(R.attr.colorThemeGray2);
 			int fontSize = 24;
 			windowCenterPopup = new PopupWindow(this.getContext());
 			windowCenterPopup.setWidth(WindowManager.LayoutParams.FILL_PARENT);
@@ -523,9 +511,6 @@ public class ScanLibraryDialog extends BaseDialog {
 	{
 		super(activity, activity.getString( R.string.scan_library), true, false);
 		mActivity = activity;
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(mActivity, isEInk);
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		setTitle(mActivity.getString(R.string.scan_library));
 		mInflater = LayoutInflater.from(getContext());
 		View view = mInflater.inflate(R.layout.scan_library_dialog, null);

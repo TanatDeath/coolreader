@@ -178,7 +178,9 @@ public interface Settings {
     String PROP_APP_TAP_ZONE_ACTIONS_TAP     ="app.tapzone.action.tap";
 	String PROP_APP_TAP_ZONE_NON_SENS_LEFT     ="app.tapzone.non.sens.left";
 	String PROP_APP_TAP_ZONE_NON_SENS_RIGHT     ="app.tapzone.non.sens.right";
-	String PROP_APP_DEVICE_TURN     ="app.device.turn";
+	String PROP_APP_DEVICE_TURN = "app.device.turn";
+
+	String PROP_APP_HARDWARE_KEYS = "app.hardware.keys";
 	String PROP_APP_DEVICE_TURN_ENABLE     ="app.device.turn.enable";
 	String PROP_APP_KEY_ACTIONS_PRESS     ="app.key.action.press";
     String PROP_APP_TRACKBALL_DISABLED    ="app.trackball.disabled";

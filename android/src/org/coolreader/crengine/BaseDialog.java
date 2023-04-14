@@ -44,7 +44,17 @@ public class BaseDialog extends Dialog {
 	int addButtonImage;
 	int addButtonContentDescriptionId;
 	public boolean isEInk;
-	HashMap<Integer, Integer> themeColors;
+	public HashMap<Integer, Integer> themeColors;
+	public int colorBlue = Color.BLUE;
+	public int colorGreen = Color.GREEN;
+	public int colorGray =Color.GRAY;
+	public int colorIcon = Color.GRAY;
+	public int colorIconL = Color.GRAY;
+	public int colorGrayC = Color.GRAY;
+	public int colorIcon128 = Color.GRAY;
+	public int colorGrayCT = Color.GRAY;
+	public int colorGrayCT2 = Color.GRAY;
+	public int colorGrayE = Color.GRAY;
 
 	public void setPositiveButtonImage(int imageId, int descriptionId) {
 		positiveButtonImage = imageId;
@@ -98,6 +108,18 @@ public class BaseDialog extends Dialog {
 		this.mActivity = (CoolReader) activity;
 		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
 		themeColors = Utils.getThemeColors(this.mActivity, isEInk);
+		colorBlue = themeColors.get(R.attr.colorThemeBlue);
+		colorGreen = themeColors.get(R.attr.colorThemeGreen);
+		colorGray = themeColors.get(R.attr.colorThemeGray);
+		colorIcon = themeColors.get(R.attr.colorIcon);
+		colorIconL = themeColors.get(R.attr.colorIconL);
+		colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
+		colorIcon128 = Color.argb(128,Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon));
+		colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		if (isEInk) colorGrayCT = Color.WHITE;
+		colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+		colorGrayE=Color.argb(100,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
+
 		this.title = title;
 		this.needCancelButton = showNegativeButton;
 		this.dlgName = dlgName;

@@ -37,10 +37,8 @@ public class TagsEditDialog extends BaseDialog {
 	private final ImageButton mBtnClearAction;
 	private final boolean mSelectionEnabled;
 	private final TagsEditDialogCloseCallback mCallback;
-	boolean isEInk;
 	boolean changed = false;
 	int mNewTextSize;
-	HashMap<Integer, Integer> themeColors;
 	ArrayList<BookTag> mBookTagsList;
 	FlowLayout mFlTags;
 	private Properties props;
@@ -49,8 +47,6 @@ public class TagsEditDialog extends BaseDialog {
 	private ArrayList<BookTag> bookTagsWas;
 
 	private void addTagButton(BookTag bookTag, String savedTag) {
-		int colorIcon = themeColors.get(R.attr.colorIcon);
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		//LinearLayout dicButton = new LinearLayout(mActivity);
 		View buttonView = mInflater.inflate(R.layout.tag_flow_item, null);
 		LinearLayout dicButton = buttonView.findViewById(R.id.tag_flow_item_body);
@@ -143,8 +139,6 @@ public class TagsEditDialog extends BaseDialog {
 		mCallback = callback;
 		props = new Properties(mActivity.settings());
 		mNewTextSize = props.getInt(Settings.PROP_STATUS_FONT_SIZE, 16);
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(activity, isEInk);
 		mItem = item;
 		mSelectionEnabled = selectionEnabled;
 		mInflater = LayoutInflater.from(getContext());

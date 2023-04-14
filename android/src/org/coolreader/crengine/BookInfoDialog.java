@@ -102,8 +102,6 @@ public class BookInfoDialog extends BaseDialog {
 	TextView tvML;
 	Button btnCalc;
 	ScrollView mainView;
-	boolean isEInk = false;
-	HashMap<Integer, Integer> themeColors;
 	ArrayList<BookTag> mBookTagsList;
 
 	private static int DM_FRAGMENT = 1;
@@ -124,15 +122,6 @@ public class BookInfoDialog extends BaseDialog {
 				curDownloadMode = DM_FULL;
 			}
 		}
-		int colorGrayC;
-		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2Contrast});
-		colorGrayC = a.getColor(0, Color.GRAY);
-		a.recycle();
-		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-
-		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-
 		mCoolReader.tintViewIcons(btnFragment, PorterDuff.Mode.CLEAR,true);
 		mCoolReader.tintViewIcons(btnDownloadLitresBook, PorterDuff.Mode.CLEAR,true);
 		btnFragment.setBackgroundColor(colorGrayCT);
@@ -316,10 +305,6 @@ public class BookInfoDialog extends BaseDialog {
 		nameView.setText(name);
 		valueView.setText(value);
 		if (item.infoTitle.equals("book.status")) {
-			int colorBlue = themeColors.get(R.attr.colorThemeBlue);
-			int colorGreen = themeColors.get(R.attr.colorThemeGreen);
-			int colorGray = themeColors.get(R.attr.colorThemeGray);
-			int colorIcon = themeColors.get(R.attr.colorIcon);
 			valueView.setTextColor(mActivity.getTextColor(colorIcon));
 			if (StrUtils.getNonEmptyStr(valueView.getText().toString(), true).
 					contains("[" + mCoolReader.getString(R.string.book_state_reading) + "]")) {
@@ -352,13 +337,6 @@ public class BookInfoDialog extends BaseDialog {
 		)
 			if ((mBookInfo != null) && (rv.mBookInfo != null))
 				if (rv.mBookInfo.getFileInfo().getFilename().equals(mBookInfo.getFileInfo().getFilename())) {
-					int colorGrayC;
-					int colorIcon;
-					TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-							{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2, R.attr.colorIcon, R.attr.colorIconL});
-					colorGrayC = a.getColor(0, Color.GRAY);
-					colorIcon = a.getColor(2, Color.BLACK);
-					a.recycle();
 					Button countButton = new Button(mCoolReader);
 					btnCalc = countButton;
 					countButton.setText(mActivity.getString(R.string.calc_stats));
@@ -433,13 +411,6 @@ public class BookInfoDialog extends BaseDialog {
 		if (
 			(name.equals(mActivity.getString(R.string.book_info_book_translation)))
 		) {
-			int colorGrayC;
-			int colorIcon;
-			TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-					{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2, R.attr.colorIcon, R.attr.colorIconL});
-			colorGrayC = a.getColor(0, Color.GRAY);
-			colorIcon = a.getColor(2, Color.BLACK);
-			a.recycle();
 			Button translButton = new Button(mCoolReader);
 			translButton.setText(mActivity.getString(R.string.specify_translation_dir));
 			translButton.setTextColor(mActivity.getTextColor(colorIcon));
@@ -496,13 +467,6 @@ public class BookInfoDialog extends BaseDialog {
 			} else {
 				Linkify.addLinks(valueView, Linkify.WEB_URLS | Linkify.EMAIL_ADDRESSES);
 				valueView.setLinksClickable(true);
-				int colorGrayC;
-				int colorIcon;
-				TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-						{R.attr.colorThemeGray2Contrast, R.attr.colorThemeGray2, R.attr.colorIcon, R.attr.colorIconL});
-				colorGrayC = a.getColor(0, Color.GRAY);
-				colorIcon = a.getColor(2, Color.BLACK);
-				a.recycle();
 				valueView.setLinkTextColor(colorIcon);
 				valueView.setTextColor(mActivity.getTextColor(colorIcon));
 			}
@@ -588,13 +552,6 @@ public class BookInfoDialog extends BaseDialog {
 	}
 
 	private void paintMarkButton() {
-		int colorGrayC;
-		int colorBlue;
-		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2Contrast, R.attr.colorThemeBlue});
-		colorGrayC = a.getColor(0, Color.GRAY);
-		colorBlue = a.getColor(1, Color.BLUE);
-		a.recycle();
 		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		mCoolReader.tintViewIcons(btnSetAddMarks, PorterDuff.Mode.CLEAR,true);
@@ -688,8 +645,6 @@ public class BookInfoDialog extends BaseDialog {
 	}
 
 	private void addTagButton(BookTag bookTag, boolean isEditButton) {
-		int colorIcon = themeColors.get(R.attr.colorIcon);
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		//LinearLayout dicButton = new LinearLayout(mActivity);
 		View buttonView = mInflater.inflate(R.layout.tag_flow_item, null);
 		LinearLayout dicButton = buttonView.findViewById(R.id.tag_flow_item_body);
@@ -749,8 +704,6 @@ public class BookInfoDialog extends BaseDialog {
 				}
 			}
 		mCoolReader = (CoolReader) activity;
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(mCoolReader, isEInk);
 		mBookInfo = bi;
 		mActionType = actionType;
 		mFileInfoCloud = fiOPDS;
@@ -951,6 +904,15 @@ public class BookInfoDialog extends BaseDialog {
 				mFileBrowser.showFindBookDialog(false, mAuthors, mFileInfoSearchDir);
 			dismiss();
 		});
+		Button btnBmk = mainView.findViewById(R.id.btn_bookmarks);
+		btnBmk.setTextColor(mActivity.getTextColor(colorIcon));
+		btnBmk.setBackgroundColor(colorGrayC);
+		btnBmk.setOnClickListener(v -> {
+			BookmarksDlg dlg = new BookmarksDlg(mActivity, mActivity.getReaderView(),
+				mBookInfo, false, null);
+			dlg.show();
+			dismiss();
+		});
 		mViewTags = mainView.findViewById(R.id.tagsFlowList);
 		refreshBookTags();
 		int w = mWindowSize * 4 / 10;
@@ -1018,14 +980,6 @@ public class BookInfoDialog extends BaseDialog {
 			infoText.setText(sss);
 		SpannableString ss = new SpannableString(annot);
 		txtAnnot.setText(ss);
-		int colorIconL;
-		int colorGrayC;
-		int colorIcon;
-		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon, R.attr.colorIconL});
-		colorGrayC = a.getColor(1, Color.GRAY);
-		colorIcon = a.getColor(2, Color.GRAY);
-		colorIconL = a.getColor(3, Color.GRAY);
 		txtAnnot.setTextColor(activity.getTextColor(colorIcon));
 		txtAnnot.setTextSize(txtAnnot.getTextsize()/4f*3f);
 

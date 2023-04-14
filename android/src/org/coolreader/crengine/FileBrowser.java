@@ -684,6 +684,14 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 				else
 					mActivity.loadDocument(selectedItem, true);
 				return true;
+			case R.id.bookmarks:
+				log.d("bookmarks menu item selected");
+				Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), selectedItem, bookInfo -> {
+					BookmarksDlg dlg = new BookmarksDlg(mActivity, mActivity.getReaderView(),
+							bookInfo, false, null);
+					dlg.show();
+				});
+				return true;
 			case R.id.book_sort_order:
 				mActivity.showToast("Sorry, sort order selection is not yet implemented");
 				return true;
@@ -800,12 +808,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 			case R.id.book_info:
 				log.d("book_info menu item selected");
 				if (!selectedItem.isDirectory && !selectedItem.isOPDSBook() && !selectedItem.isOnlineCatalogPluginDir()) {
-					Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), selectedItem, new History.BookInfoLoadedCallback() {
-						@Override
-						public void onBookInfoLoaded(BookInfo bookInfo) {
-							BookInfo bi = new BookInfo(selectedItem);
-							mActivity.showBookInfo(bi, BookInfoDialog.BOOK_INFO, null, null);
-						}
+					Services.getHistory().getOrCreateBookInfo(mActivity.getDB(), selectedItem, bookInfo -> {
+						BookInfo bi = new BookInfo(selectedItem);
+						mActivity.showBookInfo(bi, BookInfoDialog.BOOK_INFO, null, null);
 					});
 				}
 				return true;
@@ -2132,7 +2137,6 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 //				mActivity.getDB().loadGenresBooks(fileOrDir.getGenreCode(), !mHideEmptyGenres, new FileInfoLoadingCallback(fileOrDir, itemToSelect));
 //				return;
 //			}
-			//asdf
 			if (fileOrDir.isBooksByAuthorDir()) {
 				showDirectoryLoadingStub();
 				log.d("Updating author book list");

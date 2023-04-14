@@ -271,23 +271,23 @@ static bool GetFB3BookProperties(const char *name, LVStreamRef stream, BookPrope
 	ldomDocument * descDoc = context.getDescription();
 	if ( descDoc ) {
 		pBookProps->language = descDoc->textFromXPath( cs32("fb3-description/lang") );
-		lString32 title = descDoc->textFromXPath( cs32("title/main"));
+		lString32 title = descDoc->textFromXPath( cs32("fb3-description/title/main"));
 		lString32 authors;
-		lString32 annotation = descDoc->textFromXPath( cs32("annotation"));
+		lString32 annotation = descDoc->textFromXPath( cs32("fb3-description/annotation"));
 		//lString32 language = descDoc->textFromXPath( cs32("lang"));
 		lString32 translators;
 		lString32 publishers;
 		lString32 genres;
-		lString32 srclang = descDoc->textFromXPath( cs32("written/lang"));
-		lString32 bookdate = descDoc->textFromXPath( cs32("written/date"));
+		lString32 srclang = descDoc->textFromXPath( cs32("fb3-description/written/lang"));
+		lString32 bookdate = descDoc->textFromXPath( cs32("fb3-description/written/date"));
 		lString32 authorext;
 
 		for ( int i=1; i<30; i++ ) {
-			ldomNode * item = descDoc->nodeFromXPath(lString32("fb3-relations/subject[") << fmt::decimal(i) << "]");
+			ldomNode * item = descDoc->nodeFromXPath(lString32("fb3-description/fb3-relations/subject[") << fmt::decimal(i) << "]");
 			if ( !item ) break;
 			lString32 name = item->getAttributeValue("link");
 			if (name == "author") {
-				lString32 author = descDoc->textFromXPath( lString32("fb3-relations/subject[") << fmt::decimal(i) << "]/title/main");
+				lString32 author = descDoc->textFromXPath( lString32("fb3-description/fb3-relations/subject[") << fmt::decimal(i) << "]/title/main");
 				if ( !authors.empty() ) {
 					authors += " |";
 				}
@@ -295,14 +295,14 @@ static bool GetFB3BookProperties(const char *name, LVStreamRef stream, BookPrope
 			}
 			authorext = authors;
 			if (name == "translator") {
-				lString32 translator = descDoc->textFromXPath( lString32("fb3-relations/subject[") << fmt::decimal(i) << "]/title/main");
+				lString32 translator = descDoc->textFromXPath( lString32("fb3-description/fb3-relations/subject[") << fmt::decimal(i) << "]/title/main");
 				if ( !translators.empty() ) {
 					translators += " | ";
 				}
 				translators += translator;
 			}
 			if (name == "publisher") {
-				lString32 publisher = descDoc->textFromXPath( lString32("fb3-relations/subject[") << fmt::decimal(i) << "]/title/main");
+				lString32 publisher = descDoc->textFromXPath( lString32("fb3-description/fb3-relations/subject[") << fmt::decimal(i) << "]/title/main");
 				if ( !publishers.empty() ) {
 					publishers += " | ";
 				}
@@ -310,16 +310,16 @@ static bool GetFB3BookProperties(const char *name, LVStreamRef stream, BookPrope
 			}
 		}
 		for ( int i=1; i<30; i++ ) {
-			ldomNode * item = descDoc->nodeFromXPath(lString32("fb3-classification/subject[") << fmt::decimal(i) << "]");
+			ldomNode * item = descDoc->nodeFromXPath(lString32("fb3-description/fb3-classification/subject[") << fmt::decimal(i) << "]");
 			if ( !item ) break;
-			lString32 genre = descDoc->textFromXPath( lString32("fb3-classification/subject[") << fmt::decimal(i) << "]");
+			lString32 genre = descDoc->textFromXPath( lString32("fb3-description/fb3-classification/subject[") << fmt::decimal(i) << "]");
 			if ( !genres.empty() ) {
 				genres += " | ";
 			}
 			genres += genre;
 		}
 
-		ldomNode * item = descDoc->nodeFromXPath(cs32("document-info"));
+		ldomNode * item = descDoc->nodeFromXPath(cs32("fb3-description/document-info"));
 		lString32 created = cs32("");
 		lString32 docprogram = cs32("");
 		lString32 docauthor = cs32("");
@@ -333,7 +333,7 @@ static bool GetFB3BookProperties(const char *name, LVStreamRef stream, BookPrope
 			docsrcocr = item->getAttributeValue("ocr");
 		}
 		lString32 series = descDoc->textFromXPath(cs32("fb3-description/sequence/title/main"));
-		ldomNode * item2 = descDoc->nodeFromXPath(cs32("paper-publish-info"));
+		ldomNode * item2 = descDoc->nodeFromXPath(cs32("fb3-description/paper-publish-info"));
 		lString32 publisher = cs32("");
 		lString32 city = cs32("");
 		lString32 year = cs32("");
@@ -342,8 +342,8 @@ static bool GetFB3BookProperties(const char *name, LVStreamRef stream, BookPrope
 			city = item2->getAttributeValue("city");
 			year = item2->getAttributeValue("year");
 		}
-		lString32 publisbn = descDoc->textFromXPath(cs32("paper-publish-info/isbn"));
-		lString32 publsequence = descDoc->textFromXPath(cs32("paper-publish-info/sequence"));
+		lString32 publisbn = descDoc->textFromXPath(cs32("fb3-description/paper-publish-info/isbn"));
+		lString32 publsequence = descDoc->textFromXPath(cs32("fb3-description/paper-publish-info/sequence"));
 
 		pBookProps-> title = title;
 		pBookProps-> author = authors;
@@ -490,14 +490,8 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
 		return GetODTBookProperties( name, stream, pBookProps );
 	}
 
-	if ( DetectFb3Format( stream ) ) {
-		CRLog::trace("GetBookProperties() : fb3 format detected");
-		return GetFB3BookProperties( name, stream, pBookProps );
-	}
-
     time_t t = (time_t)time(0);
-
-    if ( isArchiveFile ) {
+	if ( isArchiveFile ) {
 		lvsize_t arcsize = stream->GetSize();
         LVContainerRef container = LVOpenArchieve(stream);
         if ( container.isNull() ) {
@@ -509,6 +503,26 @@ static bool GetBookProperties(const char *name,  BookProperties * pBookProps)
             CRLog::error( "Cannot open archive file item stream %s", LCSTR(lString32(name)) );
             return false;
         }
+		if ( DetectEpubFormat( stream ) ) {
+			CRLog::trace("GetBookProperties() : epub format detected");
+			pBookProps->format = doc_format_epub;
+			return GetEPUBBookProperties( name, stream, pBookProps );
+		}
+		if ( DetectFb3Format( stream ) ) {
+			CRLog::trace("GetBookProperties() : fb3 format detected");
+			pBookProps->format = doc_format_fb3;
+			return GetFB3BookProperties( name, stream, pBookProps );
+		}
+		if ( DetectDocXFormat( stream ) ) {
+			CRLog::trace("GetBookProperties() : docx format detected");
+			pBookProps->format = doc_format_docx;
+			return GetDOCXBookProperties( name, stream, pBookProps );
+		}
+		if ( DetectOpenDocumentFormat( stream ) ) {
+			CRLog::trace("GetBookProperties() : odt format detected");
+			pBookProps->format = doc_format_odt;
+			return GetODTBookProperties( name, stream, pBookProps );
+		}
     }
     struct stat fs;
     if ( !stat( name, &fs ) ) {
@@ -765,6 +779,11 @@ jbyteArray scanBookCoverInternal(JNIEnv *_env, jclass _class, jstring _path) {
 					// extract coverpage from epub
 					res = GetEpubCoverpage(arc);
 				}
+				if (DetectFb3Format(stream)) {
+					// FB3
+					// extract coverpage from fb3
+					res = GetFb3Coverpage(arc);
+				}
 			} else {
 				res = GetFB2Coverpage(stream);
 				if (res.isNull()) {
@@ -783,7 +802,18 @@ jbyteArray scanBookCoverInternal(JNIEnv *_env, jclass _class, jstring _path) {
 			arc = LVOpenArchieve(arcstream);
 			if (!arc.isNull()) {
 				LVStreamRef stream = arc->OpenStream(item.c_str(), LVOM_READ);
-				if (!stream.isNull()) {
+				LVContainerRef arcInternal = LVOpenArchieve(stream);
+				if (DetectEpubFormat(stream)) {
+					// EPUB
+					// extract coverpage from epub
+					res = GetEpubCoverpage(arcInternal);
+				}
+				if (DetectFb3Format(stream)) {
+					// FB3
+					// extract coverpage from fb3
+					res = GetFb3Coverpage(arcInternal);
+				}
+				if ((!stream.isNull()) && (res.isNull())) {
 					CRLog::debug("scanBookCoverInternal() : archive stream opened ok, parsing");
 					res = GetFB2Coverpage(stream);
 					if (res.isNull()) {

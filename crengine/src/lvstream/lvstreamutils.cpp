@@ -283,10 +283,10 @@ lString32 LVExtractPath( lString32 pathName, bool appendEmptyPath )
         if ( pathName[i]=='/' || pathName[i]=='\\' )
             last_delim_pos = i;
     if ( last_delim_pos==-1 )
-#ifdef _LINUX
-        return lString32(appendEmptyPath ? U"./" : U"");
-#else
+#ifdef _WIN32
         return lString32(appendEmptyPath ? U".\\" : U"");
+#else
+        return lString32(appendEmptyPath ? U"./" : U"");
 #endif
     return pathName.substr( 0, last_delim_pos+1 );
 }
@@ -330,11 +330,21 @@ bool LVIsAbsolutePath( lString32 pathName )
     if ( c=='\\' || c=='/' )
         return true;
 #ifdef _WIN32
-    if ( (c>='a' && c<='z') || (c>='A' && c<='Z') ) {
-        return (pathName[1]==':');
+    if (pathName.length() > 2) {
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+            if (pathName[1] == ':') {
+                return (pathName[2] == '/' || pathName[2] == '\\');
+            }
+        }
     }
 #endif
     return false;
+}
+
+lString32 LVGetAbsolutePath(lString32 pathName) {
+    if (LVIsAbsolutePath(pathName))
+        return pathName;
+    return LVCombinePaths(LVGetCurrentDirectory(), pathName);
 }
 
 /// removes first path part from pathname and returns it
@@ -409,7 +419,7 @@ void LVReplacePathSeparator( lString32 & pathName, lChar32 separator )
 // resolve relative links
 lString32 LVCombinePaths( lString32 basePath, lString32 newPath )
 {
-    if ( newPath[0]=='/' || newPath[0]=='\\' || (newPath.length()>0 && newPath[1]==':' && newPath[2]=='\\') )
+    if (LVIsAbsolutePath(newPath))
         return newPath; // absolute path
     lChar32 separator = 0;
     if (!basePath.empty())
@@ -468,6 +478,27 @@ lString32 LVCombinePaths( lString32 basePath, lString32 newPath )
     return s;
 }
 
+/// returns current working directory
+lString32 LVGetCurrentDirectory() {
+    lString32 cwd;
+#ifdef _WIN32
+    WCHAR path[MAX_PATH];
+    DWORD ret = GetCurrentDirectoryW(MAX_PATH, path);
+    if (ret > 0) {
+        cwd = Utf16ToUnicode((const lChar16*)path, ret);
+        LVAppendPathDelimiter(cwd);
+    }
+#else
+    char path[PATH_MAX];
+    char* res = getcwd(path, PATH_MAX);
+    if (NULL != res) {
+        cwd = LocalToUnicode(lString8(path));
+        LVAppendPathDelimiter(cwd);
+    }
+#endif
+    return cwd;
+}
+
 /// removes last path part from pathname and returns it
 lString32 LVExtractLastPathElement( lString32 & pathName )
 {
@@ -496,10 +527,10 @@ lChar32 LVDetectPathDelimiter( lString32 pathName )
     for ( int i=0; i<pathName.length(); i++ )
         if ( pathName[i]=='/' || pathName[i]=='\\' )
             return pathName[i];
-#ifdef _LINUX
-        return '/';
+#ifdef _WIN32
+    return '\\';
 #else
-        return '\\';
+    return '/';
 #endif
 }
 
@@ -508,10 +539,10 @@ char LVDetectPathDelimiter( lString8 pathName ) {
     for ( int i=0; i<pathName.length(); i++ )
         if ( pathName[i]=='/' || pathName[i]=='\\' )
             return pathName[i];
-#ifdef _LINUX
-        return '/';
+#ifdef _WIN32
+    return '\\';
 #else
-        return '\\';
+    return '/';
 #endif
 }
 

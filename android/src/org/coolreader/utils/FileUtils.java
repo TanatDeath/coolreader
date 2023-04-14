@@ -12,11 +12,13 @@ import android.os.Environment;
 import android.os.storage.StorageVolume;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
+
+import com.ibm.icu.text.CharsetDetector;
+import com.ibm.icu.text.CharsetMatch;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
@@ -36,13 +38,17 @@ import org.coolreader.crengine.Settings;
 import org.coolreader.eink.sony.android.ebookdownloader.SonyBookSelector;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
@@ -631,5 +637,49 @@ public class FileUtils {
     }
 
     //\ from Amaze file browser
+
+    public static String readFileAsStringGuessEncoding(String filePath)
+    {
+        String s = null;
+        try {
+            File file = new File(filePath);
+            byte [] fileData = new byte[(int)file.length()];
+            DataInputStream dis = new DataInputStream(new FileInputStream(file));
+            dis.readFully(fileData);
+            dis.close();
+
+            CharsetMatch match = new CharsetDetector().setText(fileData).detect();
+
+            if (match != null) try {
+                Log.d("ENC","For file: " + filePath + " guessed enc: " + match.getName() + " conf: " + match.getConfidence());
+                s = new String(fileData, match.getName());
+            } catch (UnsupportedEncodingException ue) {
+                s = null;
+            }
+            if (s == null)
+                s = new String(fileData);
+        } catch (Exception e) {
+            Log.d("ENC", "Exception in readFileAsStringGuessEncoding(): " + e);
+            e.printStackTrace();
+        }
+        return s;
+    }
+
+    public static String fileGuessEncoding(String filePath) {
+        String s = null;
+        try {
+            File file = new File(filePath);
+            byte [] fileData = new byte[(int)file.length()];
+            DataInputStream dis = new DataInputStream(new FileInputStream(file));
+            dis.readFully(fileData);
+            dis.close();
+            CharsetMatch match = new CharsetDetector().setText(fileData).detect();
+            return match.getName();
+        } catch (Exception e) {
+            Log.d("ENC", "Exception in readFileAsStringGuessEncoding(): " + e);
+            e.printStackTrace();
+        }
+        return "";
+    }
 
 }

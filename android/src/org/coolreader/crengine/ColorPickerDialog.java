@@ -46,7 +46,7 @@ import java.util.ArrayList;
 public class ColorPickerDialog extends BaseDialog implements OnSeekBarChangeListener {
 
     public interface OnColorChangedListener {
-        public void colorChanged(int color);
+        void colorChanged(int color);
     }
 
 	private SeekBar mR;

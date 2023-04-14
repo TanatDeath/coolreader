@@ -5351,6 +5351,9 @@ public class MainDB extends BaseDB {
 				for (Map.Entry<String, List<Lemma>> entry: dslResult.getEntries(new DicStructVisitor())) {
 					List<Lemma> lemmas = entry.getValue();
 					for (Lemma lemma: lemmas) {
+						if (lemma.lemmaText != null) { //fix for lang id, guess it is bug in original library
+							lemma.lemmaText = lemma.lemmaText.replaceAll("\\[lang id=\\d+\\]", "");
+						}
 						String key = entry.getKey() + ", " + lemma.lemmaText;
 						Lemma exLemma = existingLemmas.get(key);
 						if (exLemma == null) {
@@ -5446,14 +5449,14 @@ public class MainDB extends BaseDB {
 						if (sdil.dslDic == null) {
 							try {
 								if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-									if (sdil.dslDzExists)
+									if (sdil.dslExists)
 										sdil.dslDic = DslDictionary.loadDictionary(
-												Paths.get(sdil.dicPath + "/" + sdil.dicNameWOExt + ".dsl.dz"),
+												Paths.get(sdil.dicPath + "/" + sdil.dicNameWOExt + ".dsl"),
 												Paths.get(sdil.dicPath + "/" + sdil.dicNameWOExt + ".idx")
 										);
 									else
 										sdil.dslDic = DslDictionary.loadDictionary(
-												Paths.get(sdil.dicPath + "/" + sdil.dicNameWOExt + ".dsl"),
+												Paths.get(sdil.dicPath + "/" + sdil.dicNameWOExt + ".dsl.dz"),
 												Paths.get(sdil.dicPath + "/" + sdil.dicNameWOExt + ".idx")
 										);
 								}

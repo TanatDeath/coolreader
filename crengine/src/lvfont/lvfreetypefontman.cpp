@@ -92,7 +92,7 @@ int getFontWeight(FT_Face face) {
 
 #if USE_LOCALE_DATA==1
 LVHashTable<lString8, font_lang_compat>* getSupportedLangs(FT_Face face) {
-    LVHashTable<lString8, font_lang_compat>* langs = new LVHashTable<lString8, font_lang_compat>(16);
+    LVHashTable<lString8, font_lang_compat>* langs = new LVHashTable<lString8, font_lang_compat>(get_fc_lang_data_size());
 #define FC_LANG_START_INTERVAL_CODE     0xF0F0FFFF
     bool fullSupport;
     bool partialSupport;
@@ -151,6 +151,8 @@ LVHashTable<lString8, font_lang_compat>* getSupportedLangs(FT_Face face) {
                 langs->set(loc.langTag(), font_lang_compat_full);
             else if (partialSupport)
                 langs->set(loc.langTag(), font_lang_compat_partial);
+            else
+                langs->set(loc.langTag(), font_lang_compat_none);
         } else {
             CRLog::warn("getSupportedLangs(): invalid lang tag: %s", rec->lang_code);
         }
@@ -711,6 +713,7 @@ LVFreeTypeFontManager::~LVFreeTypeFontManager() {
         if (langTable)
             delete langTable;
     }
+    _supportedLangs.clear();
     _globalCache.clear();
     _cache.clear();
     if (_library)
@@ -1045,6 +1048,7 @@ fprintf(_log, "GetFont(size=%d, weight=%d, italic=%d, family=%d, typeface='%s')\
 #if USE_LOCALE_DATA==1
         LVHashTable<lString8, font_lang_compat>* langTable = NULL;
         if (!_supportedLangs.get(font->getTypeFace(), langTable) || NULL == langTable) {
+            // Here langTable can only be NULL
             FT_Face face = (FT_Face) font->GetHandle();
             if (NULL != face) {
                 langTable = getSupportedLangs(face);
@@ -1095,19 +1099,11 @@ font_lang_compat LVFreeTypeFontManager::checkFontLangCompat(const lString8 &type
         LVHashTable<lString8, font_lang_compat>* langTable = NULL;
         res = font_lang_compat_none;
         if (!_supportedLangs.get(typeface, langTable) || NULL == langTable) {
-            if (NULL != langTable) {
-                delete langTable;
-                langTable = NULL;
-                _supportedLangs.remove(typeface);
-            }
+            // Here langTable can only be NULL
+            // Call GetFont() to update language support table in _supportedLangs
             LVFontRef fntRef = GetFont(-1, 400, false, css_ff_inherit, typeface, -1);
-            if (!fntRef.isNull()) {
-                FT_Face face = (FT_Face) fntRef->GetHandle();
-                if (NULL != face) {
-                    langTable = getSupportedLangs(face);
-                    _supportedLangs.set(typeface, langTable);
-                }
-            }
+            // Get updated langTable
+            _supportedLangs.get(typeface, langTable);
         }
         if (NULL != langTable) {
             lString8 best_lang;

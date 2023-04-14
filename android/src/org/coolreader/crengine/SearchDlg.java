@@ -45,8 +45,6 @@ public class SearchDlg extends BaseDialog {
 	boolean bCaseSensitive = false;
 	boolean bReverse = false;
 	ImageButton btnFake;
-	public boolean isEInk;
-	public HashMap<Integer, Integer> themeColors;
 
 	@Override
 	protected void onPositiveButtonClick()
@@ -233,13 +231,6 @@ public class SearchDlg extends BaseDialog {
         setCancelable(true);
 		this.mCoolReader = coolReader;
 		this.mReaderView = readerView;
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(mActivity, isEInk);
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
-		int colorIcon = themeColors.get(R.attr.colorIcon);
-		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-
 		this.mBookInfo = mReaderView.getBookInfo();
 		setPositiveButtonImage(
 				Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_viewer_find_drawable, R.drawable.icons8_search),

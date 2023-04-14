@@ -66,20 +66,11 @@ public class BookmarkEditDialog extends BaseDialog {
 	final Button btnColorChoose;
 	final EditText edtContext;
 	public static int lastColor = 0;
-	boolean isEInk = false;
-	HashMap<Integer, Integer> themeColors;
 	private final ArrayList<Button> colorButtons = new ArrayList<>();
 
 	private boolean bColorCheck = false;
 
 	private void paintColorCheckButton() {
-		int colorGrayC;
-		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2Contrast});
-		colorGrayC = a.getColor(0, Color.GRAY);
-		a.recycle();
-		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		mCoolReader.tintViewIcons(btnColorCheck, PorterDuff.Mode.CLEAR,true);
 		if (bColorCheck) {
 			btnColorCheck.setBackgroundColor(colorGrayCT2);
@@ -92,14 +83,6 @@ public class BookmarkEditDialog extends BaseDialog {
 	}
 
 	private void selectBmkColor(boolean doSelect) {
-		int colorGray;
-		int colorGrayC;
-		TypedArray a = mCoolReader.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2, R.attr.colorThemeGray2Contrast, R.attr.colorIcon, R.attr.colorIconL});
-		colorGray = a.getColor(0, Color.GRAY);
-		colorGrayC = a.getColor(1, Color.GRAY);
-		a.recycle();
-		int colorGrayCT = Color.argb(128, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC));
 		if (doSelect) {
 			btnColorChoose.setBackgroundColor(bColorCheck ? lastColor : colorGrayCT);
 			ColorPickerDialog dlg = new ColorPickerDialog(mCoolReader, color -> {
@@ -444,8 +427,6 @@ public class BookmarkEditDialog extends BaseDialog {
 	{
 		super(activity, "", true, false);
 		mCoolReader = activity;
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(mCoolReader, isEInk);
 		mReaderView = readerView;
 		mIsNew = isNew;
 		mOriginalBookmark = bookmark;
@@ -546,7 +527,6 @@ public class BookmarkEditDialog extends BaseDialog {
 			selectBmkColor(bColorCheck);
 		});
 		edtContext = view.findViewById(R.id.context_text);
-		int colorIcon = themeColors.get(R.attr.colorIcon);
 		((TextView) view.findViewById(R.id.lbl_rb_descr)).setTextColor(Color.argb(170, Color.red(colorIcon),Color.green(colorIcon),Color.blue(colorIcon)));
 		
 		final CoolReader cr = activity;

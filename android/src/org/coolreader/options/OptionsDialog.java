@@ -61,8 +61,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	CoolReader mActivity;
 	String optionFilter;
 
-	boolean isEInk = false;
-	HashMap<Integer, Integer> themeColors;
 	public String selectedOption;
 	public int selectedTab = -1;
 
@@ -1117,11 +1115,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	public void init(CoolReader activity, Mode mode, ReaderView readerView, String[] fontFaces, String[] fontFacesFiles,
 						 TTSControlBinder ttsbinder, TTSControlServiceAccessor ttscontrol)
 	{
-//		Log.i("cr3optionsdlg", "EINK_SCREEN = " + DeviceInfo.EINK_SCREEN);
-
-		isEInk = DeviceInfo.isEinkScreen(BaseActivity.getScreenForceEink());
-		themeColors = Utils.getThemeColors(activity, isEInk);
-
 		String filter = activity.optionsFilter;
 // 		removed due to https://github.com/plotn/coolreader/issues/520, make it simple
 //		File f = activity.getSettingsFileF(activity.getCurrentProfile());
@@ -1618,8 +1611,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
         mInflater = LayoutInflater.from(getContext());
 		createOptions();
         mTabs = (TabHost) mInflater.inflate(R.layout.options, null);
-		int colorGray = themeColors.get(R.attr.colorThemeGray2);
-		int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
 		mTabs.setOnTabChangedListener(tabId -> {
 			for (int i = 0; i < mTabs.getTabWidget().getChildCount(); i++) {
 				try {
@@ -1743,6 +1734,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 					setIconIdByAttr(R.attr.attr_icons8_train_headphones, R.drawable.train_headphones));
 		}
 		mOptionsControls = new OptionsListView(getContext(), null);
+		HardwareKeysOption hwkO = (HardwareKeysOption) new HardwareKeysOption(this.mActivity, this,  getString(R.string.options_hardware_keys),
+				PROP_APP_HARDWARE_KEYS,
+				getString(R.string.options_hardware_keys_add_info), filter).setIconIdByAttr(R.attr.cr3_option_controls_keys_drawable, R.drawable.cr3_option_controls_keys);
+		//hwkO.updateFilterEnd();
+		mOptionsControls.add(hwkO);
 		KeyMapOption kmO = (KeyMapOption) new KeyMapOption(this.mActivity, getContext(),this, getString(R.string.options_app_key_actions),
 				getString(R.string.options_app_key_actions_add_info), filter).setIconIdByAttr(R.attr.cr3_option_controls_keys_drawable, R.drawable.cr3_option_controls_keys);
 		kmO.updateFilterEnd();

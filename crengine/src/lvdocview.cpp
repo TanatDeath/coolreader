@@ -3817,7 +3817,7 @@ bool LVDocView::goSelectedLink() {
 
 #define NAVIGATION_FILENAME_SEPARATOR U":"
 bool splitNavigationPos(lString32 pos, lString32 & fname, lString32 & path) {
-	int p = pos.pos(lString32(NAVIGATION_FILENAME_SEPARATOR));
+	int p = pos.rpos(lString32(NAVIGATION_FILENAME_SEPARATOR));
 	if (p <= 0) {
         fname = lString32::empty_str;
 		path = pos;
@@ -3835,7 +3835,7 @@ lString32 LVDocView::getNavigationPath() const {
 	LVAppendPathDelimiter(fpath);
 	lString32 s = fpath + fname;
 	if (!m_arc.isNull())
-        s = cs32("/") + s;
+		s = LVGetAbsolutePath(s);
 	return s;
 }
 
@@ -4583,7 +4583,7 @@ bool LVDocView::LoadDocument(const lChar32 * fname, bool metadataOnly) {
     CRLog::debug("LoadDocument(%s) textMode=%s", LCSTR(lString32(fname)), getTextFormatOptions()==txt_format_pre ? "pre" : "autoformat");
 
 	// split file path and name
-	lString32 filename32(fname);
+	lString32 filename32 = LVGetAbsolutePath(fname);
 
 	lString32 arcPathName;
 	lString32 arcItemPathName;
@@ -5171,6 +5171,7 @@ bool LVDocView::loadDocumentInt(LVStreamRef stream, bool metadataOnly) {
         }
 #endif
 
+		bool repeat_recursively = false;
         m_arc = LVOpenArchieve( m_stream );
 		if (!m_arc.isNull())
 		{
@@ -5180,12 +5181,7 @@ bool LVDocView::loadDocumentInt(LVStreamRef stream, bool metadataOnly) {
 			m_container = m_arc;
 			m_doc_props->setInt( DOC_PROP_ARC_FILE_COUNT, m_arc->GetObjectCount() );
 			bool found = false;
-			int htmCount = 0;
-			int fb2Count = 0;
-			int rtfCount = 0;
-			int txtCount = 0;
-			int fbdCount = 0;
-            int pmlCount = 0;
+			int eligibleCount = 0;
 			lString32 defHtml;
 			lString32 firstGood;
 			for (int i=0; i<m_arc->GetObjectCount(); i++)
@@ -5204,17 +5200,27 @@ bool LVDocView::loadDocumentInt(LVStreamRef stream, bool metadataOnly) {
 							lString32 nm = LVExtractFilenameWithoutExtension( s );
                             if ( nm == "index" || nm == "default" )
 							defHtml = name;
-							htmCount++;
-                        } else if ( s.endsWith(".fb2") ) {
-							fb2Count++;
-                        } else if ( s.endsWith(".rtf") ) {
-							rtfCount++;
-                        } else if ( s.endsWith(".txt") ) {
-							txtCount++;
-                        } else if ( s.endsWith(".pml") ) {
-                            pmlCount++;
-                        } else if ( s.endsWith(".fbd") ) {
-							fbdCount++;
+							eligibleCount++;
+						} else if ( s.endsWith(".fb2") ) {
+							eligibleCount++;
+						} else if ( s.endsWith(".fb3") ) {
+							eligibleCount++;
+						} else if ( s.endsWith(".epub") ) {
+							eligibleCount++;
+						} else if ( s.endsWith(".rtf") ) {
+							eligibleCount++;
+						} else if ( s.endsWith(".doc") ) {
+							eligibleCount++;
+						} else if ( s.endsWith(".docx") ) {
+							eligibleCount++;
+						} else if ( s.endsWith(".odt") ) {
+							eligibleCount++;
+						} else if ( s.endsWith(".txt") ) {
+							eligibleCount++;
+						} else if ( s.endsWith(".pml") ) {
+							eligibleCount++;
+						} else if ( s.endsWith(".fbd") ) {
+							eligibleCount++;
 						} else {
 							nameIsOk = false;
 						}
@@ -5222,29 +5228,24 @@ bool LVDocView::loadDocumentInt(LVStreamRef stream, bool metadataOnly) {
 							if ( firstGood.empty() )
                                 firstGood = name;
 						}
-						if ( name.length() >= 5 )
-						{
-							name.lowercase();
-							const lChar32 * pext = name.c_str() + name.length() - 4;
-                            if (!lStr_cmp(pext, ".fb2"))
-                                nameIsOk = true;
-                            else if (!lStr_cmp(pext, ".txt"))
-                                nameIsOk = true;
-                            else if (!lStr_cmp(pext, ".rtf"))
-                                nameIsOk = true;
-						}
-						if ( !nameIsOk )
-						continue;
 					}
 				}
 			}
+			CRLog::debug("In archive found %d suitable files", eligibleCount);
 			lString32 fn = !defHtml.empty() ? defHtml : firstGood;
 			if ( !fn.empty() ) {
+				lString32 s = fn;
+				s = s.lowercase();
+				bool set_codebase = (s.endsWith(".htm") || s.endsWith(".html"));
+				if (s.endsWith(".fb3") || s.endsWith(".epub") || s.endsWith(".doc") ||
+					s.endsWith(".docx") || s.endsWith(".odt"))
+					repeat_recursively = true;
 				m_stream = m_arc->OpenStream( fn.c_str(), LVOM_READ );
 				if ( !m_stream.isNull() ) {
 					CRLog::debug("Opened archive stream %s", LCSTR(fn) );
 					m_doc_props->setString(DOC_PROP_FILE_NAME, fn);
-					m_doc_props->setString(DOC_PROP_CODE_BASE, LVExtractPath(fn) );
+					if (set_codebase)
+						m_doc_props->setString(DOC_PROP_CODE_BASE, LVExtractPath(fn, false));
 					m_doc_props->setString(DOC_PROP_FILE_SIZE, lString32::itoa((int)m_stream->GetSize()));
                     m_doc_props->setHex(DOC_PROP_FILE_CRC32, m_stream->getcrc32());
 					found = true;
@@ -5297,6 +5298,7 @@ bool LVDocView::loadDocumentInt(LVStreamRef stream, bool metadataOnly) {
 			}
 			delete[] fullbuf;
 #endif
+			// https://wiki.mobileread.com/wiki/TCR : Text compression for Reader, a Psion format
 			LVStreamRef tcrDecoder = LVCreateTCRDecoderStream(m_stream);
 			if (!tcrDecoder.isNull())
 				m_stream = tcrDecoder;
@@ -5317,6 +5319,8 @@ bool LVDocView::loadDocumentInt(LVStreamRef stream, bool metadataOnly) {
         }
     #endif
 
+		if (repeat_recursively)
+			return loadDocumentInt(m_stream, metadataOnly);
 		return ParseDocument();
 
 	}
