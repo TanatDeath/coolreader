@@ -573,7 +573,8 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.attr_icons8_7,
 						 R.attr.attr_icons8_8,
 						 R.attr.attr_icons8_9,
-						 R.attr.attr_icons8_10
+						 R.attr.attr_icons8_10,
+				         R.attr.attr_icons8_speaker_stop
 		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
 		int btnPrevDrawableRes = a.getResourceId(0, 0);
@@ -703,6 +704,8 @@ public class BaseActivity extends Activity implements Settings {
 		int br8 = a.getResourceId(112, 0);
 		int br9 = a.getResourceId(113, 0);
 		int br10 = a.getResourceId(114, 0);
+
+		int brSpeakerStop = a.getResourceId(115, 0);
 
 		a.recycle();
 		if (btnPrevDrawableRes != 0) {
@@ -902,6 +905,8 @@ public class BaseActivity extends Activity implements Settings {
 		if (br8 != 0) ReaderAction.COMMAND_GROUP_8.setIconId(br8);
 		if (br9 != 0) ReaderAction.COMMAND_GROUP_9.setIconId(br9);
 		if (br10 != 0) ReaderAction.COMMAND_GROUP_10.setIconId(br10);
+
+		if (brSpeakerStop != 0) ReaderAction.TTS_STOP.setIconId(brSpeakerStop);
 	}
 
 	public void setCurrentTheme(InterfaceTheme theme) {
@@ -3249,6 +3254,8 @@ public class BaseActivity extends Activity implements Settings {
 
 			// By default enable workaround to disable processing of abbreviations at the end of a sentence when using "Google Speech Services".
 			props.applyDefault(ReaderView.PROP_APP_TTS_GOOGLE_END_OF_SENTENCE_ABBR, "1");
+
+			props.applyDefault(ReaderView.PROP_APP_TTS_USE_AUDIOBOOK, "1");
 
 			props.applyDefault(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "WHITE" : "GRAY1");
 	        props.applyDefault(ReaderView.PROP_APP_THEME_DAY, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "WHITE" : "LIGHT");

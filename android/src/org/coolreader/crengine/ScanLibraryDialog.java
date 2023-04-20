@@ -61,6 +61,7 @@ public class ScanLibraryDialog extends BaseDialog {
 	private final Button mBtnMaintRemove;
 	private final Button mBtnMaintRemoveOrphans;
 	private final Button mBtnMaintRemoveCloud;
+	private final Button mBtnForceRescan;
 	private final Button mBtnMaintShowStatistics;
 	ArrayList<String> toScan = new ArrayList<>();
 	LibraryStats cntWas;
@@ -703,6 +704,39 @@ public class ScanLibraryDialog extends BaseDialog {
 						mActivity.getString(R.string.long_op),
 						true, true, null);
 				mActivity.getDB().deleteCloudEntries(o -> {
+					if (progressDlg != null)
+						if (progressDlg.isShowing()) progressDlg.dismiss();
+					if (o != null) {
+						Long cnt = (Long) o;
+						BackgroundThread.instance().postGUI(() -> {
+							if (cnt == 0L) {
+								mActivity.showToast(mActivity.getString(R.string.db_maint_finished_cnt) + " " + cnt);
+							} else {
+								mActivity.showToast(mActivity.getString(R.string.db_maint_finished_cnt) + " " + cnt + ". " +
+										mActivity.getString(R.string.library_maint_done_need_restart));
+								mActivity.askConfirmation(mActivity.getString(R.string.proceeded) + ": " + cnt + ". " +
+										mActivity.getString(R.string.restart_app), () -> {
+									mActivity.finish();
+								});
+							}
+						});
+					}
+				});
+			});
+		});
+
+		mBtnForceRescan = view2.findViewById(R.id.btn_maint_force_rescan);
+		mBtnForceRescan.setBackgroundColor(colorGrayC);
+		Utils.setDashedButton(mBtnForceRescan);
+		if (isEInk) Utils.setDashedButtonEink(mBtnForceRescan);
+
+		mBtnForceRescan.setOnClickListener(v -> {
+			mActivity.askConfirmation(R.string.are_you_sure, () -> {
+				progressDlg = ProgressDialog.show(mActivity,
+						mActivity.getString(R.string.long_op),
+						mActivity.getString(R.string.long_op),
+						true, true, null);
+				mActivity.getDB().setForceRescanBooks(o -> {
 					if (progressDlg != null)
 						if (progressDlg.isShowing()) progressDlg.dismiss();
 					if (o != null) {

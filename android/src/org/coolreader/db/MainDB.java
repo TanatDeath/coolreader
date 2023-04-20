@@ -5142,6 +5142,20 @@ public class MainDB extends BaseDB {
 		return wasRec - becomeRec;
 	}
 
+	public Long setForceRescanBooks() {
+		if (!isOpened())
+			return 0L;
+		Long wasRec = 0L;
+		String sql = "SELECT count(*) as cnt FROM book";
+		try (Cursor rs = mDB.rawQuery(sql, null)) {
+			if (rs.moveToFirst()) wasRec = rs.getLong(0);
+		}
+		String sqlU = "update book set saved_with_ver = 0";
+		execSQLIgnoreErrors(sqlU);
+		flushAndTransaction();
+		return wasRec;
+	}
+
 	public LibraryStats getLibraryStats() {
 		LibraryStats ls = new LibraryStats();
 		if (!isOpened())

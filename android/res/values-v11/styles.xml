@@ -205,6 +205,7 @@
         <item name="attr_icons8_speaker_small_off">@drawable/icons8_speaker_small_off</item>
         <item name="attr_icons8_speaker_on">@drawable/icons8_speaker_on</item>
         <item name="attr_icons8_speaker_off">@drawable/icons8_speaker_off</item>
+        <item name="attr_icons8_speaker_stop">@drawable/icons8_speaker_stop</item>
         <item name="attr_icons8_page_turn">@drawable/icons8_page_turn</item>
         <item name="attr_icons8_page_turn_back">@drawable/icons8_page_turn_back</item>
         <item name="cr3_browser_folder_recent_drawable">@drawable/icons8_folder_star</item>
@@ -508,6 +509,7 @@
         <item name="attr_icons8_cloud_storage">@drawable/icons8_cloud_storage</item>
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
+        <item name="attr_icons8_audio_book">@drawable/icons8_audio_book</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
         <item name="attr_icons8_tag">@drawable/icons8_tag</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
@@ -650,6 +652,7 @@
         <item name="attr_icons8_speaker_small_off">@drawable/icons8_speaker_small_off</item>
         <item name="attr_icons8_speaker_on">@drawable/icons8_speaker_on</item>
         <item name="attr_icons8_speaker_off">@drawable/icons8_speaker_off</item>
+        <item name="attr_icons8_speaker_stop">@drawable/icons8_speaker_stop</item>
         <item name="attr_icons8_page_turn">@drawable/icons8_page_turn</item>
         <item name="attr_icons8_page_turn_back">@drawable/icons8_page_turn_back</item>
         <item name="cr3_browser_folder_recent_drawable">@drawable/icons8_folder_star</item>
@@ -953,6 +956,7 @@
         <item name="attr_icons8_cloud_storage">@drawable/icons8_cloud_storage</item>
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
+        <item name="attr_icons8_audio_book">@drawable/icons8_audio_book</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
         <item name="attr_icons8_tag">@drawable/icons8_tag</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
@@ -1082,6 +1086,7 @@
         <item name="attr_icons8_speaker_small_off">@drawable/icons8_speaker_small_off</item>
         <item name="attr_icons8_speaker_on">@drawable/icons8_speaker_on</item>
         <item name="attr_icons8_speaker_off">@drawable/icons8_speaker_off</item>
+        <item name="attr_icons8_speaker_stop">@drawable/icons8_speaker_stop</item>
         <item name="attr_icons8_page_turn">@drawable/icons8_page_turn</item>
         <item name="attr_icons8_page_turn_back">@drawable/icons8_page_turn_back</item>
         <item name="cr3_browser_folder_recent_drawable">@drawable/icons8_folder_star</item>
@@ -1383,6 +1388,7 @@
         <item name="attr_icons8_cloud_storage">@drawable/icons8_cloud_storage</item>
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
+        <item name="attr_icons8_audio_book">@drawable/icons8_audio_book</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
         <item name="attr_icons8_tag">@drawable/icons8_tag</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
@@ -1454,6 +1460,7 @@
         <item name="attr_icons8_speaker_small_off">@drawable/icons8_speaker_small_off</item>
         <item name="attr_icons8_speaker_on">@drawable/icons8_speaker_on</item>
         <item name="attr_icons8_speaker_off">@drawable/icons8_speaker_off</item>
+        <item name="attr_icons8_speaker_stop">@drawable/icons8_speaker_stop</item>
         <item name="attr_icons8_page_turn">@drawable/icons8_page_turn</item>
         <item name="attr_icons8_page_turn_back">@drawable/icons8_page_turn_back</item>
         <item name="cr3_browser_folder_recent_drawable">@drawable/icons8_folder_star</item>
@@ -1755,6 +1762,7 @@
         <item name="attr_icons8_cloud_storage">@drawable/icons8_cloud_storage</item>
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
+        <item name="attr_icons8_audio_book">@drawable/icons8_audio_book</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
         <item name="attr_icons8_tag">@drawable/icons8_tag</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
@@ -2134,6 +2142,7 @@
         <item name="attr_icons8_cloud_storage">@drawable/icons8_cloud_storage</item>
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
+        <item name="attr_icons8_audio_book">@drawable/icons8_audio_book</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
         <item name="attr_icons8_tag">@drawable/icons8_tag</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>
@@ -2568,6 +2577,7 @@
         <item name="attr_icons8_cloud_storage">@drawable/icons8_cloud_storage</item>
         <item name="attr_icons8_send_by_email">@drawable/icons8_send_by_email</item>
         <item name="attr_icons8_train_headphones">@drawable/train_headphones</item>
+        <item name="attr_icons8_audio_book">@drawable/icons8_audio_book</item>
         <item name="attr_icons8_theatre_mask">@drawable/icons8_theatre_mask</item>
         <item name="attr_icons8_tag">@drawable/icons8_tag</item>
         <item name="attr_icons8_ext_fullscreen">@drawable/icons8_ext_fullscreen</item>

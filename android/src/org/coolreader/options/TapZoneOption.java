@@ -1,5 +1,6 @@
 package org.coolreader.options;
 
+import android.annotation.SuppressLint;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;

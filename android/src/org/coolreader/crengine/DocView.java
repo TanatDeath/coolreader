@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import org.coolreader.CoolReader;
 import org.coolreader.readerview.ReaderView;
 
+import java.util.List;
+
 public class DocView {
 
 	public static final Logger log = L.create("dv");
@@ -327,7 +329,15 @@ public class DocView {
 			return getCurrentPageBookmarkInternal();
 		}
 	}
-	
+
+	public List<SentenceInfo> getAllSentences() {
+		List<SentenceInfo> sentences;
+		synchronized(mutex) {
+			sentences = getAllSentencesInternal();
+		}
+		return sentences;
+	}
+
 	/**
 	 * Check whether document is formatted/rendered.
 	 * @return true if document is rendered, and e.g. retrieving of page image will not cause long activity (formatting etc.)
@@ -516,6 +526,8 @@ public class DocView {
 	private native boolean doCommandInternal(int command, int param);
 
 	private native Bookmark getCurrentPageBookmarkInternal();
+
+	private native List<SentenceInfo> getAllSentencesInternal();
 
 	private native boolean goToPositionInternal(String xPath, boolean saveToHistory);
 

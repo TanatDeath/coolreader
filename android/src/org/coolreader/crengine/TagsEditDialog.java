@@ -18,7 +18,6 @@ import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class TagsEditDialog extends BaseDialog {
 
@@ -49,14 +48,14 @@ public class TagsEditDialog extends BaseDialog {
 	private void addTagButton(BookTag bookTag, String savedTag) {
 		//LinearLayout dicButton = new LinearLayout(mActivity);
 		View buttonView = mInflater.inflate(R.layout.tag_flow_item, null);
-		LinearLayout dicButton = buttonView.findViewById(R.id.tag_flow_item_body);
+		LinearLayout dicTag = buttonView.findViewById(R.id.tag_flow_item_body);
 		String txt = bookTag.name;
 		if (bookTag.bookCnt > 0) // not hier! show real qty
 			txt = txt + " (" + bookTag.bookCnt + ")";
 		TextView tvText = buttonView.findViewById(R.id.tag_flow_item_text);
 		tvText.setText(txt);
-		dicButton.setBackgroundColor(CoverpageManager.randomColor((bookTag.name).hashCode()));
-		dicButton.setPadding(5, 5, 5, 5);
+		dicTag.setBackgroundColor(CoverpageManager.randomColor((bookTag.name).hashCode()));
+		dicTag.setPadding(5, 5, 5, 5);
 		if (bookTagsWas != null)
 			for (BookTag bt: bookTagsWas) {
 				if (bt.name.equals(bookTag.name)) {
@@ -67,25 +66,25 @@ public class TagsEditDialog extends BaseDialog {
 		if (!StrUtils.isEmptyStr(savedTag))
 			if ((mItem != null) && (bookTag.name.equals(savedTag))) bookTag.isSelected = true;
 		if (bookTag.isSelected) {
-			Utils.setDashedView(dicButton);
+			Utils.setDashedView(dicTag);
 			tvText.setPaintFlags(tvText.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 			tvText.setTypeface(null, Typeface.BOLD);
 		}
 		final BookTag thisTag = bookTag;
 		bookTags.add(thisTag);
-		dicButton.setOnClickListener(v -> {
+		dicTag.setOnClickListener(v -> {
 			thisTag.isSelected = !thisTag.isSelected;
 			if (thisTag.isSelected) {
-				Utils.setDashedView(dicButton);
+				Utils.setDashedView(dicTag);
 				tvText.setPaintFlags(tvText.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 				tvText.setTypeface(null, Typeface.BOLD);
 			} else {
-				dicButton.setBackgroundColor(CoverpageManager.randomColor((bookTag.name).hashCode()));
+				dicTag.setBackgroundColor(CoverpageManager.randomColor((bookTag.name).hashCode()));
 				tvText.setPaintFlags(tvText.getPaintFlags() & (~ Paint.UNDERLINE_TEXT_FLAG));
 				tvText.setTypeface(null, Typeface.NORMAL);
 			}
 		});
-		dicButton.setOnLongClickListener(v -> {
+		dicTag.setOnLongClickListener(v -> {
 			mActivity.askConfirmation(R.string.rename_tag, () -> {
 				mLblTagAction.setText(mActivity.getString(R.string.dlg_button_rename_tag) + ": " + thisTag.name);
 				mBtnClearAction.setVisibility(View.VISIBLE);
@@ -112,8 +111,8 @@ public class TagsEditDialog extends BaseDialog {
 		tv.setPadding(5, 0, 0, 0);
 		tv.setBackgroundColor(Color.argb(0, Color.red(colorGrayC), Color.green(colorGrayC), Color.blue(colorGrayC)));
 		tv.setTextColor(mActivity.getTextColor(colorIcon));
-		mActivity.tintViewIcons(dicButton);
-		mFlTags.addView(dicButton);
+		mActivity.tintViewIcons(dicTag);
+		mFlTags.addView(dicTag);
 		mFlTags.addView(tv);
 	}
 

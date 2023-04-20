@@ -1278,6 +1278,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		new BoolOption(this, getString(R.string.options_tts_google_abbr_workaround),
 				PROP_APP_TTS_GOOGLE_END_OF_SENTENCE_ABBR, getString(R.string.options_tts_google_abbr_workaround_comment), "", true).
 				setDefaultValue("1").noIcon();
+		//TODO: addinfo
+		new BoolOption(this, getString(R.string.options_tts_use_audiobook),
+				PROP_APP_TTS_USE_AUDIOBOOK, getString(R.string.options_tts_use_audiobook_add_info), "", true).
+				setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_audio_book, R.drawable.icons8_audio_book);
 		new BoolOption(this, getString(R.string.options_style_floating_punctuation), PROP_FLOATING_PUNCTUATION,
 				getString(R.string.option_add_info_empty_text), "", true).setDefaultValue("1").
 				setIconIdByAttr(R.attr.cr3_option_text_floating_punct_drawable, R.drawable.cr3_option_text_other);

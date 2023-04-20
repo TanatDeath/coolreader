@@ -110,7 +110,10 @@ my %ic_actions_list=(
         'icons8_play_lock.svg' => 'icons8_play_lock.png',
         'icons8_pause_lock.svg' => 'icons8_pause_lock.png',
         'icons8_offline_dic.svg' => 'icons8_offline_dic.png',
-        'icons8_settings_from_hist.svg' => 'icons8_settings_from_hist.png'
+        'icons8_settings_from_hist.svg' => 'icons8_settings_from_hist.png',
+        'icons8_speaker_off.svg' => 'icons8_speaker_off.png',
+        'icons8_speaker_stop.svg' => 'icons8_speaker_stop.png',
+        'icons8_audio_book.svg' => 'icons8_audio_book.png'
 );
 
 my %ic_menu_list=(

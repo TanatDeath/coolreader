@@ -957,6 +957,17 @@ public class CRDBService extends BaseService {
 		flush();
 	}
 
+	public void setForceRescanBooks(final ObjectCallback callback, final Handler handler) {
+		execTask(new Task("deleteCloudEntries") {
+			@Override
+			public void work() {
+				Long cnt = mainDB.setForceRescanBooks();
+				sendTask(handler, () -> callback.onObjectLoaded(cnt));
+			}
+		});
+		flush();
+	}
+
 	public void getLibraryStats(final ObjectCallback callback, final Handler handler) {
 		execTask(new Task("getLibraryStats") {
 			@Override
@@ -1383,6 +1394,9 @@ public class CRDBService extends BaseService {
 			getService().deleteCloudEntries(callback, new Handler());
 		}
 
+		public void setForceRescanBooks(ObjectCallback callback) {
+			getService().setForceRescanBooks(callback, new Handler());
+		}
 		public void getLibraryStats(ObjectCallback callback) {
 			getService().getLibraryStats(callback, new Handler());
 		}

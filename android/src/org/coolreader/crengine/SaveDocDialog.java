@@ -64,11 +64,6 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 	Button bookStateToRead;
 	Button bookStateReading;
 	Button bookStateFinished;
-	int colorIcon;
-	int colorGrayC;
-	int colorGrayCT;
-	int colorGrayCT2;
-
 	TextView tvChosenFolder;
 
 	private ImageButton btnStar1;
@@ -156,13 +151,6 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 	}
 
 	private void paintButtons() {
-		int colorGrayC;
-		TypedArray a = mActivity.getTheme().obtainStyledAttributes(new int[]
-				{R.attr.colorThemeGray2Contrast});
-		colorGrayC = a.getColor(0, Color.GRAY);
-		a.recycle();
-		int colorGrayCT=Color.argb(30,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
-		int colorGrayCT2=Color.argb(200,Color.red(colorGrayC),Color.green(colorGrayC),Color.blue(colorGrayC));
 		for (FolderControls fc: mFolders) {
 			mActivity.tintViewIcons(fc.folderButton, PorterDuff.Mode.CLEAR,true);
 			fc.folderButton.setBackgroundColor(colorGrayCT);

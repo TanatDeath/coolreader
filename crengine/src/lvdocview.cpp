@@ -6993,6 +6993,44 @@ int LVDocView::onSelectionCommand( int cmd, int param )
     return 1;
 }
 
+bool LVDocView::nextSentence(){
+	LVRef<ldomXRange> pageRange = getPageDocumentRange();
+	if (pageRange.isNull()) {
+		clearSelection();
+		return false;
+	}
+	ldomXPointerEx pos( getBookmark() );
+	ldomXRangeList & sel = getDocument()->getSelections();
+	ldomXRange currSel;
+	if ( sel.length()>0 ){
+		currSel = *sel[0];
+	}
+
+	if ( currSel.isNull() || currSel.getStart().isNull() ) {
+		// select first sentence on page
+		if ( pos.thisSentenceStart() ) {
+			currSel.setStart(pos);
+		}
+	} else if ( !currSel.getStart().isSentenceStart() ) {
+		currSel.getStart().thisSentenceStart();
+	} else {
+		bool movedToNext = currSel.getStart().nextSentenceStart();
+		if(!movedToNext){
+			//presumably already on the last sentence
+			return false;
+		}
+	}
+
+	currSel.setEnd(currSel.getStart());
+	currSel.getEnd().thisSentenceEnd();
+
+	currSel.setFlags(1);
+	selectRange(currSel);
+	lvPoint startPoint = currSel.getStart().toPoint();
+	lvPoint endPoint = currSel.getEnd().toPoint();
+	return true;
+}
+
 //static int cr_font_sizes[] = { 24, 29, 33, 39, 44 };
 static int cr_interline_spaces[] = { 100, 70, 72, 74, 76, 78, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
 									 91, 92, 93, 94, 95, 96, 97, 98, 99, 100,

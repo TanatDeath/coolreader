@@ -111,6 +111,14 @@ JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_DocView_doCommandInterna
 
 /*
  * Class:     org_coolreader_crengine_DocView
+ * Method:    getAllSentencesInternal
+ * Signature: ()Ljava/util/ArrayList;
+ */
+JNIEXPORT jobject JNICALL Java_org_coolreader_crengine_DocView_getAllSentencesInternal
+        (JNIEnv * _env, jobject _this);
+
+/*
+ * Class:     org_coolreader_crengine_DocView
  * Method:    getCurrentPageBookmarkInternal
  * Signature: ()Lorg/coolreader/crengine/Bookmark;
  */

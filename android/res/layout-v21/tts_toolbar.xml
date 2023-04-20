@@ -49,6 +49,25 @@
 					android:textColor="?attr/colorIcon"
 					android:text="" />
 		</RelativeLayout>
+		<LinearLayout
+				android:id="@+id/ll_audio_file"
+				android:orientation="horizontal"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:gravity="top"
+				android:layout_alignParentTop="true"
+				>
+			<TextView
+					android:id="@+id/lbl_audio_file"
+					style="@style/TextAppearance.Smaller"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_margin="5dip"
+					android:singleLine="true"
+					android:textColor="?attr/colorIcon"
+					android:ellipsize="middle"
+					android:text="" />
+		</LinearLayout>
 	</LinearLayout>
 
 	<LinearLayout

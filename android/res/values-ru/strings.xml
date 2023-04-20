@@ -441,6 +441,7 @@
     <string name="mi_book_calibre_root">Библиотека Calibre</string>
     <string name="opds_search">Поиск в каталоге...</string>
     <string name="mi_tts_play">Читать вслух</string>
+    <string name="mi_tts_stop">Остановка чтения вслух</string>
     <string name="options_format_image_scaling_block_scale">Максимальное увеличение для изображений</string>
     <string name="options_format_image_scaling_mode_integer_factor">В целое число раз</string>
     <string name="options_format_image_scaling_block_mode">Масштабировать изображения</string>
@@ -1617,6 +1618,8 @@
     <string name="library_maint_remove_orphans_add_info">Это может происходить, когда файлы книг удаляются или переименовываются</string>
     <string name="library_maint_remove_cloud">Удалить облачную информацию о книгах</string>
     <string name="library_maint_remove_cloud_add_info">Ссылки между скачанными книгами и книгами в облаке будут удалены</string>
+    <string name="library_maint_force_rescan_book_info">Установить признак пересканирования свойств книг</string>
+    <string name="library_maint_force_rescan_book_info_add_info">Свойства книг будут пересканированы при посещении соответствующих папок</string>
     <string name="library_maint_list_is_empty">Список пуст, операция не выполнена</string>
     <string name="are_you_sure">Вы уверены? Эта операция не может быть отменена</string>
     <string name="proceeded">Обработано</string>
@@ -2070,5 +2073,14 @@
     <string name="options_hardware_keys">Аппаратные кнопки (дополнительные)</string>
     <string name="options_hardware_keys_add_info">Позволяет сконфигурировать дополнительные аппаратные кнопки (если они есть (на таких устройствах, как BlackBerry, Uniherz Titan) или если подключена физическая клавиатура)</string>
     <string name="cannot_rename_file">невозможно переименовать файл</string>
+    <string name="auto_start_reading">Диалог TTS: автозапуск чтения</string>
+    <string name="auto_start_reading_0">Отключен</string>
+    <string name="auto_start_reading_1">Обычный режим</string>
+    <string name="auto_start_reading_2">Непрерываемый режим</string>
+    <string name="options_tts_use_audiobook">Читать аудиокнигу вместо использования движка TTS, если существует файл *.wordtiming </string>
+    <string name="options_tts_use_audiobook_add_info">Книга, файл *.wordtiming и файлы аудиокниги должны располагаться вместе в одной папке, эта опция позволяет вам синхронизировать аудиокнигу с соответствующим текстом</string>
+    <string name="hardware_keys_hint">Нажимайте кнопки здесь -&gt;</string>
+    <string name="add_this_key">Добавить клавишу в список</string>
+    <string name="key_already_added">Клавиша уже добавлена</string>
 </resources>
 

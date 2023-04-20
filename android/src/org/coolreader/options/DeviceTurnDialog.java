@@ -2,9 +2,6 @@ package org.coolreader.options;
 
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -16,13 +13,9 @@ import org.coolreader.R;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseDialog;
-import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.Settings;
 import org.coolreader.utils.Utils;
-
-import java.util.HashMap;
-import java.util.Locale;
 
 public class DeviceTurnDialog extends BaseDialog {
 

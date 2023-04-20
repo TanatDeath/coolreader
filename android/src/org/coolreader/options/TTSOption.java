@@ -23,6 +23,24 @@ public class TTSOption extends SubmenuOption {
 			0, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1200, 1400, 1600, 1800, 1900
 	};
 
+	int[] mAutoStartMode = new int[] {
+		0,
+		1,
+		2
+	};
+
+	int[] mAutoStartModeTitles = new int[] {
+		R.string.auto_start_reading_0,
+		R.string.auto_start_reading_1,
+		R.string.auto_start_reading_2
+	};
+
+	int[] mAutoStartModeAddInfos = new int[] {
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text
+	};
+
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	public static void fillTTSLanguages(OptionsDialog od, ListOption listOption) {
 		listOption.clear();
@@ -157,6 +175,7 @@ public class TTSOption extends SubmenuOption {
 				setIconIdByAttr(R.attr.attr_icons8_toolbar_background,R.drawable.icons8_toolbar_background));
 		listView.add(OptionsDialog.getOption(Settings.PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS, this.lastFilteredValue));
 		listView.add(OptionsDialog.getOption(Settings.PROP_APP_TTS_GOOGLE_END_OF_SENTENCE_ABBR, this.lastFilteredValue));
+		listView.add(OptionsDialog.getOption(Settings.PROP_APP_TTS_USE_AUDIOBOOK, this.lastFilteredValue));
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.options_app_tts_stop_motion_timeout), Settings.PROP_APP_MOTION_TIMEOUT,
 				mActivity.getString(R.string.options_app_tts_stop_motion_timeout_add_info), this.lastFilteredValue).
 				add(mOptionsDialog.mMotionTimeouts, mOptionsDialog.mMotionTimeoutsTitles, mOptionsDialog.mMotionTimeoutsAddInfos).
@@ -174,6 +193,10 @@ public class TTSOption extends SubmenuOption {
 //					add(mForceTTS, mForceTTSTitles, mForceTTSAddInfos).
 //					setDefaultValue("0").
 //					setIconIdByAttr(R.attr.attr_icons8_speaker_koef, R.drawable.icons8_speaker_koef));
+		listView.add(new ListOption(mOwner, mActivity.getString(R.string.auto_start_reading), Settings.PROP_APP_TTS_AUTO_START,
+				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+				add(mAutoStartMode, mAutoStartModeTitles, mAutoStartModeAddInfos).setDefaultValue("0").
+				noIcon());
 		dlg.setView(listView);
 		dlg.show();
 	}
@@ -218,6 +241,8 @@ public class TTSOption extends SubmenuOption {
 				mActivity.getString(R.string.force_tts_koef_add_info));
 		this.updateFilteredMark(mActivity.getString(R.string.options_tts_google_abbr_workaround), Settings.PROP_APP_TTS_GOOGLE_END_OF_SENTENCE_ABBR,
 				mActivity.getString(R.string.options_tts_google_abbr_workaround_comment));
+		this.updateFilteredMark(mActivity.getString(R.string.options_tts_use_audiobook), Settings.PROP_APP_TTS_USE_AUDIOBOOK,
+				mActivity.getString(R.string.options_tts_use_audiobook_add_info));
 		this.updateFilteredMark(mActivity.getString(R.string.options_app_tts_stop_motion_timeout), Settings.PROP_APP_MOTION_TIMEOUT,
 				mActivity.getString(R.string.options_app_tts_stop_motion_timeout_add_info));
 		for (String s: mOptionsDialog.mMotionTimeoutsTitles) this.updateFilteredMark(s);
@@ -253,6 +278,9 @@ public class TTSOption extends SubmenuOption {
 				mActivity.getString(R.string.tts_page_mode_dont_change_add_info));
 		this.updateFilteredMark(mActivity.getString(R.string.tts_sentence_pause), Settings.PROP_APP_TTS_SENTENCE_PAUSE,
 				mActivity.getString(R.string.tts_sentence_pause));
+		this.updateFilteredMark(mActivity.getString(R.string.auto_start_reading), Settings.PROP_APP_TTS_AUTO_START, "");
+		this.updateFilteredMark(mActivity.getString(R.string.auto_start_reading_0),
+				mActivity.getString(R.string.auto_start_reading_1), mActivity.getString(R.string.auto_start_reading_2));
 		return this.lastFiltered;
 	}
 	public String getValueLabel() { return ">"; }

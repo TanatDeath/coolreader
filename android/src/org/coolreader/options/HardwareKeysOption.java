@@ -24,10 +24,10 @@ public class HardwareKeysOption extends SubmenuOption {
 	public void onSelect() {
 		if (!enabled)
 			return;
-//		grid = mInflater.inflate(R.layout.device_turn_options, null);
-//		BaseDialog dlg = new DeviceTurnDialog("DeviceTurnDialog",
-//				mActivity, mProperties, label, grid, false, false);
-//		dlg.setView(grid);
-//		dlg.show();
+		grid = mInflater.inflate(R.layout.hardware_keys_options, null);
+		BaseDialog dlg = new HardwareKeysDialog("HardwareKeysDialog",
+				mActivity, mProperties, label, grid, true, false);
+		dlg.setView(grid);
+		dlg.show();
 	}
 }

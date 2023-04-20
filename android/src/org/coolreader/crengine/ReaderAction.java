@@ -213,6 +213,9 @@ public class ReaderAction {
 	public final static ReaderAction GO_BACK = new ReaderAction("GO_BACK", 0, R.string.action_go_back,  ReaderCommand.DCMD_LINK_BACK, 0, R.id.cr3_go_back, null, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_button_prev);
 	public final static ReaderAction GO_FORWARD = new ReaderAction("GO_FORWARD", 0, R.string.action_go_forward, ReaderCommand.DCMD_LINK_FORWARD, 0, R.id.cr3_go_forward, GO_BACK, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_button_next);
 	public final static ReaderAction TTS_PLAY = new ReaderAction("TTS_PLAY", 0,  R.string.mi_tts_play, ReaderCommand.DCMD_TTS_PLAY, 0, R.id.cr3_mi_tts_play, null, R.string.option_add_info_empty_text ).setIconId(R.drawable.cr3_button_tts); //.setActivateWithLongMenuKey()
+
+	//TODO: Make corresponding icon
+	public final static ReaderAction TTS_STOP = new ReaderAction("TTS_STOP", 0,  R.string.mi_tts_stop, ReaderCommand.DCMD_TTS_STOP, 0, R.id.cr3_mi_tts_stop, TTS_PLAY, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_speaker_stop); //.setActivateWithLongMenuKey()
 	public final static ReaderAction TOGGLE_TITLEBAR = new ReaderAction("TOGGLE_TITLEBAR", 0, R.string.action_toggle_titlebar, ReaderCommand.DCMD_TOGGLE_TITLEBAR, 0 , 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_navigation_toolbar_top);
 	public final static ReaderAction SHOW_POSITION_INFO_POPUP = new ReaderAction("SHOW_POSITION_INFO_POPUP", 0, R.string.action_show_position_info, ReaderCommand.DCMD_SHOW_POSITION_INFO_POPUP, 0, 0, BOOK_INFO, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_position_info);
 	public final static ReaderAction SHOW_DICTIONARY = new ReaderAction("SHOW_DICTIONARY", 0, R.string.action_show_dictionary, ReaderCommand.DCMD_SHOW_DICTIONARY, 0, 0,null, R.string.option_add_info_empty_text).setIconId(R.drawable.icons8_google_translate);
@@ -438,6 +441,7 @@ public class ReaderAction {
 				ABOUT,
 				BOOK_INFO,
 				TTS_PLAY,
+				TTS_STOP,
 				TOGGLE_TITLEBAR,
 				SHOW_POSITION_INFO_POPUP,
 				SHOW_DICTIONARY,

@@ -6,9 +6,13 @@ import android.os.Build;
 import android.os.Handler;
 import android.speech.tts.Voice;
 
+import androidx.annotation.RequiresApi;
+
+import java.io.File;
 import java.util.Locale;
 
 import org.coolreader.crengine.BookInfo;
+import org.coolreader.crengine.SentenceInfo;
 
 public class TTSControlBinder extends Binder {
 
@@ -36,6 +40,10 @@ public class TTSControlBinder extends Binder {
 
 	public void say(String utterance, TTSControlService.BooleanResultCallback callback) {
 		mService.say(utterance, callback, new Handler());
+	}
+
+	public void setCurrentUtterance(String utterance) {
+		mService.setCurrentUtterance(utterance);
 	}
 
 	public void pause(TTSControlService.BooleanResultCallback callback) {
@@ -90,6 +98,10 @@ public class TTSControlBinder extends Binder {
 		mService.setSpeechRate(rate, callback, new Handler());
 	}
 
+	public void isAudioBookPlaybackAfterSentence(SentenceInfo sentence, TTSControlService.BooleanResultCallback callback) {
+		mService.isAudioBookPlaybackAfterSentence(sentence, callback, new Handler());
+	}
+
 	public void retrieveVolume(TTSControlService.VolumeResultCallback callback) {
 		mService.retrieveVolume(callback, new Handler());
 	}
@@ -104,6 +116,11 @@ public class TTSControlBinder extends Binder {
 
 	public void setStatusListener(OnTTSStatusListener listener) {
 		mService.setStatusListener(listener);
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	public void setAudioFile(File audioFile, double startTime) {
+		mService.setAudioFile(audioFile, startTime);
 	}
 
 	public boolean isAudioFocusLocked() {

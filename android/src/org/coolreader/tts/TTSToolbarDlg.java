@@ -2,7 +2,9 @@ package org.coolreader.tts;
 
 import android.annotation.SuppressLint;
 
+import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -17,7 +19,10 @@ import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.GetTextListener;
 import org.coolreader.crengine.L;
 import org.coolreader.crengine.Logger;
+import org.coolreader.crengine.SentenceInfo;
+import org.coolreader.crengine.SentenceInfoCache;
 import org.coolreader.crengine.TextSeekBarDrawable;
+import org.coolreader.crengine.WordTimingAudiobookMatcher;
 import org.coolreader.options.OptionsDialog;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.ReaderCommand;
@@ -40,6 +45,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -55,6 +62,8 @@ import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+
+import androidx.annotation.RequiresApi;
 
 import com.s_trace.motion_watchdog.HandlerThread;
 import com.s_trace.motion_watchdog.MotionWatchdogHandler;
@@ -83,6 +92,10 @@ public class TTSToolbarDlg implements Settings {
 	private final ImageButton mPlayLockButton;
 	//private final TextView mVolumeTextView;
 	//private final TextView mSpeedTextView;
+	private final ImageButton mBackButton;
+	private final ImageButton mForwardButton;
+	private final ImageButton mStopButton;
+	private final ImageButton mOptionsButton;
 	private final ImageView btnDecVolume;
 	private final ImageView btnIncVolume;
 	private final ImageView btnDecSpeed;
@@ -91,6 +104,8 @@ public class TTSToolbarDlg implements Settings {
 	private final SeekBar mSbVolume;
 	private TextView lblMotionWd;
 	private TextView lblLang;
+	private LinearLayout llAudioFile;
+	private TextView lblAudioFile;
 	private HandlerThread mMotionWatchdog;
 	private Runnable mOnCloseListener;
 	private boolean mClosed;
@@ -108,6 +123,7 @@ public class TTSToolbarDlg implements Settings {
 	private String mCurrentLanguage;
 	private String mCurrentVoiceName;
 	private boolean mGoogleTTSAbbreviationWorkaround;
+	private boolean allowUseAudiobook;
 	private int mTTSSpeedPercent = 50;		// 50% (normal)
 	private Button mLoadSpeed1;
 	private Button mLoadSpeed2;
@@ -124,6 +140,7 @@ public class TTSToolbarDlg implements Settings {
 	private String mTranspButtons = "";
 
 	private int mSentencePause;
+	private int mAutoStartMode;
 
 	boolean isEInk = false;
 	HashMap<Integer, Integer> themeColors;
@@ -131,6 +148,36 @@ public class TTSToolbarDlg implements Settings {
 	private String mLogFileRoot = "";
 
 	private static final String TAG = TTSToolbarDlg.class.getSimpleName();
+
+	private File wordTimingFile;
+	private File sentenceInfoCacheFile;
+	private WordTimingAudiobookMatcher wordTimingAudiobookMatcher;
+	private SentenceInfo currentSentenceInfo;
+
+	private HandlerThread wordTimingCalcHandlerThread;
+	private Handler wordTimingCalcHandler;
+
+	private Handler audioBookPosHandler = new Handler(Looper.getMainLooper());
+	private Runnable audioBookPosRunnable = new Runnable() {
+		@Override
+		public void run() {
+			try{
+				SentenceInfo currentSentence = fetchSelectedSentenceInfo();
+				if(currentSentence != null){
+					mTTSControl.bind(ttsbinder -> ttsbinder.isAudioBookPlaybackAfterSentence(
+							currentSentence,
+							isAfter -> {
+								if (isAfter) {
+									moveSelection(ReaderCommand.DCMD_SELECT_NEXT_SENTENCE, null);
+								}
+							}
+					));
+				}
+			} finally {
+				audioBookPosHandler.postDelayed(this, 500);
+			}
+		}
+	};
 
 	static public TTSToolbarDlg showDialog(CoolReader coolReader, ReaderView readerView, TTSControlServiceAccessor ttsacc)
 	{
@@ -218,6 +265,13 @@ public class TTSToolbarDlg implements Settings {
 		}
 	}
 
+	private SentenceInfo fetchSelectedSentenceInfo() {
+		if(wordTimingAudiobookMatcher != null && mCurrentSelection != null){
+			return wordTimingAudiobookMatcher.getSentence(mCurrentSelection.startPos);
+		}
+		return null;
+	}
+
 	/**
 	 * Select next or previous sentence. ONLY the selection changes and the specified callback is called!
 	 * Not affected to speech synthesis process.
@@ -228,9 +282,10 @@ public class TTSToolbarDlg implements Settings {
 	{
 		mReaderView.moveSelection(cmd, 0, new ReaderView.MoveSelectionCallback() {
 
+			@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 			@Override
 			public void onNewSelection(Selection selection) {
-				log.d("onNewSelection: " + selection.text);
+				log.d("onNewSelection: " + selection.text + " : " + selection.startY + " x " + selection.startX);
 				curTime = System.currentTimeMillis();
 				long interv = mReaderView.getDefSavePositionIntervalSpeak();
 				if (interv == 0)
@@ -267,6 +322,16 @@ public class TTSToolbarDlg implements Settings {
 					}
 				}
 				mCurrentSelection = selection;
+				if (allowUseAudiobook) {
+					SentenceInfo sentenceInfo = fetchSelectedSentenceInfo();
+					if(sentenceInfo != null && sentenceInfo.audioFile != null) {
+						mTTSControl.bind(ttsbinder -> {
+							ttsbinder.setAudioFile(sentenceInfo.audioFile, sentenceInfo.startTime);
+							if (lblAudioFile != null) lblAudioFile.setText(
+								sentenceInfo.audioFile.getName());
+						});
+					}
+				}
 				if (null != callback)
 					callback.onNewSelection(mCurrentSelection);
 			}
@@ -415,12 +480,19 @@ public class TTSToolbarDlg implements Settings {
 		return rate;
 	}
 
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	public void setAppSettings(Properties newSettings, Properties oldSettings) {
 		log.v("setAppSettings()");
 		BackgroundThread.ensureGUI();
-		if (oldSettings == null)
+		boolean initialSetup;
+		if (oldSettings == null) {
 			oldSettings = new Properties();
+			initialSetup = true;
+		} else {
+			initialSetup = false;
+		}
 		int oldTTSSpeed = mTTSSpeedPercent;
+		boolean oldAllowUseAudiobook = this.allowUseAudiobook;
 		Properties changedSettings = newSettings.diff(oldSettings);
 		for (Map.Entry<Object, Object> entry : changedSettings.entrySet()) {
 			String key = (String) entry.getKey();
@@ -435,6 +507,39 @@ public class TTSToolbarDlg implements Settings {
 					if (result)
 						BackgroundThread.instance().postGUI(() -> mSbSpeed.setProgress(mTTSSpeedPercent));
 				});
+			});
+		}
+		boolean newAllowUseAudiobook = allowUseAudiobook;
+		if (!initialSetup && oldAllowUseAudiobook && !newAllowUseAudiobook) {
+			mTTSControl.bind(ttsbinder -> {
+				ttsbinder.stop(null);
+				ttsbinder.setAudioFile(null, 0);
+				initAudiobookWordTimings(() ->
+						moveSelection(ReaderCommand.DCMD_SELECT_FIRST_SENTENCE, new ReaderView.MoveSelectionCallback() {
+					@Override
+					public void onNewSelection(Selection selection) {
+						if (isSpeaking) {
+							ttsbinder.say(preprocessUtterance(selection.text), null);
+						} else {
+							ttsbinder.setCurrentUtterance(preprocessUtterance(selection.text));
+						}
+					}
+
+					@Override
+					public void onFail() {
+					}
+				}));
+			});
+		} else
+			if(!initialSetup && !oldAllowUseAudiobook && newAllowUseAudiobook) {
+				mTTSControl.bind(ttsbinder -> {
+					ttsbinder.stop(null);
+					SentenceInfo sentenceInfo = fetchSelectedSentenceInfo();
+					if(sentenceInfo != null){
+						ttsbinder.setAudioFile(sentenceInfo.audioFile, sentenceInfo.startTime);
+					}
+					initAudiobookWordTimings(null);
+					moveSelection(ReaderCommand.DCMD_SELECT_FIRST_SENTENCE, null);
 			});
 		}
 	}
@@ -464,6 +569,9 @@ public class TTSToolbarDlg implements Settings {
 				break;
 			case PROP_APP_TTS_GOOGLE_END_OF_SENTENCE_ABBR:
 				mGoogleTTSAbbreviationWorkaround = flg;
+			case PROP_APP_TTS_USE_AUDIOBOOK:
+				allowUseAudiobook = flg;
+				break;
 			case PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS:
 				mTranspButtons = value;
 				int colorGrayC = themeColors.get(R.attr.colorThemeGray2Contrast);
@@ -516,6 +624,9 @@ public class TTSToolbarDlg implements Settings {
 				break;
 			case PROP_APP_TTS_SENTENCE_PAUSE:
 				mSentencePause = Utils.parseInt(value, 0);
+				break;
+			case PROP_APP_TTS_AUTO_START:
+				mAutoStartMode = Utils.parseInt(value, 0);
 				break;
 			case PROP_APP_TTS_SPEED_1:
 				mSpeed1 = Utils.parseInt(value, -1);
@@ -802,6 +913,7 @@ public class TTSToolbarDlg implements Settings {
 		ColorDrawable c = new ColorDrawable(colorGrayC);
 		String sTranspButtons = mCoolReader.settings().getProperty(Settings.PROP_APP_OPTIONS_TTS_TOOLBAR_TRANSP_BUTTONS, "0");
 		mSentencePause = mCoolReader.settings().getInt(Settings.PROP_APP_TTS_SENTENCE_PAUSE, 0);
+		mAutoStartMode = mCoolReader.settings().getInt(Settings.PROP_APP_TTS_AUTO_START, 0);
 		if (!sTranspButtons.equals("0")) c.setAlpha(130);
 		else c.setAlpha(255);
 
@@ -820,6 +932,8 @@ public class TTSToolbarDlg implements Settings {
 				})
 		);
 		lblLang = mPanel.findViewById(R.id.lbl_lang);
+		lblAudioFile = mPanel.findViewById(R.id.lbl_audio_file);
+		llAudioFile = mPanel.findViewById(R.id.ll_audio_file);
 		mPlayPauseButton = mPanel.findViewById(R.id.tts_play_pause);
 		mPlayPauseButton.setImageResource(
 				Utils.resolveResourceIdByAttr(mCoolReader, R.attr.attr_ic_media_play, R.drawable.icons8_play)
@@ -834,9 +948,9 @@ public class TTSToolbarDlg implements Settings {
 		);
 		mPlayLockButton.setBackground(c);
 
-		ImageButton backButton = mPanel.findViewById(R.id.tts_back);
-		ImageButton forwardButton = mPanel.findViewById(R.id.tts_forward);
-		ImageButton stopButton = mPanel.findViewById(R.id.tts_stop);
+		mBackButton = mPanel.findViewById(R.id.tts_back);
+		mForwardButton = mPanel.findViewById(R.id.tts_forward);
+		mStopButton = mPanel.findViewById(R.id.tts_stop);
 
 		mWindow = new PopupWindow(anchor.getContext());
 		llMiddleContents.setOnClickListener(v -> {
@@ -855,17 +969,17 @@ public class TTSToolbarDlg implements Settings {
 		mPlayLockButton.setBackground(c);
 		mPlayLockButton.setOnClickListener(
 				v -> mCoolReader.sendBroadcast(new Intent(TTSControlService.TTS_CONTROL_ACTION_PLAY_LOCK)));
-		backButton.setBackground(c);
-		backButton.setOnClickListener(
+		mBackButton.setBackground(c);
+		mBackButton.setOnClickListener(
 				v -> mCoolReader.sendBroadcast(new Intent(TTSControlService.TTS_CONTROL_ACTION_PREV)));
-		forwardButton.setBackground(c);
-		forwardButton.setOnClickListener(
+		mForwardButton.setBackground(c);
+		mForwardButton.setOnClickListener(
 				v -> mCoolReader.sendBroadcast(new Intent(TTSControlService.TTS_CONTROL_ACTION_NEXT)));
-		stopButton.setBackground(c);
-		stopButton.setOnClickListener(v -> stopAndClose());
-		ImageButton optionsButton = mPanel.findViewById(R.id.tts_options);
-		optionsButton.setBackground(c);
-		optionsButton.setOnClickListener(
+		mStopButton.setBackground(c);
+		mStopButton.setOnClickListener(v -> stopAndClose());
+		mOptionsButton = mPanel.findViewById(R.id.tts_options);
+		mOptionsButton.setBackground(c);
+		mOptionsButton.setOnClickListener(
 				v -> mTTSControl.bind(ttsbinder -> {
 					mCoolReader.showOptionsDialogExt(OptionsDialog.Mode.READER, Settings.PROP_TTS_TITLE, ttsbinder);
 				}));
@@ -1198,6 +1312,8 @@ public class TTSToolbarDlg implements Settings {
 		// All tasks bellow after service start
 		// Fetch book's metadata
 		BookInfo bookInfo = mReaderView.getBookInfo();
+		wordTimingFile = null;
+		sentenceInfoCacheFile = null;
 		if (null != bookInfo) {
 			FileInfo fileInfo = bookInfo.getFileInfo();
 			if (null != fileInfo) {
@@ -1207,6 +1323,16 @@ public class TTSToolbarDlg implements Settings {
 				mBookCover = Bitmap.createBitmap(MEDIA_COVER_WIDTH, MEDIA_COVER_HEIGHT, Bitmap.Config.RGB_565);
 				Services.getCoverpageManager().drawCoverpageFor(mCoolReader.getDB(), fileInfo, mBookCover, true,
 						(file, bitmap) -> mTTSControl.bind(ttsbinder -> ttsbinder.setMediaItemInfo(mBookAuthors, mBookTitle, bitmap)));
+				String pathName = fileInfo.getPathName();
+				String wordTimingPath = pathName.replaceAll("\\.\\w+$", ".wordtiming");
+				String sentenceInfoPath = pathName.replaceAll("\\.\\w+$", ".sentenceinfo");
+				if (wordTimingPath.matches(".*\\.wordtiming$")) {
+					wordTimingFile = new File(wordTimingPath);
+					sentenceInfoCacheFile = new File(sentenceInfoPath);
+					if (!wordTimingFile.exists()) Utils.hideView(llAudioFile);
+				} else {
+					Utils.hideView(llAudioFile);
+				}
 			}
 		}
 		// Show volume
@@ -1249,5 +1375,68 @@ public class TTSToolbarDlg implements Settings {
 		repaintButtons();
 		// And finally, setup status change handler
 		setupSpeechStatusHandler();
+		BackgroundThread.instance().postGUI(() -> {
+			if (mAutoStartMode == 1)
+				mCoolReader.sendBroadcast(new Intent(TTSControlService.TTS_CONTROL_ACTION_PLAY_PAUSE));
+			if (mAutoStartMode == 2)
+				mCoolReader.sendBroadcast(new Intent(TTSControlService.TTS_CONTROL_ACTION_PLAY_LOCK));
+		}, 500);
 	}
+
+	public void initAudiobookWordTimings(InitAudiobookWordTimingsCallback callback){
+		audioBookPosHandler.removeCallbacks(audioBookPosRunnable);
+
+		if(allowUseAudiobook && wordTimingFile != null && wordTimingFile.exists()){
+			if(wordTimingCalcHandler == null){
+				if(wordTimingCalcHandlerThread == null){
+					wordTimingCalcHandlerThread = new HandlerThread("word-timing-calc-handler");
+					wordTimingCalcHandlerThread.start();
+				}
+				Looper wordTimingCalcLooper = wordTimingCalcHandlerThread.getLooper();
+				wordTimingCalcHandler = new Handler(wordTimingCalcLooper);
+			}
+
+			mPlayPauseButton.setVisibility(View.GONE);
+			mPlayLockButton.setVisibility(View.GONE);
+			mBackButton.setVisibility(View.GONE);
+			mForwardButton.setVisibility(View.GONE);
+			mStopButton.setVisibility(View.GONE);
+			mOptionsButton.setVisibility(View.GONE);
+
+			wordTimingCalcHandler.removeCallbacksAndMessages(null);
+			mCoolReader.showToast("matching audiobook word timings");
+			wordTimingCalcHandler.post(
+				() -> {
+					List<SentenceInfo> allSentences = SentenceInfoCache.maybeReadCache(sentenceInfoCacheFile);
+					if(allSentences == null){
+						allSentences = mReaderView.getAllSentences();
+						SentenceInfoCache.maybeWriteCache(sentenceInfoCacheFile, allSentences);
+					}
+					wordTimingAudiobookMatcher = new WordTimingAudiobookMatcher(wordTimingFile, allSentences);
+
+					//can be very long
+					wordTimingAudiobookMatcher.parseWordTimingsFile();
+
+					moveSelection(ReaderCommand.DCMD_SELECT_FIRST_SENTENCE, null);
+					audioBookPosHandler.postDelayed(audioBookPosRunnable, 500);
+
+					BackgroundThread.instance().postGUI(() -> {
+						mPlayPauseButton.setVisibility(View.VISIBLE);
+						mPlayLockButton.setVisibility(View.VISIBLE);
+						mBackButton.setVisibility(View.VISIBLE);
+						mForwardButton.setVisibility(View.VISIBLE);
+						mStopButton.setVisibility(View.VISIBLE);
+						mOptionsButton.setVisibility(View.VISIBLE);
+					});
+
+					if(callback != null){
+						callback.onComplete();
+					}
+				}
+			);
+		} else {
+			wordTimingAudiobookMatcher = null;
+		}
+	}
+
 }

@@ -84,6 +84,7 @@ import org.coolreader.crengine.Scanner;
 import org.coolreader.crengine.SearchDlg;
 import org.coolreader.crengine.Selection;
 import org.coolreader.crengine.SelectionToolbarDlg;
+import org.coolreader.crengine.SentenceInfo;
 import org.coolreader.crengine.Services;
 import org.coolreader.crengine.Settings;
 import org.coolreader.crengine.SomeButtonsToolbarDlg;
@@ -1994,26 +1995,40 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				showManual();
 				break;
 			case DCMD_TTS_PLAY:
-			{
-				if ((!FlavourConstants.PRO_FEATURES)&&(!FlavourConstants.PREMIUM_FEATURES)) {
-					mActivity.showToast(R.string.only_in_pro);
-					break;
+				{
+					if (isTTSActive()) {
+						log.i("DCMD_TTS_PLAY: skipping re-init of TTS");
+						return;
+					}
+					if ((!FlavourConstants.PRO_FEATURES)&&(!FlavourConstants.PREMIUM_FEATURES)) {
+						mActivity.showToast(R.string.only_in_pro);
+						break;
+					}
+					log.i("DCMD_TTS_PLAY: initializing TTS");
+					mActivity.initTTS(ttsacc -> BackgroundThread.instance().executeGUI(() -> {
+						log.i("TTS created: opening TTS toolbar");
+						ttsToolbar = TTSToolbarDlg.showDialog(mActivity, ReaderView.this, ttsacc);
+						ttsToolbar.setOnCloseListener(() -> ttsToolbar = null);
+						ttsToolbar.setAppSettings(mSettings, null);
+						ttsToolbar.initAudiobookWordTimings(null);
+					})/*, false*/);
 				}
-				log.i("DCMD_TTS_PLAY: initializing TTS");
-				mActivity.initTTS(ttsacc -> BackgroundThread.instance().executeGUI(() -> {
-					log.i("TTS created: opening TTS toolbar");
-					ttsToolbar = TTSToolbarDlg.showDialog(mActivity, ReaderView.this, ttsacc);
-					ttsToolbar.setOnCloseListener(() -> ttsToolbar = null);
-					ttsToolbar.setAppSettings(mSettings, null);
-				})/*, false*/);
-			}
-			break;
+				break;
+			case DCMD_TTS_STOP:
+				if (ttsToolbar != null) {
+					log.i("DCMD_TTS_STOP: stopping TTS");
+					ttsToolbar.stopAndClose();
+				}
+				break;
 			case DCMD_TOGGLE_DOCUMENT_STYLES:
 				if (isBookLoaded())
 					toggleDocumentStyles();
 				break;
 			case DCMD_EXPERIMENTAL_FEATURE:
-				TagsEditDialog dlg1 = new TagsEditDialog(mActivity, null, true, null);
+				//TagsEditDialog dlg1 = new TagsEditDialog(mActivity, null, true, null);
+				ExternalDocCameDialog dlg1 = new ExternalDocCameDialog(mActivity, "fb2",
+						getBookInfo().getFileInfo().getFile().getAbsolutePath(),
+						getBookInfo().getFileInfo().getFile().getAbsolutePath());
 				dlg1.show();
 
 				if (0==1) {
@@ -3704,6 +3719,10 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	public BookInfo getBookInfo() {
 		BackgroundThread.ensureGUI();
 		return mBookInfo;
+	}
+
+	public List<SentenceInfo> getAllSentences() {
+		return doc.getAllSentences();
 	}
 
 	private int mBatteryState = BATTERY_STATE_DISCHARGING;
