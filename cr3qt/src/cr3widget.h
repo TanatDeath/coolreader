@@ -42,6 +42,7 @@ class CR3View : public QWidget, public LVDocViewCallback
 
         bool loadDocument( QString fileName );
         bool loadLastDocument();
+		bool exportSentenceInfo( QString inputFileName, QString outputFileName );
         void setDocumentText( QString text );
 
         QScrollBar * scrollBar() const;
