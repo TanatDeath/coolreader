@@ -135,8 +135,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	public SurfaceView getSurface() {
 		return surface;
 	}
-
 	public static int backgrNormalizedColor = 0; // color of the background - to decide which icon color use
+
+	public boolean pageWasScrolled = false; // determine wheather page was scrolled by slide
 
 	private int wasX = 0;
 	private int wasY = 0;
@@ -6479,8 +6480,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			return true; // autoscroll will be stopped in onKeyUp
 
 		keyCode = overrideKey(keyCode);
-		ReaderAction action = ReaderAction.findForKey(keyCode, mSettings);
-		ReaderAction longAction = ReaderAction.findForLongKey(keyCode, mSettings);
+		ReaderAction action = ReaderAction.findForKey(keyCode, event.getScanCode(), mSettings);
+		ReaderAction longAction = ReaderAction.findForLongKey(keyCode, event.getScanCode(), mSettings);
 		//ReaderAction dblAction = ReaderAction.findForDoubleKey( keyCode, mSettings );
 
 		if (event.getRepeatCount() == 0) {
@@ -6594,9 +6595,9 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		Long keyDownTs = keyDownTimestampMap.get(keyCode);
 		if (keyDownTs != null && System.currentTimeMillis()-keyDownTs >= LONG_KEYPRESS_TIME)
 			isLongPress = true;
-		ReaderAction action = ReaderAction.findForKey(keyCode, mSettings);
-		ReaderAction longAction = ReaderAction.findForLongKey(keyCode, mSettings);
-		ReaderAction dblAction = ReaderAction.findForDoubleKey(keyCode, mSettings);
+		ReaderAction action = ReaderAction.findForKey(keyCode, event.getScanCode(), mSettings);
+		ReaderAction longAction = ReaderAction.findForLongKey(keyCode, event.getScanCode(), mSettings);
+		ReaderAction dblAction = ReaderAction.findForDoubleKey(keyCode, event.getScanCode(), mSettings);
 		stopTracking();
 
 /*		if ( keyCode>=KeyEvent.KEYCODE_0 && keyCode<=KeyEvent.KEYCODE_9 && tracked ) {

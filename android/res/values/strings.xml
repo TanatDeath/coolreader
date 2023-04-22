@@ -131,6 +131,7 @@
     <string name="options_background_texture">Background texture</string>
     <string name="options_hyphenation_dictionary">Hyphenation dictionary</string>
     <string name="options_page_show_titlebar">Show title bar</string>
+    <string name="options_page_show_titlebar_in_scroll_mode">Show title bar in scroll mode</string>
     <string name="options_page_footnotes">Footnotes</string>
     <string name="options_page_orientation">Orientation</string>
     <string name="options_page_orientation_0">Portrait</string>
@@ -2111,6 +2112,7 @@
     <string name="start_behaviour_4">Show \'recent\' book list</string>
     <string name="start_behaviour_5">Root folder</string>
     <string name="options_hardware_keys">Configure (additional) hardware keys</string>
+    <string name="options_hardware_keys_description">After adding keys to the list (below) configure actions in \'Key actions\'</string>
     <string name="options_hardware_keys_add_info">Allows to configure additional hardware keys (if present (devices like BlackBerry, Uniherz Titan) or if physical keyboard is connected)</string>
     <string name="cannot_rename_file">cannot rename file</string>
     <string name="auto_start_reading">TTS dialog: auto start reading</string>
@@ -2119,7 +2121,7 @@
     <string name="auto_start_reading_2">Uninterrupted mode</string>
     <string name="options_tts_use_audiobook">Use audiobook instead of TTS, if *.wordtiming file exists</string>
     <string name="options_tts_use_audiobook_add_info">The book, *.wordtiming file and audiobook files should be together in one folder, this feature allows you to sync audobook with corresponding text</string>
-    <string name="hardware_keys_hint">Press keys here -&gt;</string>
+    <string name="hardware_keys_hint">Press hardware key, then press \'add key to list\'</string>
     <string name="add_this_key">Add key to keylist</string>
     <string name="key_already_added">Key is already added</string>
 </resources>

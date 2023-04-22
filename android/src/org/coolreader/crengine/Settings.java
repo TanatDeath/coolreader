@@ -46,6 +46,8 @@ public interface Settings {
     String PROP_STATUS_FONT_COLOR_NIGHT ="crengine.page.header.font.color.night";
     String PROP_STATUS_FONT_FACE        ="crengine.page.header.font.face";
     String PROP_STATUS_FONT_SIZE        ="crengine.page.header.font.size";
+	String PROP_STATUS_HEADER_IN_SCROLL_MODE
+			                            ="crengine.page.header.in.scroll.mode";
     String PROP_STATUS_CHAPTER_MARKS    ="crengine.page.header.chapter.marks";
     String PROP_PAGE_MARGIN_TOP         ="crengine.page.margin.top";
     String PROP_PAGE_MARGIN_BOTTOM      ="crengine.page.margin.bottom";

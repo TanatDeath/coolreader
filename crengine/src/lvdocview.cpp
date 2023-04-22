@@ -2963,8 +2963,8 @@ void LVDocView::Draw(LVDrawBuf & drawbuf, int position, int page, bool rotate, b
 		return;
 	if (isScrollMode()) {
 		drawbuf.SetClipRect(NULL);
-        drawbuf.setHidePartialGlyphs(false);
-        drawPageBackground(drawbuf, 0, position);
+		drawbuf.setHidePartialGlyphs(m_status_header_in_scroll_mode);
+		drawPageBackground(drawbuf, 0, position);
         int cover_height = 0;
 		if (m_pages.length() > 0 && (m_pages[0]->flags & RN_PAGE_TYPE_COVER))
 			cover_height = m_pages[0]->height;
@@ -2979,15 +2979,48 @@ void LVDocView::Draw(LVDrawBuf & drawbuf, int position, int page, bool rotate, b
 			rc.right -= m_pageMargins.right;
 			drawCoverTo(&drawbuf, rc);
 		}
-		DrawDocument(drawbuf, m_doc->getRootNode(),
-					 m_pageMargins.left,  // x0
-					 0,                   // y0
-					 drawbuf.GetWidth() - m_pageMargins.left - m_pageMargins.right, // dx
-					 drawbuf.GetHeight(), // dy
-					 0,                   // doc_x
-					 -position,           // doc_y
-					 drawbuf.GetHeight(), // page_height
-					 &m_markRanges, &m_bmkRanges);
+		if (!m_status_header_in_scroll_mode) {
+			DrawDocument(drawbuf, m_doc->getRootNode(),
+						 m_pageMargins.left,  // x0
+						 0,                   // y0
+						 drawbuf.GetWidth() - m_pageMargins.left - m_pageMargins.right, // dx
+						 drawbuf.GetHeight(), // dy
+						 0,                   // doc_x
+						 -position,           // doc_y
+						 drawbuf.GetHeight(), // page_height
+						 &m_markRanges, &m_bmkRanges);
+		} else {
+			int curPage = m_pages.FindNearestPage(position, 0);
+			int totalPages = m_pages.length();
+
+			lvRect info;
+			getPageHeaderRectangle(curPage, info);
+			drawPageHeader(&drawbuf, info, curPage, m_pageHeaderInfo, totalPages);
+
+			int top = m_pageMargins.top
+					  + (PAGE_HEADER_POS_TOP == m_pageHeaderPos ? info.height() : 0);
+			int left = m_pageMargins.left;
+
+			int contentWidth = drawbuf.GetWidth()
+							   - left
+							   - m_pageMargins.right;
+			int contentHeight = drawbuf.GetHeight()
+								- top
+								- m_pageMargins.bottom;
+
+			lvRect clip;
+			clip.top = top;
+			clip.bottom = top + contentHeight;
+			//do not clip left/right
+			//  (ignore left/right margins, allow partial glyphs to dangle)
+			clip.left = 0;
+			clip.right = drawbuf.GetWidth();
+
+			drawbuf.SetClipRect(&clip);
+
+			DrawDocument(drawbuf, m_doc->getRootNode(), left, top, contentWidth,
+						 contentHeight, 0, -position, m_dy, &m_markRanges, &m_bmkRanges);
+		}
 	} else {
 		int pc = getVisiblePageCount();
 		//CRLog::trace("searching for page with offset=%d", position);
@@ -3029,7 +3062,12 @@ bool LVDocView::windowToDocPoint(lvPoint & pt) {
 #endif
 	if (getViewMode() == DVM_SCROLL) {
 		// SCROLL mode
-		pt.y += _pos;
+		if (!m_status_header_in_scroll_mode) {
+			pt.y += _pos;
+		} else {
+			int headerHeight = (PAGE_HEADER_POS_TOP == m_pageHeaderPos) ? getPageHeaderHeight() : 0;
+			pt.y += _pos + m_pageMargins.top + headerHeight;
+		}
 		pt.x -= m_pageMargins.left;
 		return true;
 	} else {
@@ -3077,7 +3115,12 @@ bool LVDocView::docToWindowPoint(lvPoint & pt, bool isRectBottom, bool fitToPage
 	// TODO: implement coordinate conversion here
 	if (getViewMode() == DVM_SCROLL) {
 		// SCROLL mode
-		pt.y -= _pos;
+		if (!m_status_header_in_scroll_mode) {
+			pt.y -= _pos;
+		} else {
+			int headerHeight = (PAGE_HEADER_POS_TOP == m_pageHeaderPos) ? getPageHeaderHeight() : 0;
+			pt.y -= _pos + m_pageMargins.top + headerHeight;
+		}
 		pt.x += m_pageMargins.left;
 		return true;
 	} else {
@@ -4202,6 +4245,16 @@ void LVDocView::setStatusFontSize(int newSize) {
 	//goToBookmark(_posBookmark);
 }
 
+void LVDocView::setStatusHeaderInScrollMode(bool newStatusHeaderInScrollMode) {
+	LVLock lock(getMutex());
+	bool oldStatusHeaderInScrollMode = m_status_header_in_scroll_mode;
+	m_status_header_in_scroll_mode = newStatusHeaderInScrollMode;
+	if (oldStatusHeaderInScrollMode != newStatusHeaderInScrollMode) {
+		propsGetCurrent()->setBool(PROP_STATUS_HEADER_IN_SCROLL_MODE, m_status_header_in_scroll_mode);
+		REQUEST_RENDER("setStatusFontSize")
+	}
+}
+
 int LVDocView::scaleFontSizeForDPI(int fontSize) {
     if (gRenderScaleFontWithDPI) {
         fontSize = scaleForRenderDPI(fontSize);
@@ -4569,6 +4622,41 @@ static bool needToConvertBookmarks(CRFileHistRecord* historyRecord, lUInt32 domV
             convertBookmarks = true;
     }
     return convertBookmarks;
+}
+
+bool LVDocView::exportSentenceInfo(const lChar32 * inputFileName, const lChar32 * outputFileName) {
+	if (!LoadDocument(inputFileName, false)) {
+		return false;
+	}
+
+	LVStreamRef out = LVOpenFileStream(outputFileName, LVOM_WRITE);
+	if ( out.isNull() ) {
+		return false;
+	}
+
+	checkRender();
+
+	ldomXPointerEx ptrStart( m_doc->getRootNode(), m_doc->getRootNode()->getChildCount());
+	if ( !ptrStart.thisSentenceStart() ) {
+		ptrStart.nextSentenceStart();
+	}
+
+	if ( !ptrStart.thisSentenceStart() ) {
+		return false;
+	}
+
+	while ( 1 ) {
+		ldomXPointerEx ptrEnd(ptrStart);
+		ptrEnd.thisSentenceEnd();
+
+		ldomXRange range(ptrStart, ptrEnd);
+		lString32 sentenceText = range.getRangeText();
+		*out << UnicodeToUtf8(ptrStart.toString()) << "," << UnicodeToUtf8(sentenceText) << "\n";
+		if ( !ptrStart.nextSentenceStart() ) {
+			break;
+		}
+	}
+	return true;
 }
 
 /// load document from file
@@ -7219,6 +7307,7 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
 	props->limitValueList(PROP_DISPLAY_FULL_UPDATE_INTERVAL, screen_updates_options, sizeof(screen_updates_options)/sizeof(int), 1);
 	props->setBoolDef(PROP_DISPLAY_TURBO_UPDATE_MODE, false);
 	props->limitValueMinMax(PROP_STATUS_FONT_SIZE, MIN_STATUS_FONT_SIZE, MAX_STATUS_FONT_SIZE, INFO_FONT_SIZE);
+	props->setBoolDef(PROP_STATUS_HEADER_IN_SCROLL_MODE, false);
 
 	props->setBoolDef(PROP_TEXTLANG_EMBEDDED_LANGS_ENABLED, false);
 	props->setBoolDef(PROP_TEXTLANG_HYPHENATION_ENABLED, true);
@@ -7474,6 +7563,10 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
                 fontSize = MAX_STATUS_FONT_SIZE;
             setStatusFontSize(fontSize);//cr_font_sizes
             value = lString32::itoa(fontSize);
+		} else if (name == PROP_STATUS_HEADER_IN_SCROLL_MODE) {
+			bool statusHeaderInScrollMode = props->getBoolDef(PROP_STATUS_HEADER_IN_SCROLL_MODE,
+											false);
+			setStatusHeaderInScrollMode(statusHeaderInScrollMode);
 		} else if (name == PROP_HYPHENATION_DICT
 				   || name == PROP_HYPHENATION_LEFT_HYPHEN_MIN
 				   || name == PROP_HYPHENATION_RIGHT_HYPHEN_MIN

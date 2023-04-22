@@ -461,6 +461,10 @@ public class TapHandler {
 		if (event.getAction() == MotionEvent.ACTION_UP) {
 			long duration = Utils.timeInterval(firstDown);
 			mReaderView.lastDuration = duration;
+			if (mReaderView.pageWasScrolled) {
+				mReaderView.pageWasScrolled = false;
+				mReaderView.drawPage();
+			}
 			switch (state) {
 				case STATE_DOWN_1:
 					if (mReaderView.hiliteTapZoneOnTap) {

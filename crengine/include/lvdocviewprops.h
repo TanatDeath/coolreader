@@ -26,6 +26,7 @@
 #define PROP_STATUS_FONT_COLOR       "crengine.page.header.font.color"
 #define PROP_STATUS_FONT_FACE        "crengine.page.header.font.face"
 #define PROP_STATUS_FONT_SIZE        "crengine.page.header.font.size"
+#define PROP_STATUS_HEADER_IN_SCROLL_MODE "crengine.page.header.in.scroll.mode"
 #define PROP_PAGE_MARGIN_TOP         "crengine.page.margin.top"
 #define PROP_PAGE_MARGIN_BOTTOM      "crengine.page.margin.bottom"
 #define PROP_PAGE_MARGIN_LEFT        "crengine.page.margin.left"

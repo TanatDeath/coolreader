@@ -381,17 +381,32 @@ public class ReaderAction {
 		String id = settings.getProperty(getTapZoneProp(tapZoneNumber, DOUBLE));
 		return findById(id);
 	}
-	public static ReaderAction findForKey( int keyCode, Properties settings ) {
+	public static ReaderAction findForKey(int keyCode, int scanCode, Properties settings) {
 		String id = settings.getProperty(getKeyProp(keyCode, NORMAL));
-		return findById(id);
+		ReaderAction ra = findById(id);
+		if (ra.equals(NONE)) {
+			id = settings.getProperty(getKeyProp(-scanCode, NORMAL));
+			ra = findById(id);
+		}
+		return ra;
 	}
-	public static ReaderAction findForLongKey( int keyCode, Properties settings ) {
+	public static ReaderAction findForLongKey(int keyCode, int scanCode, Properties settings) {
 		String id = settings.getProperty(getKeyProp(keyCode, LONG));
-		return findById(id);
+		ReaderAction ra = findById(id);
+		if (ra.equals(NONE)) {
+			id = settings.getProperty(getKeyProp(-scanCode, LONG));
+			ra = findById(id);
+		}
+		return ra;
 	}
-	public static ReaderAction findForDoubleKey(int keyCode, Properties settings ) {
+	public static ReaderAction findForDoubleKey(int keyCode, int scanCode, Properties settings) {
 		String id = settings.getProperty(getKeyProp(keyCode, DOUBLE));
-		return findById(id);
+		ReaderAction ra = findById(id);
+		if (ra.equals(NONE)) {
+			id = settings.getProperty(getKeyProp(-scanCode, DOUBLE));
+			ra = findById(id);
+		}
+		return ra;
 	}
 	
 	public static ArrayList<ReaderAction> createList(ReaderAction ... actions) {

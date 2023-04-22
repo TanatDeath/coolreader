@@ -278,6 +278,7 @@ private:
     int m_requested_font_size;
     int m_font_size; // = m_requested_font_size, possibly scaled according to DPI
     int m_status_font_size;
+    bool m_status_header_in_scroll_mode;
     int m_def_interline_space;
 #if USE_LIMITED_FONT_SIZES_SET
     LVArray<int> m_font_sizes;
@@ -899,6 +900,7 @@ public:
     int  getStatusFontSize() const { return m_status_font_size; }
     /// sets new status bar font size
     void setStatusFontSize( int newSize );
+    void setStatusHeaderInScrollMode( bool statusHeaderInScrollMode );
 
 #if USE_LIMITED_FONT_SIZES_SET
     /// sets posible base font sizes (for ZoomFont)
@@ -954,6 +956,8 @@ public:
     bool LoadDocument( const lChar32 * fname, bool metadataOnly = false );
     /// load document from stream
     bool LoadDocument( LVStreamRef stream, const lChar32 * contentPath, bool metadataOnly = false );
+    /// load document and export sentence info
+    bool exportSentenceInfo(const lChar32 * inputFileName, const lChar32 * outputFileName);
 
     /// save last file position
     void savePosition();

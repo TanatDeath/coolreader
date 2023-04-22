@@ -98,6 +98,10 @@ public class StatusBarOption extends SubmenuOption {
 		listView.add(new ListOption(mOwner, mActivity.getString(R.string.options_page_show_titlebar), Settings.PROP_STATUS_LOCATION, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).add(mStatusPositions,
 				mStatusPositionsTitles, mStatusPositionsAddInfos).setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_document_r_title,
 				R.drawable.icons8_document_r_title));
+		//Still to many bugs
+		//listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_page_show_titlebar_in_scroll_mode), Settings.PROP_STATUS_HEADER_IN_SCROLL_MODE,
+		//		mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue, false).setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_document_r_title,
+		//		R.drawable.icons8_document_r_title));
 		listView.add(new FontSelectOption(mOwner, mActivity.getString(R.string.options_page_titlebar_font_face), Settings.PROP_STATUS_FONT_FACE,
 				mActivity.getString(R.string.option_add_info_empty_text), false, this.lastFilteredValue).setIconIdByAttr(R.attr.cr3_option_font_face_drawable,
 				R.drawable.cr3_option_font_face));

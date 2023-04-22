@@ -2,11 +2,13 @@ package org.coolreader.options;
 
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,6 +18,7 @@ import org.coolreader.R;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseDialog;
+import org.coolreader.crengine.DocProperties;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.Settings;
 import org.coolreader.layouts.FlowLayout;
@@ -32,9 +35,9 @@ public class HardwareKeysDialog extends BaseDialog {
     private final LayoutInflater mInflater;
     private final CoolReader mCoolReader;
     private final Properties mProperties;
-
+    private final SurfaceView mSvSurface;
     private final TextView tvKeyScancode;
-    private final EditText edtKeydown;
+    //private final EditText edtKeydown;
 
     private final Button btnAddKey;
     private final FlowLayout mFlKeys;
@@ -72,11 +75,6 @@ public class HardwareKeysDialog extends BaseDialog {
     }
 
     private void fillExistingKeys() {
-        String res = "";
-        for (String s: keys) {
-            if (res.equals("")) res = s;
-            else res = res + "|" + s;
-        }
         String keys = StrUtils.getNonEmptyStr(mProperties.getProperty(Settings.PROP_APP_HARDWARE_KEYS), true);
         for (String k: keys.split("\\|"))
             if (!StrUtils.isEmptyStr(k))
@@ -90,17 +88,18 @@ public class HardwareKeysDialog extends BaseDialog {
         mProperties = properties;
         mGrid = grid;
         tvKeyScancode = mGrid.findViewById(R.id.tv_key_scancode);
-        edtKeydown = mGrid.findViewById(R.id.edt_keydown);
-        mFlKeys = mGrid.findViewById(R.id.keysFlowList);
-        edtKeydown.setOnKeyListener((v, keyCode, event) -> {
+        //edtKeydown = mGrid.findViewById(R.id.edt_keydown);
+        mSvSurface = mGrid.findViewById(R.id.sv_surface);
+        mSvSurface.setOnKeyListener((v, keyCode, event) -> {
             tvKeyScancode.setText("scan = " + event.getScanCode() +
                     ", code = " + getKeyDef(event));
             lastEvent = event;
-            BackgroundThread.instance().postGUI(() -> {
-                edtKeydown.setText("");
-            }, 2000);
+//            BackgroundThread.instance().postGUI(() -> {
+//                edtKeydown.setText("");
+//            }, 2000);
             return false;
         });
+        mFlKeys = mGrid.findViewById(R.id.keysFlowList);
         btnAddKey = mGrid.findViewById(R.id.btn_add_key);
         btnAddKey.setBackgroundColor(colorGrayC);
         if (isEInk) Utils.setSolidButtonEink(btnAddKey);
@@ -143,7 +142,8 @@ public class HardwareKeysDialog extends BaseDialog {
     @Override
     protected void whenShow() {
         super.whenShow();
-        edtKeydown.requestFocus();
+        //edtKeydown.requestFocus();
+        mSvSurface.requestFocus();
     }
 
     @Override
@@ -162,5 +162,4 @@ public class HardwareKeysDialog extends BaseDialog {
         mProperties.setProperty(Settings.PROP_APP_HARDWARE_KEYS, res);
         super.onPositiveButtonClick();
     }
-
 }

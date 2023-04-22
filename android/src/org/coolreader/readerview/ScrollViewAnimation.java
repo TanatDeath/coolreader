@@ -44,6 +44,7 @@ public class ScrollViewAnimation extends ViewAnimationBase {
 		pageHeight = currPos.pageHeight;
 		fullHeight = currPos.fullHeight;
 		mReaderView.doc.doCommand(ReaderCommand.DCMD_GO_POS.nativeId, pos0);
+		mReaderView.pageWasScrolled = true;
 		image1 = mReaderView.preparePageImage(0);
 		if (image1 == null) {
 			log.v("ScrollViewAnimation -- not started: image is null");

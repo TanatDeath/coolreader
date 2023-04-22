@@ -20,6 +20,7 @@ import org.coolreader.crengine.OptionOwner;
 import org.coolreader.crengine.ReaderAction;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.crengine.Settings;
+import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 
 import java.util.EnumSet;
@@ -293,7 +294,15 @@ public class KeyMapOption extends SubmenuOption {
 					R.attr.attr_icons8_headset_key_double, R.drawable.icons8_headset_key_double
 			);
 		}
-
+		String keys = StrUtils.getNonEmptyStr(mProperties.getProperty(Settings.PROP_APP_HARDWARE_KEYS), true);
+		for (String k: keys.split("\\|"))
+			if (!StrUtils.isEmptyStr(k))
+				addKey(listView,
+						-Integer.valueOf(StrUtils.getNonEmptyStr(k.split(",")[0], true)),
+						StrUtils.getNonEmptyStr(k.split(",")[1], true),
+						R.attr.attr_icons8_1, R.drawable.icons8_1,
+						R.attr.attr_icons8_1, R.drawable.icons8_1,
+						R.attr.attr_icons8_1, R.drawable.icons8_1);
 		viewList.addView(listView);
 		ibSearch.setOnClickListener(v -> {
 			tvSearchText.setText("");
