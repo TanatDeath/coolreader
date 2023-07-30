@@ -1829,6 +1829,8 @@
     <string name="dic_application">Приложения</string>
     <string name="init_app">Инициализация приложения</string>
     <string name="init_app_add_info">Очистка кэша, сброс настроек и/или удаление базы данных книг</string>
+    <string name="init_app_request_files_access">Запросить доступ ко всем файлам</string>
+    <string name="init_app_request_files_access_add_info">Эта опция нужна, если вы хотите иметь возможность открывать любую книгу на вашем устройстве</string>
     <string name="init_app_clear_cache">Очистить кэш</string>
     <string name="init_app_clear_cache_add_info">Это безопасная операция. Иногда кэш становится поврежденным, этим действием вы можете полностью очистить его - в некоторых ситуациях это может помочь</string>
     <string name="init_app_clear_settings">Сбросить настройки</string>

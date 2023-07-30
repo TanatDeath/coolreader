@@ -1027,6 +1027,10 @@ public:
     ldomNode * getFirstChild() const;
     /// returns last child node
     ldomNode * getLastChild() const;
+    /// returns previous sibling node
+    ldomNode* getPrevSibling() const;
+    /// returns next sibling node
+    ldomNode* getNextSibling() const;
     /// removes and deletes last child element
     void removeLastChild();
     /// move range of children startChildIndex to endChildIndex inclusively to specified element

@@ -357,14 +357,17 @@ public class BookInfoDialog extends BaseDialog {
 						int iWordCnt = 0;
 						ReaderView rv1 = mCoolReader.getReaderView();
 						if ((rv1 != null) && (mBookInfo!=null)) {
-							if (rv1.getArrAllPages() != null)
-								iPageCnt = rv1.getArrAllPages().size();
-							else {
-								rv1.CheckAllPagesLoadVisual();
-								iPageCnt = rv1.getArrAllPages().size();
-							}
+//							if (rv1.getArrAllPages() != null)
+//								iPageCnt = rv1.getArrAllPages().size();
+//							else {
+//								rv1.CheckAllPagesLoadVisual();
+//								iPageCnt = rv1.getArrAllPages().size();
+//							}
+							if (rv1.getDoc() != null) iPageCnt = rv1.getDoc().getPageCount();
 							for (int i = 0; i < iPageCnt; i++) {
-								String sPage = rv1.getArrAllPages().get(i);
+								//String sPage = rv1.getArrAllPages().get(i);
+								String sPage = "";
+								if (rv1.getDoc() != null) sPage = rv1.getDoc().getPageText(false, i);
 								if (sPage == null) sPage = "";
 								sPage = sPage.replace("\\n", " ");
 								sPage = sPage.replace("\\r", " ");

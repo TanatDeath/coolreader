@@ -146,11 +146,11 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	private int curBlackpageInterval = 0; //for periodic blackpage draw
 	private int blackpageDuration = 300;
 
-	public ArrayList<String> getArrAllPages() {
-		return arrAllPages;
-	}
+//	public ArrayList<String> getArrAllPages() {
+//		return arrAllPages;
+//	}
 
-	private ArrayList<String> arrAllPages = null;
+	//private ArrayList<String> arrAllPages = null;
 
 	public interface BookView {
 		void draw();
@@ -161,28 +161,28 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		void onResume();
 	}
 
-	public void CheckAllPagesLoadVisual() {
-		if (arrAllPages == null) {
-			showProgress(10000, R.string.progress_please_wait);
-			CheckAllPagesLoad();
-			hideProgress();
-		}
-	}
+//	public void CheckAllPagesLoadVisual() {
+//		if (arrAllPages == null) {
+//			showProgress(10000, R.string.progress_please_wait);
+//			CheckAllPagesLoad();
+//			hideProgress();
+//		}
+//	}
 
-	public void CheckAllPagesLoad() {
-		if (arrAllPages!=null)
-			if (arrAllPages.size()>0)
-				return;
-		arrAllPages = new ArrayList<String>();
-		if (getDoc() == null) return;
-		int iPageCnt = getDoc().getPageCount();
-		for (int i = 0; i < iPageCnt; i++) {
-			String sPage = getDoc().getPageText(false, i);
-			if (sPage == null) sPage = "";
-			arrAllPages.add(sPage);
-		}
-		//getActivity().showToast("load page cnt " + iPageCnt);
-	}
+//	public void CheckAllPagesLoad() {
+//		if (arrAllPages!=null)
+//			if (arrAllPages.size()>0)
+//				return;
+//		arrAllPages = new ArrayList<String>();
+//		if (getDoc() == null) return;
+//		int iPageCnt = getDoc().getPageCount();
+//		for (int i = 0; i < iPageCnt; i++) {
+//			String sPage = getDoc().getPageText(false, i);
+//			if (sPage == null) sPage = "";
+//			arrAllPages.add(sPage);
+//		}
+//		//getActivity().showToast("load page cnt " + iPageCnt);
+//	}
 
 	void showCenterPopup(String val) {
 		mActivity.showCenterPopup(surface, val, false);
@@ -5969,7 +5969,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		public void OnFormatEnd() {
 			log.d("readerCallback.OnFormatEnd");
 			//mEngine.hideProgress();
-			arrAllPages = null;
+			//arrAllPages = null;
 			hideProgress();
 			nowFormatting = false;
 			drawPage();
@@ -5995,7 +5995,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		public void OnFormatStart() {
 			log.d("readerCallback.OnFormatStart");
 			nowFormatting = true;
-			arrAllPages = null;
+			//arrAllPages = null;
 		}
 
 		public void OnLoadFileEnd() {
@@ -6031,7 +6031,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		public void OnLoadFileError(String message) {
 			log.d("readerCallback.OnLoadFileError(" + message + ")");
 			docIsLoading = false;
-			arrAllPages = null;
+			//arrAllPages = null;
 		}
 
 		public void OnLoadFileFirstPagesReady() {
@@ -6088,7 +6088,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 			if (enable_progress_callback) {
 				showProgress(1000, R.string.progress_loading);
 			}
-			arrAllPages = null;
+			//arrAllPages = null;
 		}
 		/// Override to handle external links
 		public void OnImageCacheClear() {
@@ -6419,6 +6419,8 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	public boolean onKeyDown(int keyCode, final KeyEvent event) {
 
 		boolean shouldIgnore = false;
+
+		log.v("onKeyDown fired : " + event );
 
 		long curTime = System.currentTimeMillis();
 		if ((getPreventClickInterval() > 0) && ((curTime - lastTimeKey) < getPreventClickInterval())) {

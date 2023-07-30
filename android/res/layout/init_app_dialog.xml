@@ -22,6 +22,56 @@
                 >
 
             <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:id="@+id/row_request_files_access1"
+                    android:layout_margin="2dip"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    >
+                <LinearLayout
+                        android:layout_width="0dip"
+                        android:layout_height="fill_parent"
+                        android:gravity="left"
+                        android:layout_weight="2"
+                        android:orientation="horizontal">
+                    <Button
+                            android:id="@+id/btn_request_files_access"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/init_app_request_files_access"
+                            android:layout_margin="1dip"
+                            android:textColor="?attr/colorIcon"
+                            style="@style/TextAppearance.Widget.EditText"
+                            />
+                </LinearLayout>
+            </TableRow>
+            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:id="@+id/row_request_files_access2"
+                    android:layout_margin="2dip"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    >
+                <LinearLayout
+                        android:layout_width="0dip"
+                        android:layout_height="fill_parent"
+                        android:gravity="left"
+                        android:layout_weight="3"
+                        android:orientation="horizontal">
+                    <TextView
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/init_app_request_files_access_add_info"
+                            android:maxLines="25"
+                            android:ellipsize="middle"
+                            style="@style/TextAppearance.Small"
+                            android:textColor="?attr/colorIcon"
+                            android:singleLine="false"
+                            />
+                </LinearLayout>
+            </TableRow>
+
+            <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
                     android:layout_margin="2dip"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"

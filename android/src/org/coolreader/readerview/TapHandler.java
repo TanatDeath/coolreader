@@ -463,7 +463,7 @@ public class TapHandler {
 			mReaderView.lastDuration = duration;
 			if (mReaderView.pageWasScrolled) {
 				mReaderView.pageWasScrolled = false;
-				mReaderView.drawPage();
+				// mReaderView.drawPage(); // need to more analyze Elliot's work
 			}
 			switch (state) {
 				case STATE_DOWN_1:

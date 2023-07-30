@@ -894,9 +894,11 @@ void CRDocViewWindow::draw()
             drawStatusBar();
         }
     }
-    LVDocImageRef pageImage = _docview->getPageImage(0);
-    LVDrawBuf * drawbuf = pageImage->getDrawBuf();
-    _wm->getScreen()->draw( drawbuf, clientRect.left, clientRect.top );
+    if (_docview->isDocumentOpened()) {
+        LVDocImageRef pageImage = _docview->getPageImage(0);
+        LVDrawBuf* drawbuf = pageImage->getDrawBuf();
+        _wm->getScreen()->draw(drawbuf, clientRect.left, clientRect.top);
+    }
 }
 
 void CRDocViewWindow::setRect( const lvRect & rc )

@@ -102,7 +102,7 @@ public class TTSControlService extends BaseService {
 
 	private boolean useAudioBook = false;
 	private File audioFile = null;
-	private File audioFileSet = null;
+	private File fileToPlaySet = null;
 	private double startTime = 0;
 
 	private boolean mChannelCreated = false;
@@ -426,7 +426,8 @@ public class TTSControlService extends BaseService {
 									mMediaPlayer = MediaPlayer.create(TTSControlService.this, R.raw.silence_10_0);
 									mMediaPlayer.setOnCompletionListener(player -> {
 										synchronized (mLocker) {
-											mMediaPlayer.release();
+											if (mMediaPlayer != null)
+												mMediaPlayer.release();
 											mMediaPlayer = null;
 										}
 									});
@@ -1410,13 +1411,18 @@ public class TTSControlService extends BaseService {
 		if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
 			return;
 		}
-		if (audioFile == null) {
+		File fileToPlay = audioFile;
+		if (fileToPlay != null && !fileToPlay.exists()) {
+			fileToPlay = getAlternativeAudioFile(fileToPlay);
+		}
+
+		if (fileToPlay == null || !fileToPlay.exists()) {
 			return;
 		}
 
 		boolean sameFile = false;
-		if (audioFileSet != null)
-			sameFile = audioFileSet.equals(audioFile);
+		if (fileToPlaySet != null)
+			sameFile = fileToPlaySet.equals(fileToPlay);
 
 		if (!sameFile) {
 			try {
@@ -1426,8 +1432,8 @@ public class TTSControlService extends BaseService {
 					mMediaPlayer = null;
 				}
 				mMediaPlayer = MediaPlayer.create(
-						getApplicationContext(), Uri.parse("file://" + audioFile.toString()));
-				audioFileSet = audioFile;
+						getApplicationContext(), Uri.parse("file://" + fileToPlay));
+				fileToPlaySet = fileToPlay;
 			} catch (Exception e) {
 				log.d("ERROR: " + e.getMessage());
 			}
@@ -1565,6 +1571,38 @@ public class TTSControlService extends BaseService {
 			notification.contentIntent = pendingIntent;
 		}
 		return notification;
+	}
+
+	private File getAlternativeAudioFile(File origAudioFile) {
+		if(origAudioFile == null) {
+			return null;
+		}
+		String fileNoExt = origAudioFile.toString().replaceAll("\\.\\w+$", "");
+		File dir = origAudioFile.getParentFile();
+		if(dir.exists() && dir.isDirectory()) {
+			Map<String, List<File>> filesByExt = new HashMap<>();
+			File firstFile = null;
+			for(File file : dir.listFiles()) {
+				if(!file.toString().startsWith(fileNoExt + ".")){
+					continue;
+				}
+				String ext = file.toString().toLowerCase().replaceAll(".*\\.", "");
+				if(filesByExt.get(ext) == null) {
+					filesByExt.put(ext, new ArrayList<>());
+				}
+				filesByExt.get(ext).add(file);
+				if(firstFile == null) {
+					firstFile = file;
+				}
+			}
+			for(String ext : new String[]{"flac", "wav", "m4a", "ogg", "mp3"}) {
+				if(filesByExt.get(ext) != null){
+					return filesByExt.get(ext).get(0);
+				}
+			}
+			return firstFile;
+		}
+		return null;
 	}
 
 	private void setupTTSHandlers() {

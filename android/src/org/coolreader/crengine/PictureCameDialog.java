@@ -264,7 +264,9 @@ mActivity.setSettings(props, -1, true);
 		super(activity, "", true, false);
 		if (obj instanceof BookInfo) {
 			picReceived = ((CoolReader) activity).picReceived;
-			picReceived.book = (BookInfo)obj;
+			if (picReceived == null)
+				picReceived = new PictureReceived();
+			picReceived.book = (BookInfo) obj;
 		} else
 			picReceived = null;
 		if (picReceived == null) picReceived = new PictureReceived();

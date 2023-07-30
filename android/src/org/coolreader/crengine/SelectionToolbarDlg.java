@@ -27,6 +27,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -73,6 +74,8 @@ public class SelectionToolbarDlg {
 	ImageButton btnSelectionFind;
 	ImageButton btnSelectionCite;
 	ImageButton btnSelectionMore;
+
+	private final SurfaceView mSvSurface;
 
 	static public void showDialog(CoolReader coolReader, ReaderView readerView, final Selection selection)
 	{
@@ -913,6 +916,11 @@ public class SelectionToolbarDlg {
 		mIsShort = isShort;
 
 		View panel = (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar, null));
+		mSvSurface = panel.findViewById(R.id.sv_surface);
+		mSvSurface.setOnKeyListener((v, keyCode, event) -> {
+			Log.v("cr3", "selection dialog, key: " + event);
+			return false;
+		});
 		llAddButtons = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_add, null));
 		llSliderBottom = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_slider_bottom, null));
 		llSliderTop = (LinearLayout) (LayoutInflater.from(coolReader.getApplicationContext()).inflate(R.layout.selection_toolbar_slider_top, null));
@@ -1022,6 +1030,7 @@ public class SelectionToolbarDlg {
 
 		isVisibleNow = true;
 		mCoolReader.tintViewIcons(mPanel);
+		mSvSurface.requestFocus();
 	}
 
 }

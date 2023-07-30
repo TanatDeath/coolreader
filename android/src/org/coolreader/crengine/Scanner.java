@@ -1292,22 +1292,29 @@ public class Scanner extends FileInfoChangeSource {
 	public FileInfo getDownloadDirectory() {
 		for ( int i=0; i<mRoot.dirCount(); i++ ) {
 			FileInfo item = mRoot.getDir(i);
+			log.i("getDownloadDirectory, mRoot item: " + item.pathname + "/" + item.getFilename());
 			if (!item.isWritableDirectory())
 				continue;
+			log.i("getDownloadDirectory, mRoot item is writable dir: " + item.pathname + "/" + item.getFilename());
 			if (!item.isSpecialDir() && !item.isArchive) {
 				if (!item.isListed)
 					listDirectory(item, false, false);
 				FileInfo books = item.findItemByPathName(item.pathname + "/Books");
 				if (books == null)
 					books = item.findItemByPathName(item.pathname + "/books");
-				if (books != null && books.exists())
+				if (books != null && books.exists()) {
+					log.i("getDownloadDirectory, books found: " + books.pathname + "/" + books.getFilename());
 					return books;
+				}
 				File dir = new File(item.getPathName());
+				log.i("getDownloadDirectory, dir?: " + dir.getAbsolutePath());
 				if (dir.isDirectory()) {
+					log.i("getDownloadDirectory, dir!: " + dir.getAbsolutePath());
 					if (!dir.canWrite())
 						Log.w("cr3", "Directory " + dir + " is readonly");
 					File f = new File( dir, "Books" );
 					if (f.mkdirs() || f.isDirectory()) {
+						log.i("create books folder: " + f.getAbsolutePath());
 						books = new FileInfo(f);
 						books.parent = item;
 						item.addDir(books);

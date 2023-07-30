@@ -149,7 +149,6 @@ lUInt32 TextLangMan::getHash() {
 // No need to explicitely call this in frontend code.
 // Calling HyphMan::uninit() will have this one called.
 void TextLangMan::uninit() {
-    _lang_cfg_list.clear();
 }
 
 // For HyphMan legacy methods

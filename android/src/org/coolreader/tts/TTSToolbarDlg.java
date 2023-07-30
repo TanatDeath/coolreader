@@ -798,50 +798,49 @@ public class TTSToolbarDlg implements Settings {
 					}
 				}
 
+				//CHECK: tts: fix bug where prev/next while paused keeps old utterance in buffer #354
 				@Override
 				public void onNextSentenceRequested(TTSControlBinder ttsbinder) {
-					if (isSpeaking) {
-						moveSelection(ReaderCommand.DCMD_SELECT_NEXT_SENTENCE, new ReaderView.MoveSelectionCallback() {
-							@Override
-							public void onNewSelection(Selection selection) {
+					moveSelection(ReaderCommand.DCMD_SELECT_NEXT_SENTENCE, new ReaderView.MoveSelectionCallback() {
+						@Override
+						public void onNewSelection(Selection selection) {
+							if (isSpeaking) {
 								if (mSentencePause != 0) {
 									BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 										ttsbinder.say(preprocessUtterance(selection.text), null);
 									}), mSentencePause);
-								} else
+								} else {
 									ttsbinder.say(preprocessUtterance(selection.text), null);
+								}
 							}
+						}
 
-							@Override
-							public void onFail() {
-							}
-						});
-					} else {
-						moveSelection(ReaderCommand.DCMD_SELECT_NEXT_SENTENCE, null);
-					}
+						@Override
+						public void onFail() {
+						}
+					});
 				}
 
 				@Override
 				public void onPreviousSentenceRequested(TTSControlBinder ttsbinder) {
-					if (isSpeaking) {
-						moveSelection(ReaderCommand.DCMD_SELECT_PREV_SENTENCE, new ReaderView.MoveSelectionCallback() {
-							@Override
-							public void onNewSelection(Selection selection) {
+					moveSelection(ReaderCommand.DCMD_SELECT_PREV_SENTENCE, new ReaderView.MoveSelectionCallback() {
+						@Override
+						public void onNewSelection(Selection selection) {
+							if (isSpeaking) {
 								if (mSentencePause != 0) {
 									BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
 										ttsbinder.say(preprocessUtterance(selection.text), null);
 									}), mSentencePause);
-								} else
+								} else {
 									ttsbinder.say(preprocessUtterance(selection.text), null);
+								}
 							}
+						}
 
-							@Override
-							public void onFail() {
-							}
-						});
-					} else {
-						moveSelection(ReaderCommand.DCMD_SELECT_PREV_SENTENCE, null);
-					}
+						@Override
+						public void onFail() {
+						}
+					});
 				}
 
 				@Override

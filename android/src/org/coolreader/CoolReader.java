@@ -170,6 +170,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	public static final Logger log = L.create("cr");
 
 	private int startBehaviour = 0; // 0 = open last reading book; 1 = main screen; 2 = reading folder
+	public boolean hasStoragePermissions = false; // check all files storage permissions
 
 	public Uri sdCardUri = null;
 
@@ -395,7 +396,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		return mBaseDialog;
 	}
 
-	private HashMap<String, BaseDialog> mBaseDialog = new HashMap<String, BaseDialog>();
+	private HashMap<String, BaseDialog> mBaseDialog = new HashMap<>();
 	public Long mLastDialogClosed = 0L;
 
 	public boolean ismDictWordCorrrection() {
@@ -2300,6 +2301,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	}
 
 	private void requestStoragePermissions() {
+		hasStoragePermissions = true;
 		// check or request permission for storage
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			ArrayList<String> needPerms = new ArrayList<>();
@@ -2316,10 +2318,12 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				} else {
 					log.i("WRITE_EXTERNAL_STORAGE permission already granted.");
 				}
+				hasStoragePermissions = needPerms.isEmpty();
 			} else {
 				if (!Environment.isExternalStorageManager()) {
 					int manageExtStoragePermissionCheck = checkSelfPermission(Manifest.permission.MANAGE_EXTERNAL_STORAGE);
 					if (PackageManager.PERMISSION_GRANTED != manageExtStoragePermissionCheck) {
+						hasStoragePermissions = false;
 						Uri uri = Uri.parse("package:" + getApplicationContext().getPackageName());
 						Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
 						try {
@@ -2335,9 +2339,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						}
 					} else {
 						log.i("MANAGE_EXTERNAL_STORAGE permission already granted.");
+						hasStoragePermissions = true;
 					}
 				} else {
 					log.i("MANAGE_EXTERNAL_STORAGE permission already granted.");
+					hasStoragePermissions = true;
 				}
 				int queryAllPackages = checkSelfPermission(Manifest.permission.QUERY_ALL_PACKAGES);
 				if (PackageManager.PERMISSION_GRANTED != queryAllPackages) {
@@ -2345,6 +2351,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				} else {
 					log.i("QUERY_ALL_PACKAGES permission already granted.");
 				}
+				hasStoragePermissions = needPerms.isEmpty();
 			}
 			if (!needPerms.isEmpty()) {
 				// TODO: Show an explanation to the user

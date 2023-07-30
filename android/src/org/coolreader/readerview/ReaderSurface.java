@@ -101,7 +101,6 @@ public class ReaderSurface extends SurfaceView implements ReaderView.BookView {
 	protected void doDraw(Canvas canvas)
 	{
 		try {
-
 			log.d("doDraw() called");
 			if (mReaderView.isProgressActive()) {
 				log.d("onDraw() -- drawing progress " + (mReaderView.currentProgressPosition / 100));
@@ -109,7 +108,6 @@ public class ReaderSurface extends SurfaceView implements ReaderView.BookView {
 				mReaderView.doDrawProgress(canvas, mReaderView.currentProgressPosition, mReaderView.currentProgressTitle);
 			} else if (mReaderView.mInitialized && mReaderView.mCurrentPageInfo != null && mReaderView.mCurrentPageInfo.bitmap != null) {
 				log.d("onDraw() -- drawing page image");
-
 				if ((mReaderView.currentAutoScrollAnimation != null) && (!mReaderView.currentAutoScrollAnimation.mIsSimple)) {
 					mReaderView.currentAutoScrollAnimation.draw(canvas);
 				} else if (mReaderView.currentAnimation != null) {

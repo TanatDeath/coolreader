@@ -1,16 +1,24 @@
-/*******************************************************
-
-   CoolReader Engine
-
-   lvzipdecodestream.cpp
-
-   (c) Vadim Lopatin, 2000-2009
-   This source code is distributed under the terms of
-   GNU General Public License
-
-   See LICENSE file for details
-
-*******************************************************/
+/***************************************************************************
+ *   CoolReader engine                                                     *
+ *   Copyright (C) 2007-2012,2014,2015 Vadim Lopatin <coolreader.org@gmail.com>
+ *   Copyright (C) 2018,2020 poire-z <poire-z@users.noreply.github.com>    *
+ *   Copyright (C) 2020,2021 Aleksey Chernov <valexlin@gmail.com>          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or         *
+ *   modify it under the terms of the GNU General Public License           *
+ *   as published by the Free Software Foundation; either version 2        *
+ *   of the License, or (at your option) any later version.                *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the Free Software           *
+ *   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,            *
+ *   MA 02110-1301, USA.                                                   *
+ ***************************************************************************/
 
 #include "lvzipdecodestream.h"
 
@@ -343,8 +351,11 @@ LVStream *LVZipDecodeStream::Create(LVStreamRef stream, lvpos_t pos, lString32 n
     // read extra data
     const lvsize_t max_EXTRA = 128;
     if (hdr.getAddLen() > max_EXTRA) {
-        CRLog::error("ZIP entry extra length is too big: %d", (int)hdr.getAddLen());
-        return NULL;
+        CRLog::warn("ZIP entry extra length is too big: %d", (int)hdr.getAddLen());
+        //plotn: dont know why, but this fails when file (e.g. docx) is opened from the stream (not file).
+        // changed error to warning, but this require more complex investigation - classic coolreader works fine,
+        // the problem in KR
+        //return NULL;
     }
     lvsize_t extraSizeToRead = (hdr.getAddLen() < max_EXTRA) ? hdr.getAddLen() : max_EXTRA;
     lUInt8 extra[max_EXTRA];

@@ -43,10 +43,14 @@ public class DrawPageTask extends Task {
 						if (bi.bitmap.sameAs(mReaderView.lastCachedBitmap)) needDraw = false;
 				if (needDraw) {
 					mReaderView.lastCachedBitmap = bi.bitmap.copy(bi.bitmap.getConfig(), true);
-					mReaderView.bookView.draw(isPartially);
+					BackgroundThread.instance().postGUI(() -> {
+						mReaderView.bookView.draw(isPartially);
+					}, 0);
 				} else log.v("Unnessesary redraw skipped");
 			} else
-				mReaderView.bookView.draw(isPartially);
+				BackgroundThread.instance().postGUI(() -> {
+					mReaderView.bookView.draw(isPartially);
+				}, 0);
 		}
 	}
 	@Override

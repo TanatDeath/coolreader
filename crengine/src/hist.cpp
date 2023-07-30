@@ -632,11 +632,12 @@ lString32 CRFileHistRecord::getLastTimeString( bool longFormat )
 
     time_t t = getLastTime();
     tm * bt = localtime(&t);
-    char str[20];
+    char str[22];
     if ( !longFormat )
-        sprintf(str, "%02d.%02d.%04d", bt->tm_mday, 1+bt->tm_mon, 1900+bt->tm_year );
+        sprintf(str, "%02u.%02u.%04u", (uint8_t)bt->tm_mday, (uint8_t)(1 + bt->tm_mon), (uint16_t)(1900 + bt->tm_year));
     else
-        sprintf(str, "%02d.%02d.%04d %02d:%02d", bt->tm_mday, 1+bt->tm_mon, 1900+bt->tm_year, bt->tm_hour, bt->tm_min);
+        sprintf(str, "%02u.%02u.%04u %02u:%02u", (uint8_t)bt->tm_mday, (uint8_t)(1 + bt->tm_mon), (uint16_t)(1900 + bt->tm_year),
+                (uint8_t)bt->tm_hour, (uint8_t)bt->tm_min);
     return Utf8ToUnicode( lString8( str ) );
 }
 

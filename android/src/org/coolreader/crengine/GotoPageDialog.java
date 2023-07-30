@@ -78,8 +78,10 @@ public class GotoPageDialog extends BaseDialog {
 			if (arrFound == null) {
 				if (position < 0 || position >= mPageCount)
 					return null;
-				if (mReaderView.getArrAllPages()==null) return null;
-				return mReaderView.getArrAllPages().get(position);
+//				if (mReaderView.getArrAllPages()==null) return null;
+//				return mReaderView.getArrAllPages().get(position);
+				if (mReaderView.getDoc() == null) return null;
+				return mReaderView.getDoc().getPageText(false, position);
 			} else {
 				if (position < 0 || position >= arrFound.size())
 					return null;
@@ -152,8 +154,10 @@ public class GotoPageDialog extends BaseDialog {
 			super(context, true);
 			setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 			setLongClickable(true);
-			if (mReaderView.getArrAllPages()==null) mPageCount=0;
-				else mPageCount = mReaderView.getArrAllPages().size();
+//			if (mReaderView.getArrAllPages()==null) mPageCount=0;
+//				else mPageCount = mReaderView.getArrAllPages().size();
+			if (mReaderView.getDoc() == null) mPageCount=0;
+				else mPageCount = mReaderView.getDoc().getPageCount();
 			setAdapter(new BookPagesAdapter());
 			setOnItemLongClickListener((arg0, arg1, position, arg3) -> {
 				//openContextMenu(DictList.this);
@@ -193,7 +197,7 @@ public class GotoPageDialog extends BaseDialog {
 		this.minValue = minValue;
 		this.maxValue = maxValue;
 		this.mReaderView = ((CoolReader)activity).getReaderView();
-		this.mReaderView.CheckAllPagesLoadVisual();
+		//this.mReaderView.CheckAllPagesLoadVisual();
         this.mInflater = LayoutInflater.from(getContext());
         ViewGroup layout = (ViewGroup)mInflater.inflate(R.layout.goto_page_dlg, null);
         watcher = new TextWatcher() {
@@ -327,7 +331,7 @@ public class GotoPageDialog extends BaseDialog {
 		this.minValue = minValue;
 		this.maxValue = maxValue;
 		this.mReaderView = ((CoolReader)activity).getReaderView();
-		this.mReaderView.CheckAllPagesLoadVisual();
+//		this.mReaderView.CheckAllPagesLoadVisual();
 		this.mInflater = LayoutInflater.from(getContext());
 		ViewGroup layout = (ViewGroup)mInflater.inflate(R.layout.goto_page_find_dlg, null);
 		TextView promptView = (TextView)layout.findViewById(R.id.lbl_find_text_pages);
@@ -339,12 +343,15 @@ public class GotoPageDialog extends BaseDialog {
 		body.addView(mList);
 		setView(layout);
 		int iPageCnt = 0;
-		if (mReaderView.getArrAllPages()!=null) iPageCnt = mReaderView.getArrAllPages().size();
+		//if (mReaderView.getArrAllPages()!=null) iPageCnt = mReaderView.getArrAllPages().size();
+		if (mReaderView.getDoc() != null) iPageCnt = mReaderView.getDoc().getPageCount();
 		for (int i=0;i<iPageCnt;i++) {
-			String sPage = mReaderView.getArrAllPages().get(i);
+			//String sPage = mReaderView.getArrAllPages().get(i);
+			String sPage = "";
+			if (mReaderView.getDoc() != null) sPage = mReaderView.getDoc().getPageText(false, i);
 			if (sPage == null) sPage = "";
 			sPage = sPage.replace("\\n", " ");
-			sPage = sPage.replace("\\r", " ");
+			sPage = sPage.replace("\\r", " ").trim();
 			String[] arrPage = {String.valueOf(i), sPage};
 			String sFindText = findtext;
 			if (sFindText == null) sFindText = "";

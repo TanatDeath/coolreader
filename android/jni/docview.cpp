@@ -909,7 +909,7 @@ bool DocViewNative::loadDocument( const lString32& filename )
 bool DocViewNative::loadDocument( LVStreamRef stream, const lString32& contentPath )
 {
 	CRLog::info("Loading document from memory stream, content path: %s", LCSTR(contentPath));
-	bool res = _docview->LoadDocument(stream, contentPath.c_str(), false);
+	bool res = _docview->LoadDocument(stream, contentPath.c_str(), 	false);
 	if (res)
 		CRLog::info("Document %s is loaded successfully", LCSTR(contentPath));
 	else {

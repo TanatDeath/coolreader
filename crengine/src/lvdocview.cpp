@@ -1372,6 +1372,8 @@ bool LVDocView::exportWolFile(LVStream * stream, bool flgGray, int levels) {
 int LVDocView::GetFullHeight() {
 	LVLock lock(getMutex());
     CHECK_RENDER("getFullHeight()");
+	if (NULL == m_doc)
+		return 0;
 	RenderRectAccessor rd(m_doc->getRootNode());
 	return (rd.getHeight() + rd.getY());
 }
@@ -1862,15 +1864,19 @@ void LVDocView::getSectionBoundsInt( LVArray<int>& bounds, ldomNode* node, lUInt
 				lvRect rc;
 				section->getAbsRect(rc);
 				if (getViewMode() == DVM_SCROLL) {
-					int p = (int) (((lInt64) rc.top * 10000) / fh);
-					bounds.add(p);
+					if (fh > 0) {
+						int p = (int) (((lInt64) rc.top * 10000) / fh);
+						bounds.add(p);
+					}
 				} else {
 					int pages_cnt = m_pages.length();
 					if ( (pc==2 && (pages_cnt&1)) )
 						pages_cnt++;
 					int p = m_pages.FindNearestPage(rc.top, 0);
 					if (pages_cnt > 1)
-						bounds.add((int) (((lInt64) p * 10000) / pages_cnt));
+						if (fh > 0) {
+							bounds.add((int) (((lInt64) p * 10000) / pages_cnt));
+						}
 				}
 			} else if (level < target_level) {
 				getSectionBoundsInt(bounds, section, section_id, target_level, level + 1);
@@ -1911,7 +1917,7 @@ LVArray<int> & LVDocView::getSectionBounds( int max_count, int depth, bool for_e
 		for (int level = 0; level < depth; level++) {
 			LVArray<int> bounds_tmp;
 			getSectionBoundsInt(bounds_tmp, body, section_id, level, 0);
-			if (bounds.length() + bounds_tmp.length() < max_count)
+			if ((bounds.length() + bounds_tmp.length() < max_count) && (fh > 0))
 				bounds.add(bounds_tmp);
 			else
 				break;
@@ -4634,20 +4640,22 @@ bool LVDocView::exportSentenceInfo(const lChar32 * inputFileName, const lChar32 
 		return false;
 	}
 
-	checkRender();
-
 	ldomXPointerEx ptrStart( m_doc->getRootNode(), m_doc->getRootNode()->getChildCount());
 	if ( !ptrStart.thisSentenceStart() ) {
 		ptrStart.nextSentenceStart();
-	}
-
-	if ( !ptrStart.thisSentenceStart() ) {
-		return false;
+		if ( !ptrStart.thisSentenceStart() ) {
+			return false;
+		}
 	}
 
 	while ( 1 ) {
 		ldomXPointerEx ptrEnd(ptrStart);
 		ptrEnd.thisSentenceEnd();
+
+		//include last sentence even if it does not appear very sentence-like
+		if(ptrStart == ptrEnd){
+			ptrEnd.setOffset(ptrEnd.getNode()->getText().length());
+		}
 
 		ldomXRange range(ptrStart, ptrEnd);
 		lString32 sentenceText = range.getRangeText();
@@ -6004,16 +6012,15 @@ ldomXPointer LVDocView::getPageBookmark(int page) {
 	return ptr;
 }
 
-/// get bookmark position text
-bool LVDocView::getBookmarkPosText(ldomXPointer bm, lString32 & titleText,
-		lString32 & posText) {
+/// get bookmark position text (for FictionBook format)
+bool LVDocView::getBookmarkPosTextFB2Impl(ldomXPointer bm, lString32& titleText, lString32& posText) {
 	LVLock lock(getMutex());
 	checkRender();
     titleText = posText = lString32::empty_str;
 	if (bm.isNull())
 		return false;
 	ldomNode * el = bm.getNode();
-	CRLog::trace("getBookmarkPosText() : getting position text");
+	CRLog::trace("getBookmarkPosTextFB2Impl() : getting position text");
 	if (el->isText()) {
         lString32 txt = bm.getNode()->getText();
 		int startPos = bm.getOffset();
@@ -6031,8 +6038,14 @@ bool LVDocView::getBookmarkPosText(ldomXPointer bm, lString32 & titleText,
 	do {
 		while (el && el->getNodeId() != el_section && el->getNodeId()
 				!= el_body) {
-			if (el->getNodeId() == el_title || el->getNodeId() == el_subtitle)
-				inTitle = true;
+			switch (el->getNodeId()) {
+				case el_title:
+				case el_subtitle:
+					inTitle = true;
+					break;
+				default:
+					break;
+			}
 			el = el->getParentNode();
 		}
 		if (el) {
@@ -6062,6 +6075,144 @@ bool LVDocView::getBookmarkPosText(ldomXPointer bm, lString32 & titleText,
     limitStringSize(titleText, 70);
 	limitStringSize(posText, 120);
 	return true;
+}
+
+static bool s_isContainsHeader(const ldomNode* node, lString32& header, lUInt8& level) {
+	header = lString32::empty_str;
+	level = 100;
+	if (NULL == node)
+		return false;
+	switch (node->getNodeId()) {
+		case el_h1:
+			level = 1;
+			break;
+		case el_h2:
+			level = 2;
+			break;
+		case el_h3:
+			level = 3;
+			break;
+		case el_h4:
+			level = 4;
+			break;
+		case el_h5:
+			level = 5;
+			break;
+		case el_h6:
+			level = 6;
+			break;
+		default:
+			break;
+	}
+	if (level > 0 && level < 7) {
+		header = node->getText(U' ', 1024);
+		return true;
+	}
+	bool res = false;
+	for (int i = 0; i < node->getChildCount(); i++) {
+		res = s_isContainsHeader(node->getChildNode(i), header, level);
+		if (res)
+			break;
+	}
+	return res;
+}
+
+/// get bookmark position text (for html-like formats)
+bool LVDocView::getBookmarkPosTextHtmlImpl(ldomXPointer bm, lString32& titleText, lString32& posText) {
+	titleText = posText = lString32::empty_str;
+	if (bm.isNull())
+		return false;
+	ldomNode* el = bm.getNode();
+	CRLog::trace("getBookmarkPosTextHtmlImpl() : getting position text");
+	if (el->isText()) {
+		lString32 txt = bm.getNode()->getText();
+		int startPos = bm.getOffset();
+		int len = txt.length() - startPos;
+		if (len > 0)
+			txt = txt.substr(startPos, len);
+		if (startPos > 0)
+			posText = "...";
+		posText += txt;
+		el = el->getParentNode();
+	} else {
+		posText = el->getText(U' ', 1024);
+	}
+	bool inTitle = false;
+	ldomNode* t = el;
+	while (t && t->getNodeId() != el_body && t->getNodeId() != el_DocFragment) {
+		switch (t->getNodeId()) {
+			case el_h1:
+			case el_h2:
+			case el_h3:
+			case el_h4:
+			case el_h5:
+			case el_h6:
+				inTitle = true;
+				break;
+			default:
+				break;
+		}
+		t = t->getParentNode();
+	}
+	lUInt8 prevLevel = 100;
+	do {
+		lString32 header;
+		lUInt8 level;
+		while (el && el->getNodeId() != el_body && el->getNodeId() != el_DocFragment) {
+			if (s_isContainsHeader(el, header, level)) {
+				if (level < prevLevel) {
+					// We found the heading
+					break;
+				}
+			}
+			t = el->getPrevSibling();
+			if (NULL != t)
+				el = t;
+			else
+				el = el->getParentNode();
+		}
+		if (el) {
+			if (inTitle) {
+				ldomNode* nextNode = el->getNextSibling();
+				if (NULL != nextNode && nextNode->getChildCount() > 0) {
+					ldomNode* node = nextNode->getChildNode(0);
+					posText = node->getText(' ', 8192);
+				}
+				inTitle = false;
+			}
+			if (el->getNodeId() == el_body && !titleText.empty())
+				break;
+			lString32 txt = header;
+			lChar32 lastch = !txt.empty() ? txt[txt.length() - 1] : 0;
+			if (!titleText.empty()) {
+				if (lastch != '.' && lastch != '?' && lastch != '!')
+					txt += ".";
+				txt += " ";
+			}
+			titleText = txt + titleText;
+			t = el->getPrevSibling();
+			if (NULL != t)
+				el = t;
+			else
+				el = el->getParentNode();
+			prevLevel = level;
+		}
+		if (titleText.length() > 50)
+			break;
+	} while (el);
+	limitStringSize(titleText, 70);
+	limitStringSize(posText, 120);
+	return true;
+}
+
+/// get bookmark position text
+bool LVDocView::getBookmarkPosText(ldomXPointer bm, lString32& titleText, lString32& posText) {
+	LVLock lock(getMutex());
+	checkRender();
+	ldomNode* body = m_doc->nodeFromXPath(cs32("/FictionBook/body[1]"));
+	if (NULL != body)
+		return getBookmarkPosTextFB2Impl(bm, titleText, posText);
+	return getBookmarkPosTextHtmlImpl(bm, titleText, posText);
 }
 
 /// moves position to bookmark
@@ -6962,8 +7113,14 @@ int LVDocView::onSelectionCommand( int cmd, int param )
         moved = true;
     }
     if ( currSel.getStart().isNull() ) {
-        clearSelection();
-        return 0;
+        if (cmd == DCMD_SELECT_FIRST_SENTENCE) {
+            bool res;
+            currSel.setStart(pos);
+            res = currSel.getStart().nextVisibleWordStart();
+        } else {
+            clearSelection();
+            return 0;
+        }
     }
     if (cmd==DCMD_SELECT_MOVE_LEFT_BOUND_BY_WORDS || cmd==DCMD_SELECT_MOVE_RIGHT_BOUND_BY_WORDS) {
         if (cmd==DCMD_SELECT_MOVE_RIGHT_BOUND_BY_WORDS)
@@ -7056,12 +7213,20 @@ int LVDocView::onSelectionCommand( int cmd, int param )
     int y0 = GetPos();
     int h = m_pageRects[0].height() - m_pageMargins.top
             - m_pageMargins.bottom - getPageHeaderHeight();
-    //int y1 = y0 + h;
+
+	//from: tts: scroll the page when the next selected sentence is too close to the bottom #355
+	//if selection is in the bottom 150px of the screen, scroll the page
+	int bottomMarginBuffer = 150;
+	h = h - bottomMarginBuffer;
+
+	//int y1 = y0 + h;
     if (makeSelStartVisible) {
         // make start of selection visible
         if (isScrollMode()) {
-            if (startPoint.y < y0 + m_font_size * 2 || startPoint.y > y0 + h * 3/4)
-                SetPos(startPoint.y - m_font_size * 2);
+//            if (startPoint.y < y0 + m_font_size * 2 || startPoint.y > y0 + h * 3/4)
+//                SetPos(startPoint.y - m_font_size * 2);
+			if (startPoint.y < y0 + m_font_size * 2 || startPoint.y > y0 + h * 3/4 || endPoint.y > y0 + h)
+				SetPos(startPoint.y - m_font_size * 1);
         } else {
             if (startPoint.y < y0 || startPoint.y >= y0 + h)
                 SetPos(startPoint.y);
@@ -7071,7 +7236,8 @@ int LVDocView::onSelectionCommand( int cmd, int param )
         // make end of selection visible
         if (isScrollMode()) {
             if (endPoint.y > y0 + h * 3/4 - m_font_size * 2)
-                SetPos(endPoint.y - h * 3/4 + m_font_size * 2, false);
+                //SetPos(endPoint.y - h * 3/4 + m_font_size * 2, false);
+				SetPos(endPoint.y - h * 3/4 + m_font_size * 1, false);
         } else {
             if (endPoint.y < y0 || endPoint.y >= y0 + h)
                 SetPos(endPoint.y, false);

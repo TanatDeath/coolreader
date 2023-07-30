@@ -9271,6 +9271,12 @@ ldomXPointer ldomDocument::createXPointer( lvPoint pt, int direction, bool stric
             }
         }
     }
+    if ( !strictBounds ) {
+        // We had a final node, but didn't find any xpointer in its content. This might be
+        // because the final node has no text nor image, ie. with just <p><span></span></p>.
+        // So, return the final node itself.
+        return ldomXPointer( finalNode, 0 );
+    }
     return ptr;
 }
 
@@ -19103,6 +19109,22 @@ ldomNode * ldomNode::getLastChild() const
         }
 #endif
     }
+    return NULL;
+}
+
+ldomNode* ldomNode::getPrevSibling() const {
+    ldomNode* parent = getParentNode();
+    int idx = getNodeIndex();
+    if (NULL != parent && idx > 0)
+        return parent->getChildNode(idx - 1);
+    return NULL;
+}
+
+ldomNode* ldomNode::getNextSibling() const {
+    ldomNode* parent = getParentNode();
+    int idx = getNodeIndex();
+    if (NULL != parent && idx < parent->getChildCount() - 1)
+        return parent->getChildNode(idx + 1);
     return NULL;
 }
 

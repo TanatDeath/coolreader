@@ -24,6 +24,8 @@ public class InitAppDialog extends BaseDialog {
 	private final CoolReader mCoolReader;
 	private final LayoutInflater mInflater;
 	private final ViewGroup mDialog;
+
+	private final Button mBtnRequestFilesAccess;
 	private final Button mBtnClearCache;
 	private final Button mBtnClearSettings;
 	private final Button mBtnClearDB;
@@ -42,6 +44,9 @@ public class InitAppDialog extends BaseDialog {
 		View view = mInflater.inflate(R.layout.init_app_dialog, null);
 		mDialog = (ViewGroup) view;
 		//llScanLibrary = view.findViewById(R.id.ll_scan_library_dlg);
+		mBtnRequestFilesAccess = view.findViewById(R.id.btn_request_files_access);
+		Utils.setDashedButton(mBtnRequestFilesAccess);
+		if (isEInk) Utils.setDashedButtonEink(mBtnRequestFilesAccess);
 		mBtnClearCache = view.findViewById(R.id.btn_clear_cache);
 		mBtnClearSettings = view.findViewById(R.id.btn_clear_settings);
 		mBtnClearDB = view.findViewById(R.id.btn_clear_db);

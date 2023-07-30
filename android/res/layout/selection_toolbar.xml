@@ -2,6 +2,7 @@
 <!--
    Option item layout for CR3 options dialog
 -->
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/sel_body"
     android:orientation="vertical"
@@ -155,5 +156,13 @@
 			android:layout_alignParentBottom="true"
 			>
 	</LinearLayout>
+	<SurfaceView
+			android:id="@+id/sv_surface"
+			android:layout_width="1px"
+			android:focusable="true"
+			android:focusableInTouchMode="true"
+			android:background="@null"
+			android:layout_height="1px">
+	</SurfaceView>
 
 </RelativeLayout>

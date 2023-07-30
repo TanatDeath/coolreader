@@ -1869,6 +1869,8 @@
     <string name="dic_application">App</string>
     <string name="init_app">Init app dialog</string>
     <string name="init_app_add_info">Clear cache, reset settings or/and delete books database</string>
+    <string name="init_app_request_files_access">Request all files access</string>
+    <string name="init_app_request_files_access_add_info">This option is needed, if you want to open any book, stored at you device</string>
     <string name="init_app_clear_cache">Clear cache folder</string>
     <string name="init_app_clear_cache_add_info">This is safe operation. Sometimes cache can become broken, you can completely clear it - in some situations this may help</string>
     <string name="init_app_clear_settings">Reset setting</string>
