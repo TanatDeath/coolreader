@@ -306,7 +306,9 @@ bool InitCREngine( const char * exename, lString16Collection & fontDirs )
 #else
         printf("Fatal Error: Cannot open font file(s) font#.lbf \nCannot work without font\nUse FontConv utility to generate .lbf fonts from TTF\n" );
 #endif
-        return false;
+        printf("Continuing...\n" ); // plotn
+        return true;
+        //return false; //plotn
     }
 
     printf("%d fonts loaded.\n", fontMan->GetFontCount());

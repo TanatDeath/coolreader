@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.coolreader.CoolReader;
@@ -99,8 +100,10 @@ public class BookInfoDialog extends BaseDialog {
 	boolean bSetAddMarks;
 	TextView tvWC;
 	TextView tvSC;
+	TextView tvSSI;
 	TextView tvML;
 	Button btnCalc;
+	Button btnSaveSentenceInfo;
 	ScrollView mainView;
 	ArrayList<BookTag> mBookTagsList;
 
@@ -199,6 +202,7 @@ public class BookInfoDialog extends BaseDialog {
 		mLabelMap.put("book.translator", R.string.book_info_book_translator);
 		mLabelMap.put("book.symcount", R.string.book_info_book_symcount);
 		mLabelMap.put("book.wordcount", R.string.book_info_book_wordcount);
+		mLabelMap.put("book.sentenceinfo", R.string.book_info_save_sentence_info);
 		mLabelMap.put("book.minleft", R.string.book_info_stats_minutes_left);
 		mLabelMap.put("section.book_document", R.string.book_info_section_book_document);
 		mLabelMap.put("book.docauthor", R.string.book_info_book_docauthor);
@@ -329,6 +333,7 @@ public class BookInfoDialog extends BaseDialog {
 			valueView.setTag(name);
 		if (name.equals(mActivity.getString(R.string.book_info_book_symcount))) tvSC = valueView;
 		if (name.equals(mActivity.getString(R.string.book_info_book_wordcount))) tvWC = valueView;
+		if (name.equals(mActivity.getString(R.string.book_info_save_sentence_info))) tvSSI = valueView;
 		if (name.equals(mActivity.getString(R.string.book_info_stats_minutes_left))) tvML = valueView;
 		ReaderView rv = mCoolReader.getReaderView();
 		if (
@@ -411,6 +416,43 @@ public class BookInfoDialog extends BaseDialog {
 						}
 					});
 		}
+		if (
+			(name.equals(mActivity.getString(R.string.book_info_save_sentence_info))) && (rv != null)
+		)
+			if ((mBookInfo != null) && (rv.mBookInfo != null))
+				if (rv.mBookInfo.getFileInfo().getFilename().equals(mBookInfo.getFileInfo().getFilename())) {
+					Button saveButton = new Button(mCoolReader);
+					btnSaveSentenceInfo = saveButton;
+					saveButton.setText(mActivity.getString(R.string.save_to_file));
+					saveButton.setTextColor(mActivity.getTextColor(colorIcon));
+					saveButton.setBackgroundColor(colorGrayC);
+					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+							ViewGroup.LayoutParams.MATCH_PARENT,
+							ViewGroup.LayoutParams.WRAP_CONTENT);
+					llp.setMargins(20, 0, 8, 0);
+					saveButton.setLayoutParams(llp);
+					saveButton.setMaxLines(3);
+					saveButton.setEllipsize(TextUtils.TruncateAt.END);
+					final ViewGroup vg = (ViewGroup) valueView.getParent();
+					vg.addView(saveButton);
+					saveButton.setOnClickListener(v -> {
+						List<SentenceInfo> allSentences;
+						allSentences = rv.getAllSentences();
+						if (allSentences.size() == 0) {
+							mActivity.showToast(mActivity.getString(R.string.error) + ": could not get sentences", v);
+						} else {
+							String pathName = mBookInfo.getFileInfo().getPathName();
+							String sentenceInfoPath = pathName.replaceAll("\\.\\w+$", ".sentenceinfo");
+							File sentenceInfoCacheFile = new File(sentenceInfoPath);
+							String res = SentenceInfoCache.writeCache(sentenceInfoCacheFile, allSentences);
+							if (StrUtils.isEmptyStr(res)) {
+								mActivity.showToast(mActivity.getString(R.string.saved_to) + ": " + sentenceInfoPath, v);
+							} else {
+								mActivity.showToast(mActivity.getString(R.string.error) + ": " + res, v);
+							}
+						}
+					});
+				}
 		if (
 			(name.equals(mActivity.getString(R.string.book_info_book_translation)))
 		) {

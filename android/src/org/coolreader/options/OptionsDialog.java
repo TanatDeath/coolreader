@@ -1250,6 +1250,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		//mProperties.setBool(PROP_TXT_OPTION_PREFORMATTED, mReaderView.isTextAutoformatEnabled());
 		//mProperties.setBool(PROP_EMBEDDED_STYLES, mReaderView.getDocumentStylesEnabled());
 		mOptionsCSS.add(getOption(PROP_EMBEDDED_STYLES_DEF, filter));
+		mOptionsCSS.add(getOption(PROP_TRIM_INITIAL_PAR_SPACES, filter));
 		for (int i=0; i<styleCodes.length; i++) {
 			StyleEditorOption seO = (StyleEditorOption) createStyleEditor(styleCodes[i], styleTitles[i], styleAddInfos[i], filter);
 			seO.updateFilterEnd();
@@ -1273,6 +1274,8 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				setIconIdByAttr(R.attr.cr3_option_fullscreen_drawable, R.drawable.cr3_option_fullscreen);
 		new BoolOption(this, getString(R.string.options_font_italicize), PROP_FONT_ITALICIZE,
 				getString(R.string.option_add_info_empty_text), "", true).setDefaultValue("0").setIconIdByAttr(R.attr.cr3_option_text_italic_drawable, R.drawable.cr3_option_text_italic);
+		new BoolOption(this, getString(R.string.options_trim_initial_par_spaces), PROP_TRIM_INITIAL_PAR_SPACES,
+				getString(R.string.options_trim_initial_par_spaces_add_info), "", true).setDefaultValue("0").noIcon();
 		new BoolOption(this, getString(R.string.options_tts_use_doc_lang), PROP_APP_TTS_USE_DOC_LANG,
 				getString(R.string.option_add_info_empty_text), "", true).setDefaultValue("1").noIcon();
 		new BoolOption(this, getString(R.string.options_tts_google_abbr_workaround),

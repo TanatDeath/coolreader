@@ -88,12 +88,6 @@ int CRLocaleData::calcMatch(const CRLocaleData& other) const
 
 void CRLocaleData::parseTag(const lString8& langtag)
 {
-    m_langtag_src = langtag;
-    lString8 tag = langtag;
-    bool lang_ok = false;
-    bool script_ok = true;
-    bool region_ok = true;
-
     // 0. clear all fields
     m_isValid = false;
     m_lang_code = lString8::empty_str;
@@ -111,6 +105,15 @@ void CRLocaleData::parseTag(const lString8& langtag)
     m_region_alpha2 = lString8::empty_str;
     m_region_alpha3 = lString8::empty_str;
     m_region_num = 0;
+
+    if (langtag.empty())
+        return;
+
+    m_langtag_src = langtag;
+    lString8 tag = langtag;
+    bool lang_ok = false;
+    bool script_ok = true;
+    bool region_ok = true;
 
     // 1. replace '_' with '-'
     tag = tag.replace('_', '-');

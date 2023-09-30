@@ -1,7 +1,5 @@
 package org.coolreader.crengine;
 
-import android.util.Log;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -173,16 +171,35 @@ public class WordTimingAudiobookMatcher {
             return true;
         } else {
             //expensive calculation, but relatively rarely performed
-            if(word1.matches(".*[a-z].*") || word2.matches(".*[a-z].*")){
-                //if there is at least one letter in the word: compare only letters
-                word1 = word1.replaceAll("[^a-z]", "");
-                word2 = word2.replaceAll("[^a-z]", "");
-            }else{
-                //otherwise: compare only numbers
-                word1 = word1.replaceAll("[^0-9]", "");
-                word2 = word2.replaceAll("[^0-9]", "");
+            String word1Letters = "";
+            String word2Letters = "";
+            String word1Digits = "";
+            String word2Digits = "";
+            for(int i=0; i<word1.length(); i++){
+                char ch = word1.charAt(i);
+                if(Character.isLetter(ch)){
+                    word1Letters += ch;
+                }else if(Character.isDigit(ch)){
+                    word1Digits += ch;
+                }
             }
-            return word1.equals(word2);
+            for(int i=0; i<word2.length(); i++){
+                char ch = word2.charAt(i);
+                if(Character.isLetter(ch)) {
+                    word2Letters += ch;
+                }else if(Character.isDigit(ch)){
+                    word2Digits += ch;
+                }
+            }
+            if(word1Letters.length() > 0 && word2Letters.length() > 0) {
+                //if there is at least one letter in each word: compare only letters
+                return word1Letters.equals(word2Letters);
+            }else if(word1Digits.length() > 0 && word2Digits.length() > 0) {
+                //if there is at least one number in each word: compare only numbers
+                return word1Digits.equals(word2Digits);
+            }else{
+                return word1.equals(word2);
+            }
         }
     }
 
@@ -191,35 +208,35 @@ public class WordTimingAudiobookMatcher {
 
         StringBuilder str = null;
         boolean wordContainsLetterOrNumber = false;
-        for(int i=0; i<sentence.length(); i++){
+        for (int i=0; i<sentence.length(); i++) {
             char ch = sentence.charAt(i);
-            if(ch == '’'){
+            if (ch == '’') {
                 ch = '\'';
             }
             ch = Character.toLowerCase(ch);
 
             boolean isWordChar;
-            if('a' <= ch && ch <= 'z'){
+            if (Character.isLetter(ch)) {
                 isWordChar = true;
                 wordContainsLetterOrNumber = true;
-            }else if('0' <= ch && ch <= '9'){
+            } else if (Character.isDigit(ch)) {
                 isWordChar = true;
                 wordContainsLetterOrNumber = true;
-            }else if(ch == '\''){
+            } else if (ch == '\'') {
                 isWordChar = true;
-            }else{
+            } else {
                 isWordChar = false;
             }
 
             if (isWordChar) {
-                if(str == null){
+                if (str == null) {
                     str = new StringBuilder();
                 }
                 str.append(ch);
             }
 
             if (str != null && (!isWordChar || i == sentence.length()-1)) {
-                if(wordContainsLetterOrNumber){
+                if (wordContainsLetterOrNumber) {
                     words.add(str.toString());
                 }
                 str = null;
@@ -229,4 +246,13 @@ public class WordTimingAudiobookMatcher {
 
         return words;
     }
+
+//    public static void main(String[] args){
+//        if(args.length != 2){
+//            System.out.println("USAGE: SENTENCE_INFO_FILE WORDTIMING_FILE");
+//        }
+//        List<SentenceInfo> sentences = SentenceInfoCache.maybeReadCache(new File(args[0]));
+//        new WordTimingAudiobookMatcher(new File(args[1]), sentences).parseWordTimingsFile();
+//    }
+
 }

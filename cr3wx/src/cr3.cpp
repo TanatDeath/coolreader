@@ -783,7 +783,9 @@ cr3app::OnInit()
 #else
         printf("Fatal Error: Cannot open font file(s) font#.lbf \nCannot work without font\nUse FontConv utility to generate .lbf fonts from TTF\n" );
 #endif
-        return FALSE;
+        printf("Continuing...\n" ); // plotn
+        return TRUE;
+        //return FALSE; //plotn
     }
 
     printf("%d fonts loaded.\n", fontMan->GetFontCount());

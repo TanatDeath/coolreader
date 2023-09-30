@@ -91,6 +91,8 @@ public class BaseActivity extends Activity implements Settings {
 	private static final Logger log = L.create("ba");
 	private View mDecorView;
 
+	private String setLang = ""; // last language set
+
 	protected CRDBServiceAccessor mCRDBService;
 	public Dictionaries mDictionaries;
 	public OptionsDialog optionsDialog;
@@ -1039,6 +1041,8 @@ public class BaseActivity extends Activity implements Settings {
 //			});
 //		}
 		super.onConfigurationChanged(newConfig);
+		if (!StrUtils.isEmptyStr(setLang))
+			setLanguage(setLang);
 	}
 
 	protected void onScreenRotationChanged(int rotation) {
@@ -2436,6 +2440,7 @@ public class BaseActivity extends Activity implements Settings {
 	
 	public void setLanguage(String lang) {
 		setLanguage(Lang.byCode(lang));
+		setLang = lang;
 		// reload Genres Collection
 		GenresCollection.reloadGenresFromResource(this);
 	}

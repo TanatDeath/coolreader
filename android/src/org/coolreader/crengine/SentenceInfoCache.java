@@ -29,6 +29,14 @@ public class SentenceInfoCache {
         }
     }
 
+    public static String writeCache(File sentenceInfoCacheFile, List<SentenceInfo> allSentences) {
+        try{
+            new SentenceInfoCache(sentenceInfoCacheFile).writeCache(allSentences);
+            return "";
+        }catch(Exception e){
+            return "ERROR: could not write sentence info cache file: " + sentenceInfoCacheFile + " " + e;
+        }
+    }
 
     public SentenceInfoCache(File sentenceInfoCacheFile) {
         this.sentenceInfoCacheFile = sentenceInfoCacheFile;

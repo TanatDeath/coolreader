@@ -70,8 +70,7 @@
 /// to avoid showing title/author if coverpage image present
 #define NO_TEXT_IN_COVERPAGE
 
-const char
-		* def_stylesheet =
+static const char* def_stylesheet =
 				"image { text-align: center; text-indent: 0px } \n"
 					"empty-line { height: 1em; } \n"
 					"sub { vertical-align: sub; font-size: 70% }\n"
@@ -104,7 +103,7 @@ const char
 static const char * DEFAULT_FONT_NAME = "Arial, DejaVu Sans"; //Times New Roman";
 static const char * DEFAULT_STATUS_FONT_NAME =
 		"Arial Narrow, Arial, DejaVu Sans"; //Times New Roman";
-static css_font_family_t DEFAULT_FONT_FAMILY = css_ff_sans_serif;
+static const css_font_family_t DEFAULT_FONT_FAMILY = css_ff_sans_serif;
 //    css_ff_serif,
 //    css_ff_sans_serif,
 //    css_ff_cursive,
@@ -7100,7 +7099,9 @@ int LVDocView::onSelectionCommand( int cmd, int param )
     bool moved = false;
     bool makeSelStartVisible = true; // true: start, false: end
     if ( !currSel.isNull() && cmd == DCMD_SELECT_FIRST_SENTENCE
-            && !pageRange->isInside(currSel.getStart()) && !pageRange->isInside(currSel.getEnd()) )
+            && !pageRange->isInside(currSel.getStart())
+            && !pageRange->isInside(currSel.getEnd())
+       )
         currSel.clear();
     if ( currSel.isNull() || currSel.getStart().isNull() ) {
         // select first sentence on page
@@ -7427,6 +7428,7 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
 											   1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 28, 32, 64 };
 	props->limitValueList(PROP_FONT_FINE_EMBOLDEN, int_option_fine_embolding,
 					   sizeof(int_option_fine_embolding) / sizeof(int), 0); // leading zero is default
+	props->limitValueList(PROP_TRIM_INITIAL_PAR_SPACES, bool_options_def_false, 2, 0);
 #ifndef ANDROID
 	props->setBoolDef(PROP_EMBEDDED_STYLES, true);
     props->setBoolDef(PROP_EMBEDDED_FONTS, true);
@@ -7629,6 +7631,12 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
 			if (fineEmbolden != LVRendGetFontFineEmbolden()) {
 				LVRendSetFontFineEmbolden(fineEmbolden);
 				REQUEST_RENDER("propsApply - fineEmbolden")
+			}
+		} else if (name == PROP_TRIM_INITIAL_PAR_SPACES) {
+			bool trim_initial_par_spaces = props->getBoolDef(PROP_TRIM_INITIAL_PAR_SPACES, false);
+			if (trim_initial_par_spaces != LVRendGetTrimInitialParSpaces()) {
+				LVRendSetTrimInitialParSpaces(trim_initial_par_spaces);
+				REQUEST_RENDER("propsApply - trim_initial_par_spaces")
 			}
 		} else if (name == PROP_TXT_OPTION_PREFORMATTED) {
             bool preformatted = props->getBoolDef(PROP_TXT_OPTION_PREFORMATTED,

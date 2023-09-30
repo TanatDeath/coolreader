@@ -15,6 +15,7 @@
 #define PROP_FONT_ITALICIZE          "font.face.italicize"
 #define PROP_FONT_EMBOLDEN_ALG       "font.face.embolden.alg"
 #define PROP_FONT_FINE_EMBOLDEN      "font.face.fine.embolden"
+#define PROP_TRIM_INITIAL_PAR_SPACES "crengine.trim.initial.paragraph.spaces"
 #define PROP_BACKGROUND_COLOR        "background.color.default"
 #define PROP_BACKGROUND_IMAGE        "background.image.filename"
 #define PROP_TXT_OPTION_PREFORMATTED "crengine.file.txt.preformatted"

@@ -99,6 +99,8 @@
     <string name="options_font_embolden_alg0">По умолчанию</string>
     <string name="options_font_embolden_alg1">Через Freetype embolden API</string>
     <string name="options_font_italicize">Курсив (алгоритмически)</string>
+    <string name="options_trim_initial_par_spaces">Удалять пробелы в начале параграфа</string>
+    <string name="options_trim_initial_par_spaces_add_info">У некоторых книг в начале параграфов есть дополнительные пробелы (или неразрывные пробелы) - эта опция позволяет их убрать</string>
     <string name="options_font_antialias">Сглаживание шрифта</string>
     <string name="options_font_antialias_off">Без сглаживания</string>
     <string name="options_font_antialias_on_for_big">Сглаживать большие шрифты (оттенки серого)</string>
@@ -305,6 +307,7 @@
     <string name="options_selection_action_dictionary_list">Список словарей</string>
     <string name="options_selection_action_copy">Копировать</string>
     <string name="copied_to_clipboard">Скопировано в буфер обмена</string>
+    <string name="saved_to">Сохранено в</string>
     <string name="options_app_browser_hide_empty_dirs">Прятать папки без книг</string>
     <string name="options_app_browser_hide_empty_genres">Скрывать жанры без книг</string>
     <string name="dlg_about">О приложении</string>
@@ -700,6 +703,7 @@
     <string name="book_info_book_translator">Переводчик</string>
     <string name="book_info_book_symcount">Статистика - число символов</string>
     <string name="book_info_book_wordcount">Статистика - число слов (примерное)</string>
+    <string name="book_info_save_sentence_info">Сохранить информацию о предложениях - для аудиокниги (в файл .sentenceinfo)</string>
     <string name="book_info_section_book_document">Свойства документа</string>
     <string name="book_info_book_docauthor">Автор документа</string>
     <string name="book_info_book_docprogram">Создан в приложении</string>
@@ -1315,6 +1319,7 @@
     <string name="rpos_cancel">Отмена</string>
     <string name="rpos_now_at">сейчас вы на</string>
     <string name="calc_stats">Рассчитать статистику</string>
+    <string name="save_to_file">Сохранить в файл</string>
     <string name="translated_with_ynd">Переведено сервисом «Яндекс.Переводчик»</string>
     <string name="translate_lang_not_set">Язык(и) не задан(ы) (направления перевода)</string>
     <string name="translate_lang_not_found">Коды языков (языка) не найдены или не поддерживаются (направления перевода)</string>
@@ -2086,5 +2091,6 @@
     <string name="hardware_keys_hint">Нажмите аппаратную кнопку, затем нажмите \'добавить кнопку в список\'</string>
     <string name="add_this_key">Добавить кнопку в список</string>
     <string name="key_already_added">Кнопка уже добавлена</string>
+    <string name="first_sentence_failed">Невозможно выделить первое предложение - страница не содержит текста</string>
 </resources>
 

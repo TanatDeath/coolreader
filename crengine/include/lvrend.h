@@ -181,6 +181,10 @@ int LVRendGetFontEmboldenAlg();
 void LVRendSetFontFineEmbolden( int fineEmbolden );
 /// get global document font style fine embolden
 int LVRendGetFontFineEmbolden();
+/// set global document trim initial paragraph spaces
+void LVRendSetTrimInitialParSpaces( bool trim_initial_par_spaces );
+/// get global document trim initial paragraph spaces
+bool LVRendGetTrimInitialParSpaces();
 /**
  * @brief Set global document base font weight.
  * @param weight base font weight.

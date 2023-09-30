@@ -34,6 +34,8 @@ public interface Settings {
 	String PROP_FONT_EMBOLDEN_ALG       ="font.face.embolden.alg";
 	String PROP_FONT_FINE_EMBOLDEN      ="font.face.fine.embolden";
 	String PROP_FONT_BASE_WEIGHT        ="font.face.base.weight";        // replaces PROP_FONT_WEIGHT_EMBOLDEN ("font.face.weight.embolden")
+	String PROP_TRIM_INITIAL_PAR_SPACES ="crengine.trim.initial.paragraph.spaces";
+
 	String PROP_TXT_OPTION_PREFORMATTED ="crengine.file.txt.preformatted";
     String PROP_LOG_FILENAME            ="crengine.log.filename";
     String PROP_LOG_LEVEL               ="crengine.log.level";

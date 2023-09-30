@@ -22,8 +22,8 @@
 class CRLocaleData
 {
 public:
-    CRLocaleData(const char* langtag);
-    CRLocaleData(const lString8& langtag);
+    explicit CRLocaleData(const char* langtag);
+    explicit CRLocaleData(const lString8& langtag);
     bool isValid() const {
         return m_isValid;
     }

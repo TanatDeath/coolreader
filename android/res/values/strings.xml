@@ -113,6 +113,8 @@
     <string name="options_font_embolden_alg0">Default</string>
     <string name="options_font_embolden_alg1">Freetype embolden API</string>
     <string name="options_font_italicize">Italicize font (algorithmic)</string>
+    <string name="options_trim_initial_par_spaces">Trim initial paragraph spaces</string>
+    <string name="options_trim_initial_par_spaces_add_info">Some book\'s formatting include extra spaces (or non-breaking spaces) in the beginnings of paragraph - this is workaround for this</string>
     <string name="options_font_antialias">Font antialiasing</string>
     <string name="options_font_antialias_off">No antialias</string>
     <string name="options_font_antialias_on_for_big">On for big fonts (shades of gray)</string>
@@ -323,6 +325,7 @@
     <string name="options_selection_action_dictionary_list">Dictionary list</string>
     <string name="options_selection_action_copy">Copy to clipboard</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="saved_to">Saved to</string>
     <string name="options_app_browser_hide_empty_dirs">Hide folders without books</string>
     <string name="options_app_browser_hide_empty_genres">Hide genres without books</string>
     <string name="dlg_about">About</string>
@@ -670,6 +673,7 @@
     <string name="book_info_book_translator">Translator</string>
     <string name="book_info_book_symcount">Stats - symbol count</string>
     <string name="book_info_book_wordcount">Stats - average word count</string>
+    <string name="book_info_save_sentence_info">Save sentence info for audiobook (to .sentenceinfo file)</string>
     <string name="book_info_section_book_document">Document properties</string>
     <string name="book_info_book_docauthor">Document author</string>
     <string name="book_info_book_docprogram">Created in program</string>
@@ -1348,6 +1352,7 @@
     <string name="rpos_cancel">Cancel</string>
     <string name="rpos_now_at">now you at</string>
     <string name="calc_stats">Calculate statistics</string>
+    <string name="save_to_file">Save to file</string>
     <string name="translated_with_ynd">Translated with «Yandex.Translate»</string>
     <string name="translate_lang_not_set">Language(s) not set (translate directions)</string>
     <string name="translate_lang_not_found">Language(s) codes not found or not supported (translate directions)</string>
@@ -2126,4 +2131,5 @@
     <string name="hardware_keys_hint">Press hardware key, then press \'add key to list\'</string>
     <string name="add_this_key">Add key to keylist</string>
     <string name="key_already_added">Key is already added</string>
+    <string name="first_sentence_failed">Cannot select first sentence - this page does not contain text</string>
 </resources>

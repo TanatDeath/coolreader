@@ -1,33 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="ru_RU" sourcelanguage="en">
+<TS version="2.1" language="ru_RU">
 <context>
     <name>AboutDialog</name>
     <message>
-        <source>About CoolReader</source>
-        <translation>CoolReader - О программе</translation>
-    </message>
-    <message>
-        <source>License</source>
-        <translation>Лицензия</translation>
-    </message>
-    <message>
-        <source>Source Code</source>
-        <translation>Исходный код</translation>
-    </message>
-    <message>
-        <source>About</source>
-        <translation>О программе</translation>
-    </message>
-    <message>
-        <source>About Cool Reader</source>
-        <translation>О программе CoolReader</translation>
-    </message>
-    <message>
+        <location filename="../../../build/cr3qt/ui_aboutdlg.h" line="449"/>
         <source>Dialog</source>
-        <translation>Диалог</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_aboutdlg.h" line="451"/>
+        <source>About Cool Reader</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_aboutdlg.h" line="453"/>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -43,29 +30,24 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;ZLib - compressing library&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;libpng - PNG image format support&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;libjpeg - JPEG image format support&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;NanoSVG - SVG image format support&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Hyphenation dictionaries - from AlReader&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Languages character set database by Fontconfig&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;CoolReader это свободная программа с открытым исходным кодом для просмотра електронных книг основана на движке CoolReader.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Исходный код доступен на SourceForge &lt;/span&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt; text-decoration: underline;&quot;&gt;http://sourceforge.net/projects/crengine &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;под лицензией GNU GPL2.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt; text-decoration: underline;&quot;&gt;Использованы следующие компоненты:&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Qt %QT_VER% - библиотека ГПИ&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;FreeType - шрифтовой движок&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;HarfBuzz - кернинг шрифта, лигатуры&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;ZLib - библиотека сжатия&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;libpng - библиотека поддержки изображений формата PNG&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;libjpeg - библиотека поддержки изображений формата JPEG&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Словари переносов - из AlReader&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Набор символов различных письменностей от Fontconfig&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_aboutdlg.h" line="475"/>
+        <source>About</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_aboutdlg.h" line="476"/>
+        <source>License</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_aboutdlg.h" line="477"/>
         <source>Source code may be downloaded from sourceforge crengine project page:
 http://sourceforge.net/projects/crengine/
 
@@ -74,1976 +56,2436 @@ Latest source code is available from GIT repository:
 
 See README.TXT at root directory of project for build instructions.
 </source>
-        <translation>Исходный код доступен на странице проекта crengine:
-http://sourceforge.net/projects/crengine/
-
-Исходный код доступен из GIT репозитория:
-&gt; git clone git://crengine.git.sourceforge.net/gitroot/crengine/crengine
-
-Инструкция по сборке находится в файле README.TXT корневого каталога.
-</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;CoolReader is free open source e-book viewer based on CoolReader engine.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Source code is available at SourceForge &lt;/span&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt; text-decoration: underline;&quot;&gt;http://sourceforge.net/projects/crengine &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;under the terms of GNU GPL2 license.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt; text-decoration: underline;&quot;&gt;Third party components used:&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Qt %QT_VER% - as GUI library&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;FreeType - font engine&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;HarfBuzz - font kerning, ligatures&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;ZLib - compressing library&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;libpng - PNG image format support&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;libjpeg - JPEG image format support&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Hyphenation dictionaries - from AlReader&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;CoolReader это свободная программа с открытым исходным кодом для просмотра електронных книг основана на движке CoolReader.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Исходный код доступен на SourceForge &lt;/span&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt; text-decoration: underline;&quot;&gt;http://sourceforge.net/projects/crengine &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;под лицензией GNU GPL2.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt; text-decoration: underline;&quot;&gt;Использованы следующие компоненты:&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Qt %QT_VER% - библиотека ГПИ&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;FreeType - шрифтовой движок&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;HarfBuzz - кернинг шрифта, лигатуры&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;ZLib - библиотека сжатия&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;libpng - библиотека поддержки изображений формата PNG&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;libjpeg - библиотека поддержки изображений формата JPEG&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Словари переносов - из AlReader&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <location filename="../../../build/cr3qt/ui_aboutdlg.h" line="485"/>
+        <source>Source Code</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Noto Sans&apos;; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;CoolReader is free open source e-book viewer based on CoolReader engine.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Source code is available at SourceForge &lt;/span&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt; text-decoration: underline;&quot;&gt;http://sourceforge.net/projects/crengine &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;under the terms of GNU GPL2 license.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt; text-decoration: underline;&quot;&gt;Third party components used:&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Qt %QT_VER% - as GUI library&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;FreeType - font engine&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;HarfBuzz - font kerning, ligatures&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;ZLib - compressing library&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;libpng - PNG image format support&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;libjpeg - JPEG image format support&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;NanoSVG - SVG image format support&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Hyphenation dictionaries - from AlReader&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Languages character set database by Fontconfig&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Noto Sans&apos;; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;CoolReader это свободная программа с открытым исходным кодом для просмотра електронных книг основана на движке CoolReader.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Исходный код доступен на SourceForge &lt;/span&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt; text-decoration: underline;&quot;&gt;http://sourceforge.net/projects/crengine &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;под лицензией GNU GPL2.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt; text-decoration: underline;&quot;&gt;Использованы следующие компоненты:&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Qt %QT_VER% - библиотека ГПИ&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;FreeType - шрифтовой движок&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;HarfBuzz - кернинг шрифта, лигатуры&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;ZLib - библиотека сжатия&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;libpng - библиотека поддержки изображений формата PNG&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;libjpeg - библиотека поддержки изображений формата JPEG&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;NanoSVG - SVG image format support&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Словари переносов - из AlReader&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;Набор символов различных писменностей от Fontconfig&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;DejaVu Sans&apos;; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <location filename="../aboutdlg.cpp" line="38"/>
+        <source>About CoolReader</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>AddBookmarkDialog</name>
     <message>
-        <source>Add bookmark</source>
-        <translation>Добавить закладку</translation>
-    </message>
-    <message>
-        <source>Correction</source>
-        <translation>Исправление</translation>
-    </message>
-    <message>
-        <source>Bookmark type</source>
-        <translation>Тип закладки</translation>
-    </message>
-    <message>
-        <source>Title</source>
-        <translation>Название</translation>
-    </message>
-    <message>
-        <source>Position</source>
-        <translation>Позиция</translation>
-    </message>
-    <message>
-        <source>Position text</source>
-        <translation>Позиция текста</translation>
-    </message>
-    <message>
-        <source>Comment</source>
-        <translation>Комментарии</translation>
-    </message>
-    <message>
+        <location filename="../../../build/cr3qt/ui_addbookmarkdlg.h" line="120"/>
         <source>Dialog</source>
-        <translation>Диалог</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_addbookmarkdlg.h" line="121"/>
+        <source>Bookmark type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_addbookmarkdlg.h" line="122"/>
+        <location filename="../addbookmarkdlg.cpp" line="35"/>
+        <source>Position</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_addbookmarkdlg.h" line="123"/>
         <source>Page 1/10 10%</source>
-        <translation>Страница 1/10 10%</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_addbookmarkdlg.h" line="124"/>
+        <source>Position text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_addbookmarkdlg.h" line="125"/>
+        <location filename="../addbookmarkdlg.cpp" line="37"/>
+        <location filename="../addbookmarkdlg.cpp" line="111"/>
+        <source>Comment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_addbookmarkdlg.h" line="126"/>
+        <source>Title</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_addbookmarkdlg.h" line="127"/>
         <source>sample title</source>
-        <translation>пример заголовка</translation>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../addbookmarkdlg.cpp" line="30"/>
+        <source>Add bookmark</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../addbookmarkdlg.cpp" line="38"/>
+        <location filename="../addbookmarkdlg.cpp" line="115"/>
+        <source>Correction</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>BookmarkListDialog</name>
     <message>
+        <location filename="../../../build/cr3qt/ui_bookmarklistdlg.h" line="79"/>
+        <source>Dialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_bookmarklistdlg.h" line="80"/>
+        <source>Go to Bookmark</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_bookmarklistdlg.h" line="82"/>
+        <source>Return</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_bookmarklistdlg.h" line="84"/>
+        <source>Remove Bookmark</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_bookmarklistdlg.h" line="86"/>
+        <source>Del</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_bookmarklistdlg.h" line="88"/>
+        <source>Remove ALL Bookmarks</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_bookmarklistdlg.h" line="89"/>
+        <source>Edit Bookmark</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_bookmarklistdlg.h" line="91"/>
+        <source>F4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_bookmarklistdlg.h" line="93"/>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_bookmarklistdlg.h" line="95"/>
+        <source>Esc</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../bookmarklistdlg.cpp" line="29"/>
         <source>Bookmarks</source>
-        <translation>Закладки</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../bookmarklistdlg.cpp" line="32"/>
         <source>Position</source>
-        <translation>Позиция</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../bookmarklistdlg.cpp" line="32"/>
         <source>Type</source>
         <comment>bookmark type</comment>
-        <translation>Тип закладки</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../bookmarklistdlg.cpp" line="32"/>
         <source>Text</source>
-        <translation>Текст</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../bookmarklistdlg.cpp" line="32"/>
         <source>Comment</source>
-        <translation>Комментарии</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../bookmarklistdlg.cpp" line="70"/>
         <source>P</source>
         <comment>Bookmark type first letter - Position</comment>
-        <translation>П</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../bookmarklistdlg.cpp" line="72"/>
         <source>C</source>
         <comment>Bookmark type first letter - Comment</comment>
-        <translation>К</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../bookmarklistdlg.cpp" line="74"/>
         <source>E</source>
         <comment>Bookmark type first letter - Correction/Edit</comment>
-        <translation>И</translation>
-    </message>
-    <message>
-        <source>Go to Bookmark</source>
-        <translation>Перейти к закладке</translation>
-    </message>
-    <message>
-        <source>Remove Bookmark</source>
-        <translation>Удалить закладку</translation>
-    </message>
-    <message>
-        <source>Remove ALL Bookmarks</source>
-        <translation>Удалить все закладки</translation>
-    </message>
-    <message>
-        <source>Edit Bookmark</source>
-        <translation>Редактировать закладку</translation>
-    </message>
-    <message>
-        <source>Close</source>
-        <translation>Закрыть</translation>
-    </message>
-    <message>
-        <source>Dialog</source>
-        <translation>Диалог</translation>
-    </message>
-    <message>
-        <source>Return</source>
-        <translation>Return</translation>
-    </message>
-    <message>
-        <source>Del</source>
-        <translation>Del</translation>
-    </message>
-    <message>
-        <source>F4</source>
-        <translation>F4</translation>
-    </message>
-    <message>
-        <source>Esc</source>
-        <translation>Esc</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>CR3View</name>
     <message>
+        <location filename="../cr3widget.cpp" line="508"/>
         <source>Error while opening document </source>
-        <translation>Ошибка открытия документа </translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Loading: please wait...</source>
-        <translation>Загрузка: подождите...</translation>
-    </message>
-    <message>
+        <location filename="../cr3widget.cpp" line="1178"/>
         <source>Warning</source>
-        <translation>Предупреждение</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../cr3widget.cpp" line="1179"/>
         <source>Font &quot;%1&quot; isn&apos;t compatible with language &quot;%2&quot;. Instead will be used fallback font.</source>
-        <translation>Шрифт &quot;%1&quot; не совместим с языком &quot;%2&quot;. Вместо него будет задействован дополнительный шрифт.</translation>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../cr3widget.cpp" line="1521"/>
+        <source>Loading: please wait...</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>ExportProgressDlg</name>
     <message>
+        <location filename="../../../build/cr3qt/ui_exportprogressdlg.h" line="54"/>
         <source>Dialog</source>
-        <translation>Диалог</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_exportprogressdlg.h" line="55"/>
         <source>Export is in progress...</source>
-        <translation>Идет экспорт...</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>FallbackFontsDialog</name>
     <message>
+        <location filename="../../../build/cr3qt/ui_fallbackfontsdialog.h" line="72"/>
         <source>Fallback fonts</source>
-        <translation>Дополнительные шрифты</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_fallbackfontsdialog.h" line="73"/>
         <source>List of fallback fonts:</source>
-        <translation>Список дополнительных шрифтов:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../fallbackfontsdialog.cpp" line="153"/>
         <source>Remove this fallback font</source>
-        <translation>Удалить этот дополнительный шрифт</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>FilePropsDialog</name>
     <message>
-        <source>Document properties</source>
-        <translation>Свойства документа</translation>
-    </message>
-    <message>
-        <source>Property</source>
-        <translation>Свойство</translation>
-    </message>
-    <message>
-        <source>Value</source>
-        <translation>Значение</translation>
-    </message>
-    <message>
-        <source>Current page</source>
-        <translation>Текущая страница</translation>
-    </message>
-    <message>
-        <source>Total pages</source>
-        <translation>Всего страниц</translation>
-    </message>
-    <message>
-        <source>Battery state</source>
-        <translation>Состояние батареи</translation>
-    </message>
-    <message>
-        <source>Current Time</source>
-        <translation>Текущее время</translation>
-    </message>
-    <message>
-        <source>Current chapter</source>
-        <translation>Глава</translation>
-    </message>
-    <message>
-        <source>Status</source>
-        <translation>Статус</translation>
-    </message>
-    <message>
-        <source>Archive name</source>
-        <translation>Имя файла архива</translation>
-    </message>
-    <message>
-        <source>Archive path</source>
-        <translation>Путь к архиву</translation>
-    </message>
-    <message>
-        <source>Archive size</source>
-        <translation>Размер архива</translation>
-    </message>
-    <message>
-        <source>File name</source>
-        <translation>Имя файла</translation>
-    </message>
-    <message>
-        <source>File path</source>
-        <translation>Путь к файлу</translation>
-    </message>
-    <message>
-        <source>File size</source>
-        <translation>Размер файла</translation>
-    </message>
-    <message>
-        <source>File format</source>
-        <translation>Формат файла</translation>
-    </message>
-    <message>
-        <source>File info</source>
-        <translation>Информация о файле</translation>
-    </message>
-    <message>
-        <source>Title</source>
-        <translation>Название</translation>
-    </message>
-    <message>
-        <source>Author(s)</source>
-        <translation>Автор(ы)</translation>
-    </message>
-    <message>
-        <source>Series name</source>
-        <translation>Серия</translation>
-    </message>
-    <message>
-        <source>Series number</source>
-        <translation>Номер в серии</translation>
-    </message>
-    <message>
-        <source>Date</source>
-        <translation>Дата</translation>
-    </message>
-    <message>
-        <source>Genres</source>
-        <translation>Жанры</translation>
-    </message>
-    <message>
-        <source>Translator</source>
-        <translation>Перевод</translation>
-    </message>
-    <message>
-        <source>Book info</source>
-        <translation>Информация о книге</translation>
-    </message>
-    <message>
-        <source>Document author</source>
-        <translation>Автор документа</translation>
-    </message>
-    <message>
-        <source>Document date</source>
-        <translation>Дата документа</translation>
-    </message>
-    <message>
-        <source>Document source URL</source>
-        <translation>URL исходного документа</translation>
-    </message>
-    <message>
-        <source>OCR by</source>
-        <translation>OCR</translation>
-    </message>
-    <message>
-        <source>Document version</source>
-        <translation>Версия документа</translation>
-    </message>
-    <message>
-        <source>Document info</source>
-        <translation>Информация о документе</translation>
-    </message>
-    <message>
-        <source>Publication name</source>
-        <translation>Название публикации</translation>
-    </message>
-    <message>
-        <source>Publisher</source>
-        <translation>Издательство</translation>
-    </message>
-    <message>
-        <source>Publisher city</source>
-        <translation>Город</translation>
-    </message>
-    <message>
-        <source>Publication year</source>
-        <translation>Год издания</translation>
-    </message>
-    <message>
-        <source>ISBN</source>
-        <translation>ISBN</translation>
-    </message>
-    <message>
-        <source>Publication info</source>
-        <translation>Информация о публикации</translation>
-    </message>
-    <message>
-        <source>Custom info</source>
-        <translation>Прочая информация</translation>
-    </message>
-    <message>
+        <location filename="../../../build/cr3qt/ui_filepropsdlg.h" line="59"/>
         <source>Dialog</source>
-        <translation>Диалог</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../filepropsdlg.cpp" line="20"/>
+        <source>Document properties</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="23"/>
+        <source>Property</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="23"/>
+        <source>Value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="173"/>
+        <source>Current page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="174"/>
+        <source>Total pages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="175"/>
+        <source>Battery state</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="176"/>
+        <source>Current Time</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="181"/>
+        <source>Current chapter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="184"/>
+        <source>Status</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="186"/>
+        <source>Archive name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="187"/>
+        <source>Archive path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="188"/>
+        <source>Archive size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="189"/>
+        <source>File name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="190"/>
+        <source>File path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="191"/>
+        <source>File size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="192"/>
+        <source>File format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="193"/>
+        <source>File info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="195"/>
+        <source>Title</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="196"/>
+        <source>Author(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="197"/>
+        <source>Series name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="198"/>
+        <source>Series number</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="199"/>
+        <source>Date</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="200"/>
+        <source>Genres</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="201"/>
         <source>Language</source>
-        <translation>Язык</translation>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="202"/>
+        <source>Translator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="203"/>
+        <source>Book info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="205"/>
+        <source>Document author</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="206"/>
+        <source>Document date</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="207"/>
+        <source>Document source URL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="208"/>
+        <source>OCR by</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="209"/>
+        <source>Document version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="210"/>
+        <source>Document info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="212"/>
+        <source>Publication name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="213"/>
+        <source>Publisher</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="214"/>
+        <source>Publisher city</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="215"/>
+        <source>Publication year</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="216"/>
+        <source>ISBN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="217"/>
+        <source>Publication info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../filepropsdlg.cpp" line="219"/>
+        <source>Custom info</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>MainWindow</name>
     <message>
-        <source>Open book file</source>
-        <translation>Открыть книгу</translation>
-    </message>
-    <message>
+        <location filename="../mainwindow.cpp" line="190"/>
         <source>Export document to</source>
-        <translation>Экспортировать документ в</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="192"/>
         <source>WOL book (*.wol)</source>
-        <translation>Книга WOL (.wol)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="197"/>
         <source>Export to WOL format</source>
-        <translation>Экспортировать в WOL формат</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="232"/>
+        <source>Open book file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="234"/>
         <source>All supported formats</source>
-        <translation>Все форматы</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="235"/>
         <source>FB2 books</source>
-        <translation>Книги FB2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Text files</source>
-        <translation>Текстовые файлы</translation>
-    </message>
-    <message>
-        <source>Rich text</source>
-        <translation>Текст RTF</translation>
-    </message>
-    <message>
-        <source>MS Word document</source>
-        <translation>Документы MS Word</translation>
-    </message>
-    <message>
-        <source>HTML files</source>
-        <translation>Файлы HTML</translation>
-    </message>
-    <message>
-        <source>EPUB files</source>
-        <translation>Книги EPUB</translation>
-    </message>
-    <message>
-        <source>CHM files</source>
-        <translation>Файлы CHM</translation>
-    </message>
-    <message>
-        <source>MOBI files</source>
-        <translation>Файлы MOBI</translation>
-    </message>
-    <message>
-        <source>PalmDOC files</source>
-        <translation>Файлы PDB/PalmDoc</translation>
-    </message>
-    <message>
-        <source>ZIP archives</source>
-        <translation>Архивы ZIP</translation>
-    </message>
-    <message>
+        <location filename="../mainwindow.cpp" line="236"/>
         <source>FB3 books</source>
-        <translation>Книги FB3</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="237"/>
+        <source>Text files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="238"/>
+        <source>Rich text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="239"/>
+        <source>MS Word document</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="240"/>
         <source>Open Document files</source>
-        <translation type="unfinished">Файлы Open Document</translation>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="241"/>
+        <source>HTML files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="242"/>
+        <source>EPUB files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="243"/>
+        <source>CHM files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="244"/>
+        <source>MOBI files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="245"/>
+        <source>PalmDOC files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="246"/>
+        <source>ZIP archives</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>MainWindowClass</name>
     <message>
-        <source>File</source>
-        <translation>Файл</translation>
-    </message>
-    <message>
-        <source>View</source>
-        <translation>Вид</translation>
-    </message>
-    <message>
-        <source>Navigation</source>
-        <translation>Навигация</translation>
-    </message>
-    <message>
-        <source>Help</source>
-        <translation>Справка</translation>
-    </message>
-    <message>
-        <source>Open...</source>
-        <translation>Открыть...</translation>
-    </message>
-    <message>
-        <source>Open file</source>
-        <translation>Открыть файл</translation>
-    </message>
-    <message>
-        <source>Toggle Pages/Scroll</source>
-        <translation>Переключить вид Страница/Свиток</translation>
-    </message>
-    <message>
-        <source>Close</source>
-        <translation>Закрыть</translation>
-    </message>
-    <message>
-        <source>Minimize</source>
-        <translation>Свернуть</translation>
-    </message>
-    <message>
-        <source>Page Down</source>
-        <translation>На страницу вниз</translation>
-    </message>
-    <message>
-        <source>Page Up</source>
-        <translation>На страницу вверх</translation>
-    </message>
-    <message>
-        <source>Line Down</source>
-        <translation>На строку вниз</translation>
-    </message>
-    <message>
-        <source>Line Up</source>
-        <translation>На строку вверх</translation>
-    </message>
-    <message>
-        <source>First Page</source>
-        <translation>Первая страница</translation>
-    </message>
-    <message>
-        <source>Go to first page</source>
-        <translation>Перейти на первую страницу</translation>
-    </message>
-    <message>
-        <source>Last Page</source>
-        <translation>Последняя страница</translation>
-    </message>
-    <message>
-        <source>End</source>
-        <translation>End</translation>
-    </message>
-    <message>
-        <source>Back</source>
-        <translation>Назад</translation>
-    </message>
-    <message>
-        <source>Forward</source>
-        <translation>Вперед</translation>
-    </message>
-    <message>
-        <source>Next Chapter</source>
-        <translation>Следующая глава</translation>
-    </message>
-    <message>
-        <source>Previous Chapter</source>
-        <translation>Предыдущая глава</translation>
-    </message>
-    <message>
-        <source>Toggle Full Screen</source>
-        <translation>Полно-экранный режим</translation>
-    </message>
-    <message>
-        <source>Toggle Full Screen mode</source>
-        <translation>Полно-экранный режим</translation>
-    </message>
-    <message>
-        <source>Zoom In</source>
-        <translation>Увеличить</translation>
-    </message>
-    <message>
-        <source>Increase font size</source>
-        <translation>Увеличить размер шрифта</translation>
-    </message>
-    <message>
-        <source>Zoom Out</source>
-        <translation>Уменьшить</translation>
-    </message>
-    <message>
-        <source>Decrease font size</source>
-        <translation>Уменьшить размер шрифта</translation>
-    </message>
-    <message>
-        <source>Table of Contents...</source>
-        <translation>Содержание...</translation>
-    </message>
-    <message>
-        <source>Show table of contents</source>
-        <translation>Показать содержание</translation>
-    </message>
-    <message>
-        <source>Recent Books</source>
-        <translation>Последние книги</translation>
-    </message>
-    <message>
-        <source>Show recent books list</source>
-        <translation>Показать список последних книг</translation>
-    </message>
-    <message>
-        <source>Settings...</source>
-        <translation>Настройки...</translation>
-    </message>
-    <message>
-        <source>Settings dialog</source>
-        <translation>Диалог настроек</translation>
-    </message>
-    <message>
-        <source>Copy</source>
-        <translation>Копировать</translation>
-    </message>
-    <message>
-        <source>Copy selected text</source>
-        <translation>Копировать выделение</translation>
-    </message>
-    <message>
-        <source>About Qt</source>
-        <translation>О Qt</translation>
-    </message>
-    <message>
-        <source>About CoolReader</source>
-        <translation>О программе CoolReader</translation>
-    </message>
-    <message>
-        <source>Add Bookmark</source>
-        <translation>Добавить закладку</translation>
-    </message>
-    <message>
-        <source>Add bookmark</source>
-        <translation>Добавить закладку</translation>
-    </message>
-    <message>
-        <source>Bookmark List...</source>
-        <translation>Список закладок...</translation>
-    </message>
-    <message>
-        <source>Show bookmarks list</source>
-        <translation>Показать список закладок</translation>
-    </message>
-    <message>
-        <source>File Properties...</source>
-        <translation>Свойства документа...</translation>
-    </message>
-    <message>
-        <source>Show file properties</source>
-        <translation>Свойства документа</translation>
-    </message>
-    <message>
-        <source>Rotate</source>
-        <translation>Поворот страницы</translation>
-    </message>
-    <message>
-        <source>Find text...</source>
-        <translation>Найти текст...</translation>
-    </message>
-    <message>
-        <source>Find text</source>
-        <translation>Найти текст</translation>
-    </message>
-    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="318"/>
         <source>CoolReader</source>
-        <translation>CoolReader</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="319"/>
+        <source>Open...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="321"/>
+        <source>Open file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="324"/>
         <source>F3</source>
-        <translation>F3</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="326"/>
+        <source>Toggle Pages/Scroll</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="328"/>
         <source>Ctrl+P</source>
-        <translation>Ctrl+P</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="330"/>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="332"/>
         <source>F12</source>
-        <translation>F12</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="334"/>
+        <source>Minimize</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="336"/>
         <source>Esc</source>
-        <translation>Esc</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="338"/>
+        <source>Page Down</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="340"/>
         <source>Go to next page</source>
-        <translation>Перейти на следующую страницу</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="343"/>
         <source>PgDown</source>
-        <translation>PgDown</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="345"/>
+        <source>Page Up</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="347"/>
         <source>Back by page</source>
-        <translation>Назад на страницу</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="350"/>
         <source>PgUp</source>
-        <translation>PgUp</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="352"/>
+        <source>Line Down</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="354"/>
         <source>Forward by one line</source>
-        <translation>Вперед на одну линию</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="357"/>
         <source>Down</source>
-        <translation>Down</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="359"/>
+        <source>Line Up</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="361"/>
         <source>Back by line</source>
-        <translation>Назад на линию</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="364"/>
         <source>Up</source>
-        <translation>Up</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="366"/>
+        <source>First Page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="368"/>
+        <source>Go to first page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="371"/>
         <source>Home</source>
-        <translation>Home</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="373"/>
+        <source>Last Page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="375"/>
         <source>Go to last page</source>
-        <translation>Перейти у последней странице</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="378"/>
+        <source>End</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="380"/>
+        <source>Back</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="382"/>
         <source>Back in navigation history</source>
-        <translation>Назад по истории навигации</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="385"/>
         <source>Backspace</source>
-        <translation>Backspace</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="387"/>
+        <source>Forward</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="389"/>
         <source>Go to the next position in navigation history</source>
-        <translation>Перейти к следующей позиции і истории навигации</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="392"/>
         <source>Shift+Backspace</source>
-        <translation>Shift+Backspace</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="394"/>
+        <source>Next Chapter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="396"/>
         <source>Go to next chapter</source>
-        <translation>Перейти к следующей главе</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="399"/>
         <source>Alt+Down</source>
-        <translation>Alt+Down</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="401"/>
+        <source>Previous Chapter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="403"/>
         <source>Go to previous chapter</source>
-        <translation>Перейти к предыдущей главе</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="406"/>
         <source>Alt+Up</source>
-        <translation>Alt+Up</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="408"/>
+        <source>Toggle Full Screen</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="410"/>
+        <source>Toggle Full Screen mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="413"/>
         <source>Alt+Return</source>
-        <translation>Alt+Return</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="415"/>
+        <source>Zoom In</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="417"/>
+        <source>Increase font size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="420"/>
         <source>+</source>
-        <translation>+</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="422"/>
+        <source>Zoom Out</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="424"/>
+        <source>Decrease font size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="427"/>
         <source>-</source>
-        <translation>-</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="429"/>
+        <source>Table of Contents...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="431"/>
+        <source>Show table of contents</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="434"/>
         <source>F4</source>
-        <translation>F4</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="436"/>
+        <source>Recent Books</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="438"/>
+        <source>Show recent books list</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="441"/>
         <source>F5</source>
-        <translation>F5</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="443"/>
+        <source>Settings...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="445"/>
+        <source>Settings dialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="448"/>
         <source>F9</source>
-        <translation>F9</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="450"/>
+        <source>Copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="452"/>
+        <source>Copy selected text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="455"/>
         <source>Ctrl+C</source>
-        <translation>Ctrl+C</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="457"/>
         <source>copy2</source>
-        <translation>копия2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="459"/>
         <source>Copy alternative shortcut</source>
-        <translation>Копировать альтернативную ссылку</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="462"/>
         <source>Ctrl+Ins</source>
-        <translation>Ctrl+Ins</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="464"/>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="466"/>
+        <source>About Qt</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="468"/>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="470"/>
+        <source>About CoolReader</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="473"/>
         <source>F1</source>
-        <translation>F1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="475"/>
+        <source>Add Bookmark</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="477"/>
+        <source>Add bookmark</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="480"/>
         <source>Ctrl+B</source>
-        <translation>Ctrl+B</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="482"/>
+        <source>Bookmark List...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="484"/>
+        <source>Show bookmarks list</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="487"/>
         <source>F6</source>
-        <translation>F6</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="489"/>
+        <source>File Properties...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="491"/>
+        <source>Show file properties</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="494"/>
         <source>Ctrl+F1</source>
-        <translation>Ctrl+F1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="496"/>
+        <source>Rotate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="498"/>
         <source>Ctrl+R</source>
-        <translation>Ctrl+R</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="500"/>
+        <source>Find text...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="502"/>
+        <source>Find text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="505"/>
         <source>Ctrl+F</source>
-        <translation>Ctrl+F</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Ctrl+E</source>
-        <translation>Ctrl+E</translation>
-    </message>
-    <message>
-        <source>Export</source>
-        <translation>Экспорт</translation>
-    </message>
-    <message>
-        <source>Export document</source>
-        <translation>Экспортировать документ</translation>
-    </message>
-    <message>
-        <source>Ctrl+S</source>
-        <translation>Ctrl+S</translation>
-    </message>
-    <message>
-        <source>Next Page</source>
-        <translation>Следующая страница</translation>
-    </message>
-    <message>
-        <source>Right</source>
-        <translation>Вправо</translation>
-    </message>
-    <message>
-        <source>Previous Page</source>
-        <translation>Предыдущая страница</translation>
-    </message>
-    <message>
-        <source>Left</source>
-        <translation>Влево</translation>
-    </message>
-    <message>
-        <source>Space</source>
-        <translation>Пробел</translation>
-    </message>
-    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="507"/>
         <source>Toggle Edit Mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="509"/>
         <source>Toggle edit mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Next Sentence</source>
-        <translation type="unfinished">Следующее предложение</translation>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="512"/>
+        <source>Ctrl+E</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="514"/>
+        <source>Export</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="516"/>
+        <source>Export document</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="519"/>
+        <source>Ctrl+S</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="521"/>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="523"/>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="535"/>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="537"/>
+        <source>Next Page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="526"/>
+        <source>Right</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="528"/>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="530"/>
+        <source>Previous Page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="533"/>
+        <source>Left</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="540"/>
+        <source>Space</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="542"/>
+        <source>Next Sentence</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="544"/>
         <source>Move selection to next sentence</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="547"/>
         <source>Ctrl+Right</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="549"/>
         <source>actionPrevSentence</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="551"/>
         <source>Select orevious sentence</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="554"/>
         <source>Ctrl+Left</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="556"/>
+        <source>File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="557"/>
+        <source>View</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="558"/>
+        <source>Navigation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_mainwindow.h" line="559"/>
+        <source>Help</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>RecentBooksDlg</name>
     <message>
-        <source>#</source>
-        <translation>№п/п</translation>
-    </message>
-    <message>
-        <source>Author</source>
-        <translation>Автор</translation>
-    </message>
-    <message>
-        <source>Title</source>
-        <translation>Название</translation>
-    </message>
-    <message>
-        <source>Filename</source>
-        <translation>Имя файла</translation>
-    </message>
-    <message>
-        <source>Remove all history items</source>
-        <translation>Очистка списка последних книг</translation>
-    </message>
-    <message>
-        <source>Do you really want to remove all history records?</source>
-        <translation>Вы действительно ходите удалить все записи из списка последних открытых книг?</translation>
-    </message>
-    <message>
+        <location filename="../../../build/cr3qt/ui_recentdlg.h" line="70"/>
         <source>Recent Books</source>
-        <translation>Последние книги</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_recentdlg.h" line="71"/>
         <source>Remove Item</source>
-        <translation>Удалить запись</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>Очистить весь список</translation>
-    </message>
-    <message>
+        <location filename="../../../build/cr3qt/ui_recentdlg.h" line="73"/>
         <source>Del</source>
-        <translation>Del</translation>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_recentdlg.h" line="75"/>
+        <source>Clear All</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../recentdlg.cpp" line="22"/>
+        <source>#</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../recentdlg.cpp" line="22"/>
+        <source>Author</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../recentdlg.cpp" line="22"/>
+        <source>Title</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../recentdlg.cpp" line="22"/>
+        <source>Filename</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../recentdlg.cpp" line="164"/>
+        <source>Remove all history items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../recentdlg.cpp" line="164"/>
+        <source>Do you really want to remove all history records?</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>SearchDialog</name>
     <message>
-        <source>Not found</source>
-        <translation>Не найдено</translation>
-    </message>
-    <message>
-        <source>Search pattern is not found in document</source>
-        <translation>Искомый шаблон не найден в документе</translation>
-    </message>
-    <message>
+        <location filename="../../../build/cr3qt/ui_searchdlg.h" line="115"/>
         <source>Search</source>
-        <translation>Поиск</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_searchdlg.h" line="116"/>
         <source>Text</source>
-        <translation>Текст</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_searchdlg.h" line="117"/>
         <source>Case Sensitive</source>
-        <translation>Чувствительность к регистру</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_searchdlg.h" line="118"/>
         <source>Search forward</source>
-        <translation>Искать вперед</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_searchdlg.h" line="119"/>
         <source>Search backward</source>
-        <translation>Искать назад</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_searchdlg.h" line="120"/>
         <source>Find Next</source>
-        <translation>Найти следующий</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_searchdlg.h" line="121"/>
         <source>Close</source>
-        <translation>Закрыть</translation>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../searchdlg.cpp" line="130"/>
+        <source>Not found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../searchdlg.cpp" line="130"/>
+        <source>Search pattern is not found in document</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>SettingsDlg</name>
     <message>
-        <source>[No hyphenation]</source>
-        <translation>[Без переносов]</translation>
-    </message>
-    <message>
-        <source>[Algorythmic hyphenation]</source>
-        <translation>[Алгоритмические переносы]</translation>
-    </message>
-    <message>
-        <source>The quick brown fox jumps over the lazy dog. </source>
-        <translation>Съешь ещё этих мягких французских булочек! </translation>
-    </message>
-    <message>
-        <source>Text color</source>
-        <translation>Цвет текста</translation>
-    </message>
-    <message>
-        <source>Background color</source>
-        <translation>Цвет фона</translation>
-    </message>
-    <message>
-        <source>Page header text color</source>
-        <translation>Цвет колонтитула</translation>
-    </message>
-    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1406"/>
         <source>Settings</source>
-        <translation>Настройки</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1408"/>
         <source>Window options</source>
-        <translation>Настройки окна</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Window</source>
-        <translation>Окно</translation>
-    </message>
-    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1413"/>
         <source>Look &amp; feel</source>
-        <translation>Стиль интерфейса</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1414"/>
         <source>Startup action</source>
-        <translation>Действие при старте</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1415"/>
         <source>Open recent book</source>
-        <translation>Открыть последнюю книгу</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1416"/>
         <source>Show list of recent books</source>
-        <translation>Показать список последних книг</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1417"/>
         <source>Show File Open dialog</source>
-        <translation>Показать диалог открытия файла</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1418"/>
         <source>Do nothing</source>
-        <translation>Ничего не делать</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1420"/>
         <source>Controls</source>
-        <translation>Управление</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1421"/>
         <source>Show toolbar</source>
-        <translation>Показать панель инструментов</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1422"/>
         <source>Show menu</source>
-        <translation>Показать меню</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1423"/>
         <source>Show scroll bar</source>
-        <translation>Показать полосу прокрутки</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1424"/>
         <source>Show status bar</source>
-        <translation>Показать строку состояния</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1425"/>
         <source>Fullscreen display</source>
-        <translation>Полно-экранный режим</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Page</source>
-        <translation>Страница</translation>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1426"/>
+        <source>Window</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1427"/>
         <source>One page</source>
-        <translation>Одна страница</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1428"/>
         <source>Two pages</source>
-        <translation>Две страницы</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1429"/>
         <source>Scroll View</source>
-        <translation>Свиток</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1431"/>
         <source>Vew Mode</source>
-        <translation>Режим просмотра</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1432"/>
         <source>Page margins</source>
-        <translation>Отступы страницы</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Show page header</source>
-        <translation>Показывать заголовок страницы</translation>
-    </message>
-    <message>
-        <source>Book name</source>
-        <translation>Название книги</translation>
-    </message>
-    <message>
-        <source>Clock</source>
-        <translation>Часы</translation>
-    </message>
-    <message>
-        <source>Battery status</source>
-        <translation>Состояние батареи</translation>
-    </message>
-    <message>
-        <source>Header font</source>
-        <translation>Шрифт заголовка</translation>
-    </message>
-    <message>
-        <source>Change</source>
-        <translation>Изменить</translation>
-    </message>
-    <message>
-        <source>Show footnotes at bottom of page</source>
-        <translation>Показывать сноски внизу страницы</translation>
-    </message>
-    <message>
-        <source>Styles</source>
-        <translation>Стили</translation>
-    </message>
-    <message>
-        <source>Text font</source>
-        <translation>Шрифт текста</translation>
-    </message>
-    <message>
-        <source>Hyphenation</source>
-        <translation>Переносы</translation>
-    </message>
-    <message>
-        <source>Interline spacing</source>
-        <translation>Междустрочный интервал</translation>
-    </message>
-    <message>
-        <source>Page skin</source>
-        <translation>Стиль страницы</translation>
-    </message>
-    <message>
-        <source>Sample</source>
-        <translation>Образец</translation>
-    </message>
-    <message>
-        <source>.TXT files</source>
-        <translation>.TXT файлы</translation>
-    </message>
-    <message>
-        <source>Disable automatic formatting</source>
-        <translation>Отключить авто форматирование</translation>
-    </message>
-    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1433"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1482"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1491"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1501"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1511"/>
+        <location filename="../settings.cpp" line="521"/>
+        <location filename="../settings.cpp" line="562"/>
         <source>0</source>
-        <translation>0</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>5</source>
-        <translation>5</translation>
-    </message>
-    <message>
-        <source>8</source>
-        <translation>8</translation>
-    </message>
-    <message>
-        <source>10</source>
-        <translation>10</translation>
-    </message>
-    <message>
-        <source>15</source>
-        <translation>15</translation>
-    </message>
-    <message>
-        <source>20</source>
-        <translation>20</translation>
-    </message>
-    <message>
-        <source>25</source>
-        <translation>25</translation>
-    </message>
-    <message>
-        <source>30</source>
-        <translation>30</translation>
-    </message>
-    <message>
-        <source>Default paragraph style</source>
-        <translation>Стиль параграфа</translation>
-    </message>
-    <message>
-        <source>Title</source>
-        <translation>Заголовок</translation>
-    </message>
-    <message>
-        <source>Subtitle</source>
-        <translation>Подзаголовок</translation>
-    </message>
-    <message>
-        <source>Preformatted text</source>
-        <translation>Пред-форматированный текст</translation>
-    </message>
-    <message>
-        <source>Link</source>
-        <translation>Ссылка</translation>
-    </message>
-    <message>
-        <source>Cite / quotation</source>
-        <translation>Цитата</translation>
-    </message>
-    <message>
-        <source>Epigraph</source>
-        <translation>Эпиграф</translation>
-    </message>
-    <message>
-        <source>Poem</source>
-        <translation>Поэма</translation>
-    </message>
-    <message>
-        <source>Text author</source>
-        <translation>Автор текста</translation>
-    </message>
-    <message>
-        <source>Footnote link</source>
-        <translation>Ссылка на сноску</translation>
-    </message>
-    <message>
-        <source>Footnote</source>
-        <translation>Сноска</translation>
-    </message>
-    <message>
-        <source>Footnote title</source>
-        <translation>Заголовок сноски</translation>
-    </message>
-    <message>
-        <source>Annotation</source>
-        <translation>Аннотация</translation>
-    </message>
-    <message>
-        <source>-</source>
-        <translation>-</translation>
-    </message>
-    <message>
-        <source>Justify</source>
-        <translation>Выравнивание</translation>
-    </message>
-    <message>
-        <source>Left</source>
-        <translation>Слева</translation>
-    </message>
-    <message>
-        <source>Center</source>
-        <translation>По центру</translation>
-    </message>
-    <message>
-        <source>Right</source>
-        <translation>Справа</translation>
-    </message>
-    <message>
-        <source>No indent</source>
-        <translation>Без отступа</translation>
-    </message>
-    <message>
-        <source>Small Indent</source>
-        <translation>Маленький отступ</translation>
-    </message>
-    <message>
-        <source>Big Indent</source>
-        <translation>Большой отступ</translation>
-    </message>
-    <message>
-        <source>Small Outdent</source>
-        <translation>Маленький выступ</translation>
-    </message>
-    <message>
-        <source>Big Outdent</source>
-        <translation>Большой выступ</translation>
-    </message>
-    <message>
-        <source>20% of line height</source>
-        <translation>20% от высоты строки</translation>
-    </message>
-    <message>
-        <source>30% of line height</source>
-        <translation>30% от высоты строки</translation>
-    </message>
-    <message>
-        <source>50% of line height</source>
-        <translation>50% от высоты строки</translation>
-    </message>
-    <message>
-        <source>100% of line height</source>
-        <translation>100% от высоты строки</translation>
-    </message>
-    <message>
-        <source>150% of line height</source>
-        <translation>150% от высоты строки</translation>
-    </message>
-    <message>
-        <source>200% of line height</source>
-        <translation>200% от высоты строки</translation>
-    </message>
-    <message>
-        <source>400% of line height</source>
-        <translation>400% от высоты строки</translation>
-    </message>
-    <message>
-        <source>5% of line width</source>
-        <translation>5% от ширины строки</translation>
-    </message>
-    <message>
-        <source>10% of line width</source>
-        <translation>10% от ширины строки</translation>
-    </message>
-    <message>
-        <source>15% of line width</source>
-        <translation>15% от ширины строки</translation>
-    </message>
-    <message>
-        <source>20% of line width</source>
-        <translation>20% от ширины строки</translation>
-    </message>
-    <message>
-        <source>30% of line width</source>
-        <translation>30% от ширины строки</translation>
-    </message>
-    <message>
-        <source>Normal</source>
-        <translation>Обычный</translation>
-    </message>
-    <message>
-        <source>Bold</source>
-        <translation>Полужирный</translation>
-    </message>
-    <message>
-        <source>Bolder</source>
-        <translation>Жирный</translation>
-    </message>
-    <message>
-        <source>Lighter</source>
-        <translation>Тонкий</translation>
-    </message>
-    <message>
-        <source>Increase: 110%</source>
-        <translation>Увеличить: 110%</translation>
-    </message>
-    <message>
-        <source>Increase: 120%</source>
-        <translation>Увеличить: 120%</translation>
-    </message>
-    <message>
-        <source>Increase: 150%</source>
-        <translation>Увеличить: 150%</translation>
-    </message>
-    <message>
-        <source>Decrease: 90%</source>
-        <translation>Уменьшить: 90%</translation>
-    </message>
-    <message>
-        <source>Decrease: 80%</source>
-        <translation>Уменьшить: 80%</translation>
-    </message>
-    <message>
-        <source>Decrease: 70%</source>
-        <translation>Уменьшить: 70%</translation>
-    </message>
-    <message>
-        <source>Decrease: 60%</source>
-        <translation>Уменьшить: 60%</translation>
-    </message>
-    <message>
-        <source>Italic</source>
-        <translation>Курсив</translation>
-    </message>
-    <message>
-        <source>[Default Sans Serif]</source>
-        <translation>[рубленый шрифт без засечек]</translation>
-    </message>
-    <message>
-        <source>[Default Serif]</source>
-        <translation>[рубленый шрифт с засечками]</translation>
-    </message>
-    <message>
-        <source>[Default Monospace]</source>
-        <translation>[моноширинный шрифт]</translation>
-    </message>
-    <message>
-        <source>Black</source>
-        <translation>Чёрный</translation>
-    </message>
-    <message>
-        <source>Green</source>
-        <translation>Зелёный</translation>
-    </message>
-    <message>
-        <source>Silver</source>
-        <translation>Серебристый</translation>
-    </message>
-    <message>
-        <source>Lime</source>
-        <translation>Лимоновый</translation>
-    </message>
-    <message>
-        <source>Gray</source>
-        <translation>Серый</translation>
-    </message>
-    <message>
-        <source>Olive</source>
-        <translation>Оливковый</translation>
-    </message>
-    <message>
-        <source>White</source>
-        <translation>Белый</translation>
-    </message>
-    <message>
-        <source>Yellow</source>
-        <translation>Жёлтый</translation>
-    </message>
-    <message>
-        <source>Maroon</source>
-        <translation>Каштановый</translation>
-    </message>
-    <message>
-        <source>Navy</source>
-        <translation>Темно-синий</translation>
-    </message>
-    <message>
-        <source>Red</source>
-        <translation>Красный</translation>
-    </message>
-    <message>
-        <source>Blue</source>
-        <translation>Синий</translation>
-    </message>
-    <message>
-        <source>Purple</source>
-        <translation>Пурпурный</translation>
-    </message>
-    <message>
-        <source>Teal</source>
-        <translation>Сине-зелёный</translation>
-    </message>
-    <message>
-        <source>Fuchsia</source>
-        <translation>Фуксия</translation>
-    </message>
-    <message>
-        <source>Aqua</source>
-        <translation>Зеленовато-голубой</translation>
-    </message>
-    <message>
-        <source>None</source>
-        <translation>Нет</translation>
-    </message>
-    <message>
-        <source>Underline</source>
-        <translation>Подчеркнутый</translation>
-    </message>
-    <message>
-        <source>Line through</source>
-        <translation>Перечеркнутый</translation>
-    </message>
-    <message>
-        <source>Overline</source>
-        <translation>Надчеркнутый</translation>
-    </message>
-    <message>
-        <source>Baseline</source>
-        <translation>По снованию</translation>
-    </message>
-    <message>
-        <source>Subscript</source>
-        <translation>Нижний индекс</translation>
-    </message>
-    <message>
-        <source>Superscript</source>
-        <translation>Верхний индекс</translation>
-    </message>
-    <message>
-        <source>Floating punctuation</source>
-        <translation>Висячая пунктуация</translation>
-    </message>
-    <message>
-        <source>Enable floating punctuation</source>
-        <translation>Разрешить висячую пунктуацию</translation>
-    </message>
-    <message>
-        <source>0.3</source>
-        <translation>0.3</translation>
-    </message>
-    <message>
-        <source>0.35</source>
-        <translation>0.35</translation>
-    </message>
-    <message>
-        <source>0.4</source>
-        <translation>0.4</translation>
-    </message>
-    <message>
-        <source>0.45</source>
-        <translation>0.45</translation>
-    </message>
-    <message>
-        <source>0.5</source>
-        <translation>0.5</translation>
-    </message>
-    <message>
-        <source>0.55</source>
-        <translation>0.55</translation>
-    </message>
-    <message>
-        <source>0.6</source>
-        <translation>0.6</translation>
-    </message>
-    <message>
-        <source>0.65</source>
-        <translation>0.65</translation>
-    </message>
-    <message>
-        <source>0.7</source>
-        <translation>0.7</translation>
-    </message>
-    <message>
-        <source>0.75</source>
-        <translation>0.75</translation>
-    </message>
-    <message>
-        <source>0.8</source>
-        <translation>0.8</translation>
-    </message>
-    <message>
-        <source>0.85</source>
-        <translation>0.85</translation>
-    </message>
-    <message>
-        <source>0.9</source>
-        <translation>0.9</translation>
-    </message>
-    <message>
-        <source>0.95</source>
-        <translation>0.95</translation>
-    </message>
-    <message>
-        <source>0.98</source>
-        <translation>0.98</translation>
-    </message>
-    <message>
-        <source>1.0</source>
-        <translation>1.0</translation>
-    </message>
-    <message>
-        <source>1.02</source>
-        <translation>1.02</translation>
-    </message>
-    <message>
-        <source>1.05</source>
-        <translation>1.05</translation>
-    </message>
-    <message>
-        <source>1.1</source>
-        <translation>1.1</translation>
-    </message>
-    <message>
-        <source>1.15</source>
-        <translation>1.15</translation>
-    </message>
-    <message>
-        <source>1.2</source>
-        <translation>1.2</translation>
-    </message>
-    <message>
-        <source>1.25</source>
-        <translation>1.25</translation>
-    </message>
-    <message>
-        <source>1.3</source>
-        <translation>1.3</translation>
-    </message>
-    <message>
-        <source>1.35</source>
-        <translation>1.35</translation>
-    </message>
-    <message>
-        <source>1.4</source>
-        <translation>1.4</translation>
-    </message>
-    <message>
-        <source>1.45</source>
-        <translation>1.45</translation>
-    </message>
-    <message>
-        <source>1.5</source>
-        <translation>1.5</translation>
-    </message>
-    <message>
-        <source>1.6</source>
-        <translation>1.6</translation>
-    </message>
-    <message>
-        <source>1.7</source>
-        <translation>1.7</translation>
-    </message>
-    <message>
-        <source>1.8</source>
-        <translation>1.8</translation>
-    </message>
-    <message>
-        <source>1.9</source>
-        <translation>1.9</translation>
-    </message>
-    <message>
-        <source>Font Gamma</source>
-        <translation>Гамма шрифта</translation>
-    </message>
-    <message>
-        <source>Font hinting</source>
-        <translation>Хинтинг</translation>
-    </message>
-    <message>
-        <source>No hinting</source>
-        <translation>Без хинтинга</translation>
-    </message>
-    <message>
-        <source>Use bytecode</source>
-        <translation>Использовать байт-код</translation>
-    </message>
-    <message>
-        <source>Autohinting</source>
-        <translation>Автохинтинг</translation>
-    </message>
-    <message>
-        <source>Fallback fonts</source>
-        <translation>Дополнительные шрифты</translation>
-    </message>
-    <message>
-        <source>Enable document internal styles</source>
-        <translation>Разрешить встроенные стили</translation>
-    </message>
-    <message>
-        <source>Internal CSS</source>
-        <translation>Внутренние таблицы стилей</translation>
-    </message>
-    <message>
-        <source>Enable document embedded fonts</source>
-        <translation>Разрешить встроенные шрифты</translation>
-    </message>
-    <message>
-        <source>.EPUB</source>
-        <translation>Для файлов .EPUB</translation>
-    </message>
-    <message>
-        <source>Alignment</source>
-        <translation>Выравнивание</translation>
-    </message>
-    <message>
-        <source>First line</source>
-        <translation>Первая строка</translation>
-    </message>
-    <message>
-        <source>Font size</source>
-        <translation>Размер шрифта</translation>
-    </message>
-    <message>
-        <source>Font face</source>
-        <translation>Начертание шрифта</translation>
-    </message>
-    <message>
-        <source>Font weight</source>
-        <translation>Насыщенность шрифта</translation>
-    </message>
-    <message>
-        <source>Font style</source>
-        <translation>Стиль шрифта</translation>
-    </message>
-    <message>
-        <source>Font color</source>
-        <translation>Цвет шрифта</translation>
-    </message>
-    <message>
-        <source>Margins:</source>
-        <translation>Отступы:</translation>
-    </message>
-    <message>
-        <source>Before</source>
-        <translation>Перед</translation>
-    </message>
-    <message>
-        <source>After</source>
-        <translation>После</translation>
-    </message>
-    <message>
-        <source>Interline space</source>
-        <translation>Междустрочный интервал</translation>
-    </message>
-    <message>
-        <source>Text decoration</source>
-        <translation>Оформление текста</translation>
-    </message>
-    <message>
-        <source>Vertical align</source>
-        <translation>Вертикальное выравнивание</translation>
-    </message>
-    <message>
-        <source>Stylesheet</source>
-        <translation>Таблицы стилей</translation>
-    </message>
-    <message>
-        <source>Selection color</source>
-        <translation>Цвет выделения</translation>
-    </message>
-    <message>
-        <source>Comment bookmark color</source>
-        <translation>Цвет комментариев</translation>
-    </message>
-    <message>
-        <source>Correction bookmark color</source>
-        <translation>Цвет исправлений</translation>
-    </message>
-    <message>
-        <source>Comment color</source>
-        <translation>Цвет комментариев</translation>
-    </message>
-    <message>
-        <source>Correction color</source>
-        <translation>Цвет исправлений</translation>
-    </message>
-    <message>
-        <source>Bookmark highlight</source>
-        <translation>Подсветка закладок</translation>
-    </message>
-    <message>
-        <source>Disabled</source>
-        <translation>Отключить</translation>
-    </message>
-    <message>
-        <source>Solid fill</source>
-        <translation>Цвет фона</translation>
-    </message>
-    <message>
-        <source>Inline images zoom in</source>
-        <translation>Инлайн картинки, увеличение</translation>
-    </message>
-    <message>
-        <source>Integer scale</source>
-        <translation>В целое число раз</translation>
-    </message>
-    <message>
-        <source>Arbitrary scale</source>
-        <translation>Произвольный масштаб</translation>
-    </message>
-    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1434"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1483"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1492"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1502"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1512"/>
         <source>1</source>
-        <translation>х1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1435"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1484"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1493"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1503"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1513"/>
         <source>2</source>
-        <translation>х2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1436"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1485"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1494"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1504"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1514"/>
         <source>3</source>
-        <translation>х3</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Block images zoom in</source>
-        <translation>Обычные картинки, увеличеие</translation>
-    </message>
-    <message>
-        <source>Block images zoom out</source>
-        <translation>Обычные картинки, уменьшение</translation>
-    </message>
-    <message>
-        <source>Inline images zoom out</source>
-        <translation>Инлайн картинки, уменьшение</translation>
-    </message>
-    <message>
-        <source>Image scaling options</source>
-        <translation>Масштабирование картинок</translation>
-    </message>
-    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1437"/>
         <source>4</source>
-        <translation type="unfinished">4</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1438"/>
+        <source>5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1439"/>
         <source>6</source>
-        <translation type="unfinished">6</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1440"/>
         <source>7</source>
-        <translation type="unfinished">7</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1441"/>
+        <source>8</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1442"/>
         <source>9</source>
-        <translation type="unfinished">9</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1443"/>
+        <source>10</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1444"/>
         <source>11</source>
-        <translation type="unfinished">11</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1445"/>
         <source>12</source>
-        <translation type="unfinished">12</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1446"/>
+        <source>15</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1447"/>
+        <source>20</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1448"/>
+        <source>25</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1449"/>
+        <source>30</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1450"/>
         <source>40</source>
-        <translation type="unfinished">40</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1451"/>
         <source>50</source>
-        <translation type="unfinished">50</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1452"/>
         <source>60</source>
-        <translation type="unfinished">60</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Font kerning</source>
-        <translation>Кернинг шрифта</translation>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1454"/>
+        <source>Show page header</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Enable font kerning</source>
-        <translation>Разрешить кернинг шрифта</translation>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1455"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1602"/>
+        <location filename="../settings.cpp" line="733"/>
+        <source>None</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1456"/>
+        <source>Page header</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1457"/>
+        <source>Page footer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1459"/>
+        <source>Book name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1460"/>
+        <source>Clock</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1461"/>
+        <source>Battery status</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1462"/>
+        <source>Header font</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1463"/>
+        <location filename="../settings.cpp" line="953"/>
+        <source>Page header text color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1464"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1467"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1469"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1471"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1520"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1524"/>
+        <source>Change</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1465"/>
+        <source>Show footnotes at bottom of page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1466"/>
+        <location filename="../settings.cpp" line="1218"/>
+        <source>Selection color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1468"/>
+        <source>Comment color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1470"/>
+        <source>Correction color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1472"/>
+        <source>Bookmark highlight</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1473"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1478"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1487"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1497"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1507"/>
+        <source>Disabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1474"/>
+        <source>Solid fill</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1475"/>
+        <location filename="../settings.cpp" line="734"/>
+        <source>Underline</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1477"/>
+        <source>Inline images zoom in</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1479"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1488"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1498"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1508"/>
+        <source>Integer scale</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1480"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1489"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1499"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1509"/>
+        <source>Arbitrary scale</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1496"/>
+        <source>Block images zoom in</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1506"/>
+        <source>Block images zoom out</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1516"/>
+        <source>Inline images zoom out</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1517"/>
+        <source>Image scaling options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1518"/>
+        <source>Page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1519"/>
+        <location filename="../settings.cpp" line="943"/>
+        <source>Text color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1521"/>
+        <source>Text font</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1522"/>
+        <source>Page skin</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1523"/>
+        <location filename="../settings.cpp" line="948"/>
+        <source>Background color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1525"/>
         <source>Rendering flags</source>
-        <translation>Флаги рендеринга</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1526"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1532"/>
         <source>Legacy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1527"/>
         <source>Flat</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1528"/>
         <source>Book</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1529"/>
         <source>Web (Full)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1531"/>
         <source>DOM level:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1533"/>
         <source>Newest</source>
-        <translation type="unfinished">Самый новый</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1535"/>
         <source>Multi languages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1536"/>
         <source>Support for multilingual documents</source>
-        <translation>Поддержка мультиязычных документов</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Manage...</source>
-        <translation>Настроить...</translation>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1537"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1596"/>
+        <source>Hyphenation</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1538"/>
+        <source>Font Gamma</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1539"/>
+        <source>0.3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1540"/>
+        <source>0.35</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1541"/>
+        <source>0.4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1542"/>
+        <source>0.45</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1543"/>
+        <source>0.5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1544"/>
+        <source>0.55</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1545"/>
+        <source>0.6</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1546"/>
+        <source>0.65</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1547"/>
+        <source>0.7</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1548"/>
+        <source>0.75</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1549"/>
+        <source>0.8</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1550"/>
+        <source>0.85</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1551"/>
+        <source>0.9</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1552"/>
+        <source>0.95</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1553"/>
+        <source>0.98</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1554"/>
+        <source>1.0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1555"/>
+        <source>1.02</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1556"/>
+        <source>1.05</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1557"/>
+        <source>1.1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1558"/>
+        <source>1.15</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1559"/>
+        <source>1.2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1560"/>
+        <source>1.25</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1561"/>
+        <source>1.3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1562"/>
+        <source>1.35</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1563"/>
+        <source>1.4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1564"/>
+        <source>1.45</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1565"/>
+        <source>1.5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1566"/>
+        <source>1.6</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1567"/>
+        <source>1.7</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1568"/>
+        <source>1.8</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1569"/>
+        <source>1.9</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1571"/>
+        <source>Font hinting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1572"/>
+        <source>No hinting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1573"/>
+        <source>Use bytecode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1574"/>
+        <source>Autohinting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1576"/>
         <source>Text Shaping</source>
-        <translation>Формировщик текста</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1577"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1581"/>
         <source>Simple (FreeType only, fastest)</source>
-        <translation>Простой (FreeType only, быстрый)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1578"/>
         <source>Light (HarfBuzz without ligatures)</source>
-        <translation>Легкий (HarfBuzz, без лигатур)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1579"/>
         <source>Full (HarfBuzz with ligatures)</source>
-        <translation>Полный (HarfBuzz, с лигатурами)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Enable hyphenation</source>
-        <translation>Разрешить переносы</translation>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1582"/>
+        <source>Interline spacing</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Page header</source>
-        <translation>верхний колонтитул страницы</translation>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1583"/>
+        <source>Font kerning</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Page footer</source>
-        <translation>нижний колонтитул страницы</translation>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1584"/>
+        <source>Enable font kerning</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1585"/>
+        <source>Floating punctuation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1586"/>
+        <source>Enable floating punctuation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1587"/>
+        <source>Internal CSS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1588"/>
+        <source>Enable document internal styles</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1589"/>
+        <source>.EPUB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1590"/>
+        <source>Enable document embedded fonts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1591"/>
         <source>Internal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1592"/>
         <source>Ignore document margins</source>
-        <translation>Игнорировать отступы документа</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1593"/>
+        <source>.TXT files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1594"/>
+        <source>Disable automatic formatting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1595"/>
+        <source>Sample</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1597"/>
+        <source>Enable hyphenation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1598"/>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1616"/>
+        <source>Font weight</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1599"/>
+        <source>Fallback fonts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1600"/>
+        <source>Manage...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1601"/>
         <source>Antialiasing</source>
-        <translation>Сглаживание</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1603"/>
+        <location filename="../settings.cpp" line="677"/>
+        <source>Gray</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1604"/>
         <source>LCD (RGB)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1605"/>
         <source>LCD (BGR)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1606"/>
         <source>LCD (RGB) vertical</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1607"/>
         <source>LCD (BGR) vertical</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1609"/>
+        <source>Styles</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1610"/>
+        <location filename="../settings.cpp" line="382"/>
+        <source>Default paragraph style</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1612"/>
+        <source>Alignment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1613"/>
+        <source>First line</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1614"/>
+        <source>Font size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1615"/>
+        <source>Font face</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1617"/>
+        <source>Font style</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1618"/>
+        <source>Font color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1619"/>
+        <source>Margins:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1620"/>
+        <source>Before</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1621"/>
+        <source>After</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1622"/>
+        <location filename="../settings.cpp" line="470"/>
+        <source>Left</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1623"/>
+        <location filename="../settings.cpp" line="472"/>
+        <source>Right</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1624"/>
+        <source>Interline space</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1625"/>
+        <source>Text decoration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1626"/>
+        <source>Vertical align</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../../build/cr3qt/ui_settings.h" line="1627"/>
+        <source>Stylesheet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="350"/>
+        <source>[No hyphenation]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="352"/>
+        <source>[Algorythmic hyphenation]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="376"/>
+        <source>The quick brown fox jumps over the lazy dog. </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="383"/>
+        <source>Title</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="384"/>
+        <source>Subtitle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="385"/>
+        <source>Preformatted text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="386"/>
+        <source>Link</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="387"/>
+        <source>Cite / quotation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="388"/>
+        <source>Epigraph</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="389"/>
+        <source>Poem</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="390"/>
+        <source>Text author</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="391"/>
+        <source>Footnote link</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="392"/>
+        <source>Footnote</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="393"/>
+        <source>Footnote title</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="394"/>
+        <source>Annotation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="468"/>
+        <location filename="../settings.cpp" line="487"/>
+        <location filename="../settings.cpp" line="520"/>
+        <location filename="../settings.cpp" line="561"/>
+        <location filename="../settings.cpp" line="590"/>
+        <location filename="../settings.cpp" line="610"/>
+        <location filename="../settings.cpp" line="628"/>
+        <location filename="../settings.cpp" line="672"/>
+        <location filename="../settings.cpp" line="732"/>
+        <location filename="../settings.cpp" line="748"/>
+        <source>-</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="469"/>
+        <source>Justify</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="471"/>
+        <source>Center</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="488"/>
+        <source>No indent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="489"/>
+        <source>Small Indent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="490"/>
+        <source>Big Indent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="491"/>
+        <source>Small Outdent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="492"/>
+        <source>Big Outdent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="522"/>
+        <source>20% of line height</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="523"/>
+        <source>30% of line height</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="524"/>
+        <location filename="../settings.cpp" line="563"/>
+        <source>50% of line height</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="525"/>
+        <location filename="../settings.cpp" line="564"/>
+        <source>100% of line height</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="526"/>
+        <location filename="../settings.cpp" line="565"/>
+        <source>150% of line height</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="566"/>
+        <source>200% of line height</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="567"/>
+        <source>400% of line height</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="568"/>
+        <source>5% of line width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="569"/>
+        <source>10% of line width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="570"/>
+        <source>15% of line width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="571"/>
+        <source>20% of line width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="572"/>
+        <source>30% of line width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="591"/>
+        <location filename="../settings.cpp" line="629"/>
+        <source>Normal</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="592"/>
+        <source>Bold</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="593"/>
+        <source>Bolder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="594"/>
+        <source>Lighter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="611"/>
+        <source>Increase: 110%</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="612"/>
+        <source>Increase: 120%</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="613"/>
+        <source>Increase: 150%</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="614"/>
+        <source>Decrease: 90%</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="615"/>
+        <source>Decrease: 80%</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="616"/>
+        <source>Decrease: 70%</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="617"/>
+        <source>Decrease: 60%</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="630"/>
+        <source>Italic</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="638"/>
+        <source>[Default Sans Serif]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="640"/>
+        <source>[Default Serif]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="642"/>
+        <source>[Default Monospace]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="673"/>
+        <source>Black</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="674"/>
+        <source>Green</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="675"/>
+        <source>Silver</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="676"/>
+        <source>Lime</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="678"/>
+        <source>Olive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="679"/>
+        <source>White</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="680"/>
+        <source>Yellow</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="681"/>
+        <source>Maroon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="682"/>
+        <source>Navy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="683"/>
+        <source>Red</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="684"/>
+        <source>Blue</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="685"/>
+        <source>Purple</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="686"/>
+        <source>Teal</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="687"/>
+        <source>Fuchsia</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="688"/>
+        <source>Aqua</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="735"/>
+        <source>Line through</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="736"/>
+        <source>Overline</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="749"/>
+        <source>Baseline</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="750"/>
+        <source>Subscript</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="751"/>
+        <source>Superscript</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="1058"/>
         <source>synthetic*</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../settings.cpp" line="1060"/>
         <source>synthetic</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="1223"/>
+        <source>Comment bookmark color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings.cpp" line="1228"/>
+        <source>Correction bookmark color</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>TocDlg</name>
     <message>
-        <source>Title</source>
-        <translation>Название</translation>
-    </message>
-    <message>
-        <source>Page</source>
-        <translation>Страница</translation>
-    </message>
-    <message>
+        <location filename="../../../build/cr3qt/ui_tocdlg.h" line="66"/>
         <source>Table of Contents</source>
-        <translation>Содержание</translation>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tocdlg.cpp" line="58"/>
+        <source>Title</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tocdlg.cpp" line="58"/>
+        <source>Page</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>WolExportDlg</name>
     <message>
+        <location filename="../../../build/cr3qt/ui_wolexportdlg.h" line="88"/>
         <source>Dialog</source>
-        <translation>Диалог</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_wolexportdlg.h" line="89"/>
         <source>Bits per pixel</source>
-        <translation>Бит на пиксель</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_wolexportdlg.h" line="90"/>
+        <location filename="../../../build/cr3qt/ui_wolexportdlg.h" line="94"/>
         <source>1</source>
-        <translation>1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_wolexportdlg.h" line="91"/>
+        <location filename="../../../build/cr3qt/ui_wolexportdlg.h" line="95"/>
         <source>2</source>
-        <translation>2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_wolexportdlg.h" line="93"/>
         <source>Table of Contents levels</source>
-        <translation>Уровней заголовка</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../../build/cr3qt/ui_wolexportdlg.h" line="96"/>
         <source>3</source>
-        <translation>3</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>crqtutils</name>
     <message>
+        <location filename="../crqtutil.cpp" line="162"/>
         <source>Undetermined</source>
-        <translation>Неопределенный</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

@@ -2298,6 +2298,7 @@ bool rend_font_italicize = false;
 int rend_font_embolden_alg = 0;
 int rend_font_fine_embolden = 0;
 static int rend_font_base_weight = 400;
+bool rend_trim_initial_par_spaces = false;
 
 void LVRendSetBaseFontWeight( int weight )
 {
@@ -2341,6 +2342,16 @@ void LVRendSetFontFineEmbolden( int fineEmbolden )
 int LVRendGetFontFineEmbolden()
 {
     return rend_font_fine_embolden;
+}
+
+void LVRendSetTrimInitialParSpaces( bool trim_initial_par_spaces )
+{
+    rend_trim_initial_par_spaces = trim_initial_par_spaces;
+}
+
+bool LVRendGetTrimInitialParSpaces()
+{
+    return rend_trim_initial_par_spaces;
 }
 
 LVFontRef getFont(ldomNode * node, css_style_rec_t * style, int documentId)
@@ -4177,6 +4188,22 @@ void renderFinalBlock( ldomNode * enode, LFormattedText * txform, RenderRectAcce
                 }
                 // legacy new line processing: set indentation for **each** new line
                 tflags |= LTEXT_LEGACY_RENDERING;
+            }
+            // https://github.com/plotn/coolreader/issues/708
+            // https://github.com/buggins/coolreader/commit/273cf58292fd15ef3343409806ea0a9933562186
+            if ( rend_trim_initial_par_spaces ) {
+                int offs = 0;
+                if ( txform->GetLineCount()==0 && style->white_space!=css_ws_pre ) {
+                    // clear leading spaces for first text of paragraph
+                    int i=0;
+                    txt[i];
+                    for ( ;txt.length()>i && (txt[i]==' ' || txt[i]=='\t' || txt[i]==UNICODE_NO_BREAK_SPACE); i++ )
+                        ;
+                    if ( i>0 ) {
+                        txt.erase(0, i);
+                        offs = i;
+                    }
+                }
             }
             if ( txt.length()>0 ) {
                 txform->AddSourceLine( txt.c_str(), txt.length(), cl, bgcl, font.get(), lang_cfg, baseflags | tflags,

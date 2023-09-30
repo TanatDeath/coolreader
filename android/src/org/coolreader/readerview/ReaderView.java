@@ -2027,10 +2027,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				break;
 			case DCMD_EXPERIMENTAL_FEATURE:
 				//TagsEditDialog dlg1 = new TagsEditDialog(mActivity, null, true, null);
-				ExternalDocCameDialog dlg1 = new ExternalDocCameDialog(mActivity, "fb2",
-						getBookInfo().getFileInfo().getFile().getAbsolutePath(),
-						getBookInfo().getFileInfo().getFile().getAbsolutePath());
-				dlg1.show();
+				String lang = getSettings().getProperty(ReaderView.PROP_APP_LOCALE, Lang.DEFAULT.code);
+				mActivity.setLanguage(lang);
+//				ExternalDocCameDialog dlg1 = new ExternalDocCameDialog(mActivity, "fb2",
+//						getBookInfo().getFileInfo().getFile().getAbsolutePath(),
+//						getBookInfo().getFileInfo().getFile().getAbsolutePath());
+//				dlg1.show();
 
 				if (0==1) {
 					Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
@@ -4095,7 +4097,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}
 		int iOrnt = getSettings().getInt(Settings.PROP_APP_SCREEN_ORIENTATION, 0);
 		int curOrientation = getActivity().sensorCurRot;
-		if ((bSwitched)&&(iOrnt==4)) {
+		if ((bSwitched) && (iOrnt == 4)) {
 			int iSett = getSettings().getInt(Settings.PROP_APP_SCREEN_ORIENTATION_POPUP_DURATION, 10);
 			int iExtFS = getSettings().getInt(Settings.PROP_EXT_FULLSCREEN_MARGIN, 0);
 			int iExtFSM = getSettings().getInt(Settings.PROP_EXT_FULLSCREEN_MOD, 0);

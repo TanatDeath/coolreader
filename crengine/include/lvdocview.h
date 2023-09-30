@@ -232,16 +232,16 @@ public:
 /// page header flags
 enum {
     PGHDR_NONE=0,
-    PGHDR_PAGE_NUMBER=1,
-    PGHDR_PAGE_COUNT=2,
-    PGHDR_AUTHOR=4,
-    PGHDR_TITLE=8,
-    PGHDR_CLOCK=16,
-    PGHDR_BATTERY=32,
-    PGHDR_CHAPTER_MARKS=64,
-    PGHDR_PERCENT=128,
-    PGHDR_PAGES_TO_CHAPTER=256,
-    PGHDR_TIME_LEFT=512
+    PGHDR_PAGE_NUMBER = 1,      // show current page number
+    PGHDR_PAGE_COUNT = 2,       // show total pages count
+    PGHDR_AUTHOR = 4,           // show book author
+    PGHDR_TITLE = 8,            // show book title
+    PGHDR_CLOCK = 16,           // show current clock
+    PGHDR_BATTERY = 32,         // show current battery charge
+    PGHDR_CHAPTER_MARKS = 64,   // show chapter marks
+    PGHDR_PERCENT = 128,        // show current posistion in percent
+    PGHDR_PAGES_TO_CHAPTER=256, // show pages left to chapter end
+    PGHDR_TIME_LEFT=512         // show time left to book end
 };
 
 

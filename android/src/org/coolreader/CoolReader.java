@@ -4489,6 +4489,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 							}
 							itemsBook.add(new BookInfoEntry("book.symcount", ""+fi.symCount,"text"));
 							itemsBook.add(new BookInfoEntry("book.wordcount", ""+fi.wordCount,"text"));
+							itemsBook.add(new BookInfoEntry("book.sentenceinfo", "_","text"));
 							String sLeft = getReadingTimeLeft(fi,true);
 							itemsBook.add(new BookInfoEntry("book.minleft", sLeft,"text"));
 							itemsBook.add(new BookInfoEntry("section", "section.book_document","section"));

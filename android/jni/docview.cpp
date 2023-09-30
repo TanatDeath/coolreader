@@ -1856,12 +1856,30 @@ JNIEXPORT jobject JNICALL Java_org_coolreader_crengine_DocView_getAllSentencesIn
 
 	jobject arrList = env->NewObject(arrListClass, arrListCtor);
 
-
 	p->_docview->savePosition();
 	p->_docview->clearSelection();
-	p->_docview->goToPage(0);
-	p->_docview->SetPos(0, false);
-	while(p->_docview->nextSentence()){
+	int iPage = 0;
+	int iRes = 0;
+	bool success = false;
+	while (!success) {
+		success = true;
+		p->_docview->goToPage(iPage);
+		if (iPage == 0)
+			p->_docview->SetPos(0, false);
+		bool proceed = p->_docview->nextSentence();
+		if (!proceed) {
+			iRes = p->_docview->onSelectionCommand(DCMD_SELECT_FIRST_SENTENCE, 0);
+			if (iRes == 0)
+				success = false;
+		}
+		if (!success) {
+			iPage++;
+			if (iPage > 100)
+				success = true;
+		}
+	}
+	bool proceed = success && (iPage < 100);
+		while(proceed){
 		jobject sentenceInfo = _env->NewObject(sentenceInfoClass, sentenceInfoCtor);
 		jint startX = 0;
 		jint startY = 0;
@@ -1871,8 +1889,13 @@ JNIEXPORT jobject JNICALL Java_org_coolreader_crengine_DocView_getAllSentencesIn
 		if ( sel.length()>0 ){
 			currSel = *sel[0];
 		}
+
+        bool res;
+
 		lvPoint startPoint = currSel.getStart().toPoint();
 		lvPoint endPoint = currSel.getEnd().toPoint();
+
+        CRLog::info("Range text %s", UnicodeToUtf8(currSel.getRangeText()).c_str());
 
 		env->CallVoidMethod(sentenceInfo, sentenceInfoSetText, env->NewStringUTF(
 				UnicodeToUtf8(currSel.getRangeText()).c_str()
@@ -1882,6 +1905,7 @@ JNIEXPORT jobject JNICALL Java_org_coolreader_crengine_DocView_getAllSentencesIn
 		));
 
 		env->CallBooleanMethod(arrList, arrListAdd, sentenceInfo);
+		proceed = p->_docview->nextSentence();
 	}
 	p->_docview->restorePosition();
 

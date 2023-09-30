@@ -11,8 +11,8 @@ android {
         multiDexEnabled true
         // When new version released, version code must be incremented at least by 8
         // for compatibility with ABI versioning of split apk (see below).
-        versionCode 202305211
-        versionName "2023.05.21.1"
+        versionCode 202308131
+        versionName "2023.08.13.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -340,7 +340,7 @@ dependencies {
     //\
     //implementation project(path: ':onyxsdk-device-1.2.5')
     //implementation 'com.onyx.android.sdk:onyxsdk-device:1.1.8'
-    implementation 'com.onyx.android.sdk:onyxsdk-device:1.2.9'
-    onyxImplementation 'com.onyx.android.sdk:onyxsdk-readerutils:0.0.10'
-    onyxImplementation 'com.onyx.android.sdk:onyxsdk-base:1.6.24'
+    implementation 'com.onyx.android.sdk:onyxsdk-device:1.2.24'
+    onyxImplementation 'com.onyx.android.sdk:onyxsdk-readerutils:0.0.14'
+    onyxImplementation 'com.onyx.android.sdk:onyxsdk-base:1.6.49'
 }

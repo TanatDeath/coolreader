@@ -242,11 +242,26 @@ public class TTSToolbarDlg implements Settings {
 		});
 	}
 
+	private void selectFirstSentence() {
+		moveSelection(ReaderCommand.DCMD_SELECT_FIRST_SENTENCE,
+			new ReaderView.MoveSelectionCallback() {
+				@Override
+				public void onNewSelection(Selection selection) {
+				}
+
+				@Override
+				public void onFail() {
+					BackgroundThread.instance().postGUI(() -> mCoolReader.showToast(R.string.first_sentence_failed));
+				}
+			}
+		);
+	}
+
 	// plotn: NB!!! same fix as we did, but in other way. Check if it works
 	private void setReaderMode()
 	{
 		String oldViewSetting = mReaderView.getSetting(ReaderView.PROP_PAGE_VIEW_MODE);
-		moveSelection(ReaderCommand.DCMD_SELECT_FIRST_SENTENCE, null);
+		selectFirstSentence();
 		if (("1".equals(oldViewSetting)) &&
 				(!("1".equals(mReaderView.getSetting(ReaderView.PROP_PAGE_VIEW_MODE_TTS_DONT_CHANGE))))) {
 			changedPageMode = true;
@@ -515,19 +530,20 @@ public class TTSToolbarDlg implements Settings {
 				ttsbinder.stop(null);
 				ttsbinder.setAudioFile(null, 0);
 				initAudiobookWordTimings(() ->
-						moveSelection(ReaderCommand.DCMD_SELECT_FIRST_SENTENCE, new ReaderView.MoveSelectionCallback() {
-					@Override
-					public void onNewSelection(Selection selection) {
-						if (isSpeaking) {
-							ttsbinder.say(preprocessUtterance(selection.text), null);
-						} else {
-							ttsbinder.setCurrentUtterance(preprocessUtterance(selection.text));
+					moveSelection(ReaderCommand.DCMD_SELECT_FIRST_SENTENCE, new ReaderView.MoveSelectionCallback() {
+						@Override
+						public void onNewSelection(Selection selection) {
+							if (isSpeaking) {
+								ttsbinder.say(preprocessUtterance(selection.text), null);
+							} else {
+								ttsbinder.setCurrentUtterance(preprocessUtterance(selection.text));
+							}
 						}
-					}
 
-					@Override
-					public void onFail() {
-					}
+						@Override
+						public void onFail() {
+							BackgroundThread.instance().postGUI(() -> mCoolReader.showToast(R.string.first_sentence_failed));
+						}
 				}));
 			});
 		} else
@@ -539,7 +555,7 @@ public class TTSToolbarDlg implements Settings {
 						ttsbinder.setAudioFile(sentenceInfo.audioFile, sentenceInfo.startTime);
 					}
 					initAudiobookWordTimings(null);
-					moveSelection(ReaderCommand.DCMD_SELECT_FIRST_SENTENCE, null);
+					selectFirstSentence();
 			});
 		}
 	}
@@ -1407,7 +1423,7 @@ public class TTSToolbarDlg implements Settings {
 			wordTimingCalcHandler.post(
 				() -> {
 					List<SentenceInfo> allSentences = SentenceInfoCache.maybeReadCache(sentenceInfoCacheFile);
-					if(allSentences == null){
+					if(allSentences == null) {
 						allSentences = mReaderView.getAllSentences();
 						SentenceInfoCache.maybeWriteCache(sentenceInfoCacheFile, allSentences);
 					}
@@ -1416,7 +1432,7 @@ public class TTSToolbarDlg implements Settings {
 					//can be very long
 					wordTimingAudiobookMatcher.parseWordTimingsFile();
 
-					moveSelection(ReaderCommand.DCMD_SELECT_FIRST_SENTENCE, null);
+					selectFirstSentence();
 					audioBookPosHandler.postDelayed(audioBookPosRunnable, 500);
 
 					BackgroundThread.instance().postGUI(() -> {
