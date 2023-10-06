@@ -818,7 +818,7 @@ public class CoverpageManager {
 					db.saveBookCoverpage(file, imageData);
 			}
 			Services.getEngine().drawBookCover(buffer, imageData, respectAspectRatio, fontFace, file.getTitleOrFileName(),
-					file.getAuthors(), file.series, file.seriesNumber, DeviceInfo.isBlackAndWhiteEinkScreen(BaseActivity.getScreenForceEink()) ? 4 : 16);
+					file.getAuthors(), file.series, file.seriesNumber, DeviceInfo.isBlackAndWhiteEinkScreen(BaseActivity.getScreenTypeForce()) ? 4 : 16);
 			BackgroundThread.instance().postGUI(() -> {
 				boolean isCustomCover = false;
 				final String sBookFName = StrUtils.getNonEmptyStr(file.getFilename(), false);
@@ -916,9 +916,11 @@ public class CoverpageManager {
 	private Bitmap drawCoverpage(byte[] data, ImageItem file)
 	{
 		try {
-			Bitmap bmp = Bitmap.createBitmap(file.maxWidth, file.maxHeight, DeviceInfo.getBufferColorFormat(BaseActivity.getScreenForceEink()));
+			Bitmap bmp = Bitmap.createBitmap(file.maxWidth, file.maxHeight,
+				DeviceInfo.getBufferColorFormat(BaseActivity.getScreenTypeForce()));
 			Services.getEngine().drawBookCover(bmp, data, false, fontFace, file.file.getTitleOrFileName(),
-					file.file.getAuthors(), file.file.series, file.file.seriesNumber, DeviceInfo.isBlackAndWhiteEinkScreen(BaseActivity.getScreenForceEink()) ? 4 : 16);
+				file.file.getAuthors(), file.file.series, file.file.seriesNumber,
+				DeviceInfo.isBlackAndWhiteEinkScreen(BaseActivity.getScreenTypeForce()) ? 4 : 16);
 			return bmp;
 		} catch ( Exception e ) {
     		Log.e("cr3", "exception while decoding coverpage " + e.getMessage());

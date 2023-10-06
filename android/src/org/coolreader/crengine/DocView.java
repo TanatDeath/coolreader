@@ -420,7 +420,7 @@ public class DocView {
 	 */
 	public void getPageImage(Bitmap bitmap) {
 		synchronized(mutex) {
-			getPageImageInternal(bitmap, DeviceInfo.isBlackAndWhiteEinkScreen(BaseActivity.getScreenForceEink()) ? 4 : 32);
+			getPageImageInternal(bitmap, DeviceInfo.isBlackAndWhiteEinkScreen(BaseActivity.getScreenTypeForce()) ? 4 : 32);
 		}
 	}
 
@@ -465,7 +465,7 @@ public class DocView {
 	 */
 	public boolean drawImage(Bitmap bitmap, ImageInfo imageInfo) {
 		synchronized(mutex) {
-			return drawImageInternal(bitmap, DeviceInfo.isBlackAndWhiteEinkScreen(BaseActivity.getScreenForceEink()) ? 4 : 32, imageInfo);
+			return drawImageInternal(bitmap, DeviceInfo.isBlackAndWhiteEinkScreen(BaseActivity.getScreenTypeForce()) ? 4 : 32, imageInfo);
 		}
 	}
 

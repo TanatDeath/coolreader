@@ -81,8 +81,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 
 	public static int getFontSizeShift(int curSize, int shift) {
 		if (curSize + shift < 0) return 20;
-		if (curSize + shift >= 150) return 150;
-		return curSize + shift;
+		return Math.min(curSize + shift, 150);
 	}
 
 	public static int getFontSizeShiftOld(int curSize, int shift) {
@@ -294,6 +293,22 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text
+	};
+
+	int[] mScreenTypeForce = new int[] {
+			0, 1, 2
+	};
+
+	int[] mScreenTypeForceTitles = new int[] {
+			R.string.screen_type_force_0,
+			R.string.screen_type_force_1,
+			R.string.screen_type_force_2
+	};
+
+	int[] mScreenTypeForceAddInfos = new int[] {
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text
@@ -1303,13 +1318,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		new BoolOption(this, mActivity.getString(R.string.options_app_tapzone_hilite), Settings.PROP_APP_TAP_ZONE_HILIGHT,
 				mActivity.getString(R.string.options_app_tapzone_hilite_add_info), "", true).setDefaultValue("0").
 				setIconIdByAttr(R.attr.attr_icons8_highlight_tap_zone, R.drawable.	icons8_highlight_tap_zone);
-		new BoolOption(this, getString(R.string.options_screen_force_eink), PROP_APP_SCREEN_FORCE_EINK,
-				getString(R.string.options_screen_force_eink_add_info), "", true).
-				setIconIdByAttr(R.attr.attr_icons8_eink, R.drawable.icons8_eink).
-				setDefaultValue("0")
-				.setOnChangeHandler(() -> {
-					mActivity.showToast(R.string.force_eink_warn);
-				});
 		// Backlight options
 		new BoolOption(this, mActivity.getString(R.string.fix_double_backlight_delta), Settings.PROP_APP_SCREEN_BACKLIGHT_FIX_DELTA,
 				mActivity.getString(R.string.fix_double_backlight_delta_add_info),
@@ -1355,7 +1363,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		new BoolOption(this, mActivity.getString(R.string.tts_page_mode_dont_change2), Settings.PROP_PAGE_VIEW_MODE_SEL_DONT_CHANGE,
 				mActivity.getString(R.string.tts_page_mode_dont_change_add_info), "", true).setDefaultValue("0").
 				setIconIdByAttr(R.attr.cr3_option_view_mode_scroll_drawable, R.drawable.cr3_option_view_mode_scroll);
-		if ( DeviceInfo.EINK_ONYX )
+		if (DeviceInfo.EINK_ONYX)
 			if (DeviceInfo.EINK_SCREEN_REGAL)
 				new BoolOption(this, mActivity.getString(R.string.options_screen_update_mode_onyx_regal), Settings.PROP_APP_EINK_ONYX_REGAL,
 						mActivity.getString(R.string.option_add_info_empty_text), "", true).
@@ -1797,7 +1805,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				getString(R.string.option_add_info_empty_text), filter).setIconIdByAttr(R.attr.attr_icons8_page_turn, R.drawable.icons8_page_turn));
 		mOptionsApplication = new OptionsListView(getContext(), null);
 		mOptionsApplication.add(new LangOption(this.mActivity, this, filter).setIconIdByAttr(R.attr.attr_icons8_system_lang, R.drawable.icons8_system_lang));
-		if (!DeviceInfo.isForceHCTheme(false)) {
+		if (!DeviceInfo.isForceHCTheme(0)) {
 			//plotn - when setting EINK manually, hc doesnt work ... still dont know why
 			mOptionsApplication.add(new ThemeOptions(this.mActivity,this, getString(R.string.options_app_ui_theme), getString(R.string.options_app_ui_theme_add_info), filter).setIconIdByAttr(R.attr.attr_icons8_change_theme_1,
 					R.drawable.icons8_change_theme_1));
@@ -1812,7 +1820,19 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				add(mStartBehaviour, mStartBehaviourTitles, mStartBehaviourAddInfos).setDefaultValue("0").
 				setIconIdByAttr(R.attr.cr3_browser_folder_root_drawable, R.drawable.icons8_home));
 
-		mOptionsApplication.add(getOption(PROP_APP_SCREEN_FORCE_EINK, filter));
+		String devFlags = "";
+		if (!StrUtils.isEmptyStr(DeviceInfo.getDeviceFlags()))
+			devFlags = ". Device flags:" + DeviceInfo.getDeviceFlags();
+		mOptionsApplication.add(new ListOption(this, getString(R.string.options_screen_force_eink),
+				PROP_APP_SCREEN_FORCE_EINK,
+				getString(R.string.options_screen_force_eink_add_info) + devFlags, filter).
+				add(mScreenTypeForce, mScreenTypeForceTitles, mScreenTypeForceAddInfos).
+				setIconIdByAttr(R.attr.attr_icons8_eink, R.drawable.icons8_eink).
+				setDefaultValue("0")
+				.setOnChangeHandler(() -> {
+					mActivity.showToast(R.string.force_eink_warn);
+				}));
+
 		mOptionsApplication.add(new ListOption(this, getString(R.string.save_pos_timeout),
 				PROP_SAVE_POS_TIMEOUT, getString(R.string.save_pos_timeout_add_info), filter).add(mMotionTimeouts1, mMotionTimeoutsTitles1, mMotionTimeoutsAddInfos1).setDefaultValue(Integer.toString(mMotionTimeouts1[2])).
 				setIconIdByAttr(R.attr.attr_icons8_position_to_disk_interval, R.drawable.icons8_position_to_disk_interval));

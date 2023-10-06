@@ -388,6 +388,13 @@ public class BookmarksDlg extends BaseDialog {
 					if (mReaderView.removeBookmark(bm) != null)
 						listUpdated();
 					return true;
+				case R.id.bookmark_delete_all:
+					mCoolReader.askQuestion(R.string.mi_bookmark_delete_all, R.string.mi_bookmark_delete_all_q,
+						() -> {
+							mReaderView.removeAllBookmarks();
+							listUpdated();
+						}, null);
+					return true;
 				case R.id.bookmark_shortcut_goto:
 					mReaderView.goToBookmark(shortcut+1);
 					dismiss();
@@ -405,6 +412,13 @@ public class BookmarksDlg extends BaseDialog {
 		case R.id.bookmark_delete:
 			if (mReaderView.removeBookmark(bm) != null)
 				listUpdated();
+			return true;
+		case R.id.bookmark_delete_all:
+			mCoolReader.askQuestion(R.string.mi_bookmark_delete_all, R.string.mi_bookmark_delete_all_q,
+				() -> {
+					mReaderView.removeAllBookmarks();
+					listUpdated();
+				}, null);
 			return true;
 		case R.id.bookmark_goto:
 			if ( bm!=null )

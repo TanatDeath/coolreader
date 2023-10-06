@@ -4758,15 +4758,23 @@ public class MainDB extends BaseDB {
 		Long bookId = getBookId(fileInfo);
 		if (bookId == null)
 			return;
-		execSQLIgnoreErrors("DELETE FROM bookmark WHERE book_fk=" + bookId + " AND type=0");
-		execSQLIgnoreErrors("UPDATE book SET last_access_time=0 WHERE id=" + bookId);
+		execSQLIgnoreErrors("DELETE FROM bookmark WHERE book_fk = " + bookId + " AND type = 0");
+		execSQLIgnoreErrors("UPDATE book SET last_access_time=0 WHERE id = " + bookId);
 		flushAndTransaction();
 	}
 
 	public void deleteBookmark(Bookmark bm) {
 		if (bm.getId() == null)
 			return;
-		execSQLIgnoreErrors("DELETE FROM bookmark WHERE id=" + bm.getId());
+		execSQLIgnoreErrors("DELETE FROM bookmark WHERE id = " + bm.getId());
+		flushAndTransaction();
+	}
+
+	public void deleteAllBookmarks(FileInfo fileInfo) {
+		Long bookId = getBookId(fileInfo);
+		if (bookId == null)
+			return;
+		execSQLIgnoreErrors("DELETE FROM bookmark WHERE book_fk=" + bookId + " AND type != 0");
 		flushAndTransaction();
 	}
 

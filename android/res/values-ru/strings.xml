@@ -386,6 +386,8 @@
     <string name="toast_position_bookmark_is_set">Добавлена закладка для страницы</string>
     <string name="mi_bookmark_add">Добавить закладку</string>
     <string name="mi_bookmark_delete">Удалить закладку</string>
+    <string name="mi_bookmark_delete_all">Удалить все закладки</string>
+    <string name="mi_bookmark_delete_all_q">Вы собираетесь удалить все закладки в книге, продолжить?</string>
     <string name="mi_bookmark_edit">Редактировать закладку</string>
     <string name="mi_bookmark_export">Экспорт закладок в файл</string>
     <string name="mi_bookmark_save">Экспорт и импорт</string>

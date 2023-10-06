@@ -41,7 +41,8 @@ public class BitmapFactory {
 			//log.d("Recycling free bitmap "+bmp.getWidth()+"x"+bmp.getHeight());
 			//bmp.recycle(); //20110109
 		}
-		Bitmap bmp = Bitmap.createBitmap(dx, dy, DeviceInfo.getBufferColorFormat(BaseActivity.getScreenForceEink()));
+		Bitmap bmp = Bitmap.createBitmap(dx, dy,
+			DeviceInfo.getBufferColorFormat(BaseActivity.getScreenTypeForce()));
 		mRuntime.trackFree(dx*dy*2);
 		//bmp.setDensity(0);
 		usedList.add(bmp);

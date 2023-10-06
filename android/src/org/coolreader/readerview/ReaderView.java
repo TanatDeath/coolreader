@@ -1236,6 +1236,16 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		return removed;
 	}
 
+	public void removeAllBookmarks() {
+		for (Bookmark bookmark: mBookInfo.getAllBookmarks()) {
+			if (bookmark.getType() != 0) {
+				mBookInfo.removeBookmark(bookmark);
+			}
+		}
+		mActivity.getDB().deleteAllBookmarks(mBookInfo.getFileInfo());
+		highlightBookmarks(true);
+	}
+
 	public Bookmark updateBookmark(final Bookmark bookmark) {
 		Bookmark bm = mBookInfo.updateBookmark(bookmark);
 		if (bm != null) {

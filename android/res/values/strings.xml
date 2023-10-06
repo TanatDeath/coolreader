@@ -404,6 +404,8 @@
     <string name="toast_position_bookmark_is_set">Added bookmark for page</string>
     <string name="mi_bookmark_add">Add</string>
     <string name="mi_bookmark_delete">Delete</string>
+    <string name="mi_bookmark_delete_all">Delete all</string>
+    <string name="mi_bookmark_delete_all_q">You want to delete all bookmarks in this book, proceed?</string>
     <string name="mi_bookmark_edit">Edit</string>
     <string name="mi_bookmark_export">Export bookmarks</string>
     <string name="mi_bookmark_save">Export and import</string>
@@ -2132,4 +2134,7 @@
     <string name="add_this_key">Add key to keylist</string>
     <string name="key_already_added">Key is already added</string>
     <string name="first_sentence_failed">Cannot select first sentence - this page does not contain text</string>
+    <string name="screen_type_force_0">Auto</string>
+    <string name="screen_type_force_1">Black and white E-Ink screen</string>
+    <string name="screen_type_force_2">Color E-Ink screen</string>
 </resources>

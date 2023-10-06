@@ -73,12 +73,14 @@ public class DeviceInfo {
 		return EINK_SCREEN || isEinkFromSettings;
 	}
 
-	public static boolean isBlackAndWhiteEinkScreen(boolean isEinkFromSettings) {
-		return (EINK_SCREEN || isEinkFromSettings) && (!ONYX_HAVE_COLOR);
+	public static boolean isBlackAndWhiteEinkScreen(int screenTypeForce) {
+		return (EINK_SCREEN || (screenTypeForce > 0)) &&
+			(!((ONYX_HAVE_COLOR) || (screenTypeForce == 2)));
 	}
 
-	public static boolean isForceHCTheme(boolean isEinkFromSettings) {
-		return (FORCE_HC_THEME || isEinkFromSettings) && (!ONYX_HAVE_COLOR);
+	public static boolean isForceHCTheme(int screenTypeForce) {
+		return (FORCE_HC_THEME || (screenTypeForce > 0)) &&
+			(!((ONYX_HAVE_COLOR) || (screenTypeForce == 2)));
 		//return false;
 	}
 
@@ -88,12 +90,35 @@ public class DeviceInfo {
 		return custToast;
 	}
 
-	public static android.graphics.Bitmap.Config getBufferColorFormat(boolean isEinkFromSettings) {
-		return isBlackAndWhiteEinkScreen(isEinkFromSettings) || USE_OPENGL ? android.graphics.Bitmap.Config.ARGB_8888 : android.graphics.Bitmap.Config.RGB_565;
+	public static android.graphics.Bitmap.Config getBufferColorFormat(int screenTypeForce) {
+		return isBlackAndWhiteEinkScreen(screenTypeForce) || USE_OPENGL ?
+			android.graphics.Bitmap.Config.ARGB_8888 : android.graphics.Bitmap.Config.RGB_565;
 	}
 
-	public static int getPixelFormat(boolean isEinkFromSettings) {
-		return (getBufferColorFormat(isEinkFromSettings) == android.graphics.Bitmap.Config.RGB_565) ? PixelFormat.RGB_565 : PixelFormat.RGBA_8888;
+	public static int getPixelFormat(int screenTypeForce) {
+		return (getBufferColorFormat(screenTypeForce) ==
+			android.graphics.Bitmap.Config.RGB_565) ? PixelFormat.RGB_565 : PixelFormat.RGBA_8888;
+	}
+
+	public static String getDeviceFlags() {
+		String devFlags = "";
+		if (DeviceInfo.AMOLED_SCREEN) devFlags = devFlags + ", AMOLED screen";
+		if (DeviceInfo.isEinkScreen(false)) devFlags = devFlags + ", EINK screen";
+		if (DeviceInfo.EINK_NOOK) devFlags = devFlags + ", EINK Nook";
+		if (DeviceInfo.EINK_NOOK_120) devFlags = devFlags + ", EINK Nook 120";
+		if (DeviceInfo.EINK_SONY) devFlags = devFlags + ", EINK Sony";
+		if (DeviceInfo.EINK_ONYX) devFlags = devFlags + ", EINK Onyx";
+		if (DeviceInfo.ONYX_HAVE_COLOR) devFlags = devFlags + ", Color EINK Screen";
+		if (DeviceInfo.EINK_DNS) devFlags = devFlags + ", EINK Dns";
+		if (DeviceInfo.EINK_TOLINO) devFlags = devFlags + ", EINK Tolino";
+		if (DeviceInfo.ONYX_BUTTONS_LONG_PRESS_NOT_AVAILABLE) devFlags = devFlags + ", Onyx buttons long press unavailable";
+		if (DeviceInfo.POCKETBOOK) devFlags = devFlags + ", Pocketbook";
+		if (DeviceInfo.EINK_SCREEN_UPDATE_MODES_SUPPORTED) devFlags = devFlags + ", EINK screen update modes supported";
+		if (DeviceInfo.NAVIGATE_LEFTRIGHT) devFlags = devFlags + ", navigate left right";
+		if (DeviceInfo.REVERT_LANDSCAPE_VOLUME_KEYS) devFlags = devFlags + ", revert landscape volume keys";
+		if (!DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS) devFlags = devFlags + ", screen brightness cannot be controlled by swipe";
+		if (!devFlags.equals("")) devFlags=devFlags.substring(2);
+		return devFlags;
 	}
 
 	// minimal screen backlight level percent for different devices

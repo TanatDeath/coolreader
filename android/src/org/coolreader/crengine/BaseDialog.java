@@ -73,7 +73,7 @@ public class BaseDialog extends Dialog {
 		addButtonContentDescriptionId = descriptionId;
 	}
 	
-	public static final boolean DARK_THEME = !DeviceInfo.isForceHCTheme(BaseActivity.getScreenForceEink());
+	public static final boolean DARK_THEME = !DeviceInfo.isForceHCTheme(BaseActivity.getScreenTypeForce());
 	public BaseDialog(String dlgName, BaseActivity activity)
 	{
 		this(dlgName, activity, "", false, false );
@@ -130,7 +130,7 @@ public class BaseDialog extends Dialog {
 			WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
 			lp.alpha = 1.0f;
 			lp.dimAmount = 0.0f;
-			lp.format = DeviceInfo.getPixelFormat(BaseActivity.getScreenForceEink());
+			lp.format = DeviceInfo.getPixelFormat(BaseActivity.getScreenTypeForce());
 			lp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL;
 			lp.horizontalMargin = 0;
 			lp.verticalMargin = 0;

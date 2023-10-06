@@ -821,6 +821,16 @@ public class CRDBService extends BaseService {
 		});
 		flush();
 	}
+
+	public void deleteAllBookmarks(FileInfo fileInfo) {
+		execTask(new Task("deleteAllBookmarks") {
+			@Override
+			public void work() {
+				mainDB.deleteAllBookmarks(fileInfo);
+			}
+		});
+		flush();
+	}
 	
 	public void setPathCorrector(final MountPathCorrector corrector) {
 		execTask(new Task("setPathCorrector") {
@@ -1336,6 +1346,10 @@ public class CRDBService extends BaseService {
     	public void deleteBookmark(final Bookmark bm) {
     		getService().deleteBookmark(new Bookmark(bm));
     	}
+
+		public void deleteAllBookmarks(final FileInfo fileInfo) {
+			getService().deleteAllBookmarks(fileInfo);
+		}
 
     	public void loadBookInfo(final FileInfo fileInfo, final BookInfoLoadingCallback callback) {
     		getService().loadBookInfo(new FileInfo(fileInfo), callback, new Handler());

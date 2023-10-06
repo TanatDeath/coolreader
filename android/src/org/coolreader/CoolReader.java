@@ -4335,23 +4335,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 						    "; density: " + getDensityDpi() + "; inches: " + (Math.round(getDiagonalInches() * 100) / 100.00),"text"));
 		itemsSys.add(new BookInfoEntry("system.device_model",DeviceInfo.MANUFACTURER + " / "+DeviceInfo.MODEL+" / "+
 				DeviceInfo.DEVICE+ " / "+DeviceInfo.PRODUCT + " / " + DeviceInfo.BRAND,"text"));
-		String sDevFlags = "";
-		if (DeviceInfo.AMOLED_SCREEN) sDevFlags = sDevFlags + ", AMOLED screen";
-		if (DeviceInfo.isEinkScreen(false)) sDevFlags = sDevFlags + ", EINK screen";
-		if (DeviceInfo.EINK_NOOK) sDevFlags = sDevFlags + ", EINK Nook";
-		if (DeviceInfo.EINK_NOOK_120) sDevFlags = sDevFlags + ", EINK Nook 120";
-		if (DeviceInfo.EINK_SONY) sDevFlags = sDevFlags + ", EINK Sony";
-		if (DeviceInfo.EINK_ONYX) sDevFlags = sDevFlags + ", EINK Onyx";
-		if (DeviceInfo.EINK_DNS) sDevFlags = sDevFlags + ", EINK Dns";
-		if (DeviceInfo.EINK_TOLINO) sDevFlags = sDevFlags + ", EINK Tolino";
-		if (DeviceInfo.ONYX_BUTTONS_LONG_PRESS_NOT_AVAILABLE) sDevFlags = sDevFlags + ", Onyx buttons long press unavailable";
-		if (DeviceInfo.POCKETBOOK) sDevFlags = sDevFlags + ", Pocketbook";
-		if (DeviceInfo.EINK_SCREEN_UPDATE_MODES_SUPPORTED) sDevFlags = sDevFlags + ", EINK screen update modes supported";
-		if (DeviceInfo.NAVIGATE_LEFTRIGHT) sDevFlags = sDevFlags + ", navigate left right";
-		if (DeviceInfo.REVERT_LANDSCAPE_VOLUME_KEYS) sDevFlags = sDevFlags + ", revert landscape volume keys";
-		if (!DeviceInfo.SCREEN_CAN_CONTROL_BRIGHTNESS) sDevFlags = sDevFlags + ", screen brightness cannot be controlled by swipe";
-		if (!sDevFlags.equals("")) sDevFlags=sDevFlags.substring(2);
-		itemsSys.add(new BookInfoEntry("system.device_flags",sDevFlags,"text"));
+		itemsSys.add(new BookInfoEntry("system.device_flags", DeviceInfo.getDeviceFlags(),"text"));
 
 		final BookInfo bi = setBI;
 		if (bi != null) {

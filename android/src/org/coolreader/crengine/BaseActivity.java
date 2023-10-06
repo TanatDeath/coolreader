@@ -175,7 +175,7 @@ public class BaseActivity extends Activity implements Settings {
 			Field fld = dm.getClass().getField("densityDpi");
 			if (fld != null) {
 				Object v = fld.get(dm);
-				if (v != null && v instanceof Integer) {
+				if (v instanceof Integer) {
 					densityDpi = ((Integer) v).intValue();
 					log.i("Screen density detected: " + densityDpi + "DPI");
 				}
@@ -240,21 +240,23 @@ public class BaseActivity extends Activity implements Settings {
 			WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
 			lp.alpha = 1.0f;
 			lp.dimAmount = 0.0f;
-			lp.format = DeviceInfo.getPixelFormat(getScreenForceEink());
+			lp.format = DeviceInfo.getPixelFormat(getScreenTypeForce());
 			lp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL;
 			lp.horizontalMargin = 0;
 			lp.verticalMargin = 0;
 			lp.windowAnimations = 0;
 			lp.layoutAnimationParameters = null;
-			lp.memoryType = WindowManager.LayoutParams.MEMORY_TYPE_NORMAL;
+			if (DeviceInfo.getSDKLevel() <= DeviceInfo.ICE_CREAM_SANDWICH) {
+				lp.memoryType = WindowManager.LayoutParams.MEMORY_TYPE_NORMAL;
+			}
 			getWindow().setAttributes(lp);
 		}
 
 		// load settings
 		Properties props = settings();
-		String theme = props.getProperty(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenForceEink()) ?
+		String theme = props.getProperty(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenTypeForce()) ?
 				getEinkThemeName() : "GRAY1");
-		if (DeviceInfo.isForceHCTheme(getScreenForceEink())) theme = getEinkThemeName();
+		if (DeviceInfo.isForceHCTheme(getScreenTypeForce())) theme = getEinkThemeName();
 		String lang = props.getProperty(ReaderView.PROP_APP_LOCALE, Lang.DEFAULT.code);
 		setLanguage(lang);
 		setCurrentTheme(theme);
@@ -445,7 +447,7 @@ public class BaseActivity extends Activity implements Settings {
 	public void setCurrentTheme(String themeCode) {
 		InterfaceTheme theme = InterfaceTheme.findByCode(themeCode);
 		if (null == theme)
-			theme = DeviceInfo.isForceHCTheme(getScreenForceEink()) ? InterfaceTheme.WHITE : InterfaceTheme.LIGHT;
+			theme = DeviceInfo.isForceHCTheme(getScreenTypeForce()) ? InterfaceTheme.WHITE : InterfaceTheme.LIGHT;
 		if (currentTheme != theme) {
 			setCurrentTheme(theme);
 		}
@@ -961,9 +963,7 @@ public class BaseActivity extends Activity implements Settings {
 	{
 		if (screenOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
 			return true;
-		if (DeviceInfo.getSDKLevel() >= 9 && isReverseLandscape())
-			return true;
-		return false;
+		return (DeviceInfo.getSDKLevel() >= 9) && isReverseLandscape();
 	}
 
 	// support pre API LEVEL 9
@@ -1799,12 +1799,18 @@ public class BaseActivity extends Activity implements Settings {
         mScreenBlackpageDuration = screenBlackpageDuration;
     }
 
-    private static boolean mScreenForceEink = false;
+	public int SCREEN_TYPE_FORCE_NONE = 0;
+	public int SCREEN_TYPE_FORCE_EINK = 1;
+	public int SCREEN_TYPE_FORCE_EINK_COLOR = 2;
+    private static int mScreenTypeForce = 0;
     public static boolean getScreenForceEink() {
-        return BaseActivity.mScreenForceEink;
+        return BaseActivity.mScreenTypeForce > 0;
     }
-    public static void setScreenForceEink( boolean screenForceEink) {
-        BaseActivity.mScreenForceEink = screenForceEink;
+	public static int getScreenTypeForce() {
+		return BaseActivity.mScreenTypeForce;
+	}
+    public static void setScreenTypeForce(int screenTypeForce) {
+        BaseActivity.mScreenTypeForce = screenTypeForce;
     }
 
 	public void showToast(int stringResourceId) {
@@ -2499,9 +2505,9 @@ public class BaseActivity extends Activity implements Settings {
         } else if (key.equals(PROP_APP_SCREEN_BLACKPAGE_DURATION)) {
             setScreenBlackpageDuration(Utils.parseInt(value, 300));
         } else if (key.equals(PROP_APP_SCREEN_FORCE_EINK)) {
-            setScreenForceEink(Utils.parseInt(value, 0) == 0? false : true);
+            setScreenTypeForce(Utils.parseInt(value, 0));
         } else if (key.equals(PROP_APP_THEME)) {
-			if (DeviceInfo.isForceHCTheme(getScreenForceEink())) setCurrentTheme("WHITE");
+			if (DeviceInfo.isForceHCTheme(getScreenTypeForce())) setCurrentTheme("WHITE");
 			else setCurrentTheme(value);
         } else if (key.equals(PROP_APP_SCREEN_ORIENTATION)) {
 			setScreenOrientation(Utils.parseInt(value, 0));
@@ -3262,9 +3268,9 @@ public class BaseActivity extends Activity implements Settings {
 
 			props.applyDefault(ReaderView.PROP_APP_TTS_USE_AUDIOBOOK, "1");
 
-			props.applyDefault(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "WHITE" : "GRAY1");
-	        props.applyDefault(ReaderView.PROP_APP_THEME_DAY, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "WHITE" : "LIGHT");
-	        props.applyDefault(ReaderView.PROP_APP_THEME_NIGHT, DeviceInfo.isForceHCTheme(getScreenForceEink()) ? "BLACK" : "DARK");
+			props.applyDefault(ReaderView.PROP_APP_THEME, DeviceInfo.isForceHCTheme(getScreenTypeForce()) ? "WHITE" : "GRAY1");
+	        props.applyDefault(ReaderView.PROP_APP_THEME_DAY, DeviceInfo.isForceHCTheme(getScreenTypeForce()) ? "WHITE" : "LIGHT");
+	        props.applyDefault(ReaderView.PROP_APP_THEME_NIGHT, DeviceInfo.isForceHCTheme(getScreenTypeForce()) ? "BLACK" : "DARK");
 	        props.applyDefault(ReaderView.PROP_APP_SELECTION_PERSIST, "0");
 	        props.applyDefault(ReaderView.PROP_APP_SCREEN_BACKLIGHT_LOCK, "3");
 	        if ("1".equals(props.getProperty(ReaderView.PROP_APP_SCREEN_BACKLIGHT_LOCK)))
@@ -3387,7 +3393,7 @@ public class BaseActivity extends Activity implements Settings {
             props.applyDefault(ReaderView.PROP_APP_SCREEN_FORCE_EINK, "0");
 
             props.applyDefault(ReaderView.PROP_NIGHT_MODE, "0");
-	        if (DeviceInfo.isForceHCTheme(getScreenForceEink())) {
+	        if (DeviceInfo.isForceHCTheme(getScreenTypeForce())) {
 	        	props.applyDefault(ReaderView.PROP_PAGE_BACKGROUND_IMAGE, Engine.NO_TEXTURE.id);
 	        } else {
 	        	if ( props.getBool(ReaderView.PROP_NIGHT_MODE, false) )
@@ -3744,7 +3750,7 @@ public class BaseActivity extends Activity implements Settings {
 
 	public int getTextColor(int setColor) {
 		Boolean custIcons = settings().getBool(PROP_APP_ICONS_IS_CUSTOM_COLOR, false);
-		if (DeviceInfo.isForceHCTheme(getScreenForceEink())) custIcons = false;
+		if (DeviceInfo.isForceHCTheme(getScreenTypeForce())) custIcons = false;
 		int custColor = settings().getColor(PROP_APP_ICONS_CUSTOM_COLOR, 0x000000);
 		TypedArray a = this.getTheme().obtainStyledAttributes(new int[]
 				{R.attr.isTintedIcons, R.attr.colorIcon});
@@ -3763,7 +3769,7 @@ public class BaseActivity extends Activity implements Settings {
 							  boolean nightEInk) {
 		if (o == null) return;
 		Boolean custIcons = settings().getBool(PROP_APP_ICONS_IS_CUSTOM_COLOR, false);
-		if (DeviceInfo.isForceHCTheme(getScreenForceEink())) custIcons = false;
+		if (DeviceInfo.isForceHCTheme(getScreenTypeForce())) custIcons = false;
 		//Boolean nightEInk = settings().getBool(BaseActivity.PROP_NIGHT_MODE, false) && getScreenForceEink();
 		int custColor = settings().getColor(PROP_APP_ICONS_CUSTOM_COLOR, 0x000000);
 		if (nightEInk) {

@@ -107,7 +107,7 @@ public class CRToolBar extends ViewGroup {
 		if ((!useBackgrColor) && (!nightEInk)) mActivity.tintViewIcons(v, true);
 		else {
 			Boolean custIcons = mActivity.settings().getBool(BaseActivity.PROP_APP_ICONS_IS_CUSTOM_COLOR, false);
-			if (DeviceInfo.isForceHCTheme(BaseActivity.getScreenForceEink())) custIcons = false;
+			if (DeviceInfo.isForceHCTheme(BaseActivity.getScreenTypeForce())) custIcons = false;
 			int custColor = mActivity.settings().getColor(BaseActivity.PROP_APP_ICONS_CUSTOM_COLOR, 0x000000);
 //			if (nightEInk) {
 //				custIcons = true;
