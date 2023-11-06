@@ -324,7 +324,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 //		log.i("accel service: " + s);
 		int ornt = deviceOrientation.getOrientation();
 		if (sensorPrevRot == -1) sensorPrevRot = ornt;
-		if (sensorCurRot == -1) sensorCurRot = ornt;
+		if (sensorCurRot == -1) {
+			sensorCurRot = ornt;
+		}
         if (sensorCurRot != ornt) {
             sensorPrevRot = sensorCurRot;
 			sensorCurRot = ornt;
@@ -2637,7 +2639,10 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				if (mReaderView != null)
 					mReaderView.stopAutoScroll();
 			mPreviousFrame = mCurrentFrame;
-			log.i("New current frame: " + newFrame.getClass());
+			if ((newFrame.getClass()) != null)
+				log.i("New current frame: " + newFrame.getClass());
+			else
+				log.i("New current frame: null");
 			if (mCurrentFrame == mBrowserFrame) {
 				FileBrowser.mListPosCacheOld = (HashMap<String, Integer>) FileBrowser.mListPosCache.clone();
 			}
@@ -3542,6 +3547,25 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		});
 	}
 
+	public void setBookRateAndReadingState(FileInfo book1, int rate, int state) {
+		Services.getHistory().getOrCreateBookInfo(getDB(), book1, bookInfo -> {
+			book1.setRate(rate);
+			book1.setReadingState(state);
+			BookInfo bi = new BookInfo(book1);
+			getDB().saveBookInfo(bi);
+			getDB().flush();
+			if (bookInfo.getFileInfo() != null) {
+				bookInfo.getFileInfo().setRate(rate);
+				bookInfo.getFileInfo().setReadingState(state);
+				if (bookInfo.getFileInfo().parent != null)
+					directoryUpdated(bookInfo.getFileInfo().parent, bookInfo.getFileInfo());
+			}
+			BookInfo bi2 = Services.getHistory().getBookInfo(book1);
+			if (bi2 != null)
+				bi2.getFileInfo().setFileProperties(book1);
+		});
+	}
+
 	public boolean willBeCheckAskReading(FileInfo book, PositionProperties props, int pagesCnt) {
 		if ((!book.askedMarkReading) && (book.getReadingState() != FileInfo.STATE_READING) && (props.pageNumber + 1 < 15)) {
 			if (!book.arrReadBeg.contains(props.pageNumber)) book.arrReadBeg.add(props.pageNumber);
@@ -3738,7 +3762,8 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 			FileInfo downloadDir = Services.getScanner().getDownloadDirectory();
 			String subdir = null;
 			if (!StrUtils.isEmptyStr(item.getAuthors())) {
-				subdir = Utils.transcribeFileName(item.getAuthors());
+				int naming = settings().getInt(Settings.PROP_APP_CLOUD_SAVE_FOLDER_NAMING, 0);
+				subdir = Utils.transcribeFileName(item.getAuthors(), naming);
 				if (subdir.length() > FileBrowser.MAX_SUBDIR_LEN)
 					subdir = subdir.substring(0, FileBrowser.MAX_SUBDIR_LEN);
 			} else {
@@ -4209,37 +4234,61 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 		dlg.show();
 	}
 
-	public String getReadingTimeLeft(FileInfo fi, boolean defString) {
+	public String[] getReadingTimeLeft(FileInfo fi, boolean defString) {
 		String sLeft = getString(R.string.not_enough_stat_data);
+		String sLeftToChapter = getString(R.string.not_enough_stat_data);
 		if (!defString) sLeft = "";
+		if (!defString) sLeftToChapter = "";
 		try {
 			ReadingStatRes sres = getReaderView().getBookInfo().getFileInfo().calcStats();
 			double speedKoef = sres.val;
 			int pagesLeft;
+			int pagesLeftToChapter;
 			double msecLeft;
+			double msecLeftToChapter;
 			double msecFivePages;
 			if (speedKoef > 0.000001) {
 				PositionProperties currpos = getReaderView().getDoc().getPositionProps(null, true);
 				if (fi.symCount>0) {
 					pagesLeft = getReaderView().getDoc().getPageCount() - currpos.pageNumber;
+					pagesLeftToChapter = currpos.pagesLeftToChapter;
 					double msecAllPages;
 					msecAllPages = speedKoef * (double) fi.symCount;
 					msecFivePages = msecAllPages / ((double) getReaderView().getDoc().getPageCount()) * 5.0;
 					msecLeft = (((double) pagesLeft) / 5.0) * msecFivePages;
+					msecLeftToChapter = (((double) pagesLeftToChapter) / 5.0) * msecFivePages;
 					sLeft = " ";
+					sLeftToChapter = " ";
 					int minutes = (int) ((msecLeft / 1000) / 60);
 					int hours = (int) ((msecLeft / 1000) / 60 / 60);
-					if (hours>0) {
+					int minutesToChapter = (int) ((msecLeftToChapter / 1000) / 60);
+					int hoursToChapter = (int) ((msecLeftToChapter / 1000) / 60 / 60);
+					if (hours > 0) {
 						minutes = minutes - (hours * 60);
 						if (!defString)
-							sLeft = sLeft + hours + "h "+minutes+"m";
+							sLeft = sLeft + hours + "h " + minutes + "m";
 						else
-							sLeft = sLeft + hours + "h "+minutes+"min (calc count: "+ sres.cnt +")";
+							sLeft = sLeft + hours + "h " + minutes + "min (calc count: " +
+									sres.cnt + ")";
 					} else {
 						if (!defString)
 							sLeft = sLeft + minutes + "m";
 						else
-							sLeft = sLeft + minutes + "min (calc count: "+ sres.cnt +")";
+							sLeft = sLeft + minutes + "min (calc count: "
+									+ sres.cnt + ")";
+					}
+					if (hoursToChapter > 0) {
+						minutesToChapter = minutesToChapter - (hoursToChapter * 60);
+						if (!defString)
+							sLeftToChapter = sLeftToChapter + hoursToChapter + "h "+minutesToChapter + "m";
+						else
+							sLeftToChapter = sLeftToChapter + hoursToChapter + "h "+minutesToChapter +
+									"min (calc count: "+ sres.cnt + ")";
+					} else {
+						if (!defString)
+							sLeftToChapter = sLeftToChapter + minutesToChapter + "m";
+						else
+							sLeftToChapter = sLeftToChapter + minutesToChapter + "min (calc count: " + sres.cnt + ")";
 					}
 				} else {
 					if (currpos.pageNumber > 4) {
@@ -4250,11 +4299,16 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 								StrUtils.getNonEmptyStr(getReaderView().getDoc().getPageText(false, currpos.pageNumber - 5), true).length();
 						msecFivePages = speedKoef * (double) fivePages;
 						pagesLeft = getReaderView().getDoc().getPageCount() - currpos.pageNumber;
+						pagesLeftToChapter = currpos.pagesLeftToChapter;
 						msecLeft = (((double) pagesLeft) / 5.0) * msecFivePages;
+						msecLeftToChapter = (((double) pagesLeftToChapter) / 5.0) * msecFivePages;
 						sLeft = " ";
+						sLeftToChapter = " ";
 						int minutes = (int) ((msecLeft / 1000) / 60);
 						int hours = (int) ((msecLeft / 1000) / 60 / 60);
-						if (hours>0) {
+						int minutesToChapter = (int) ((msecLeftToChapter / 1000) / 60);
+						int hoursToChapter = (int) ((msecLeftToChapter / 1000) / 60 / 60);
+						if (hours > 0) {
 							minutes = minutes - (hours * 60);
 							if (!defString)
 								sLeft = sLeft + hours + "h "+minutes + "m";
@@ -4266,13 +4320,27 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 							else
 								sLeft = sLeft + minutes + "min (calc count: "+ sres.cnt +")";
 						}
+						if (hoursToChapter > 0) {
+							minutesToChapter = minutesToChapter - (hoursToChapter * 60);
+							if (!defString)
+								sLeftToChapter = sLeftToChapter + hoursToChapter + "h " + minutesToChapter + "m";
+							else
+								sLeftToChapter = sLeftToChapter + hoursToChapter + "h " + minutesToChapter +
+										"min (calc count: " + sres.cnt + ")";
+						} else {
+							if (!defString)
+								sLeftToChapter = sLeftToChapter + minutesToChapter + "m";
+							else
+								sLeftToChapter = sLeftToChapter + minutesToChapter + "min (calc count: " +
+										sres.cnt + ")";
+						}
 					}
 				}
 			}
 		} catch (Exception e) {
 			log.e("Min left error");
 		}
-		return sLeft;
+		return new String[] {sLeft, sLeftToChapter};
 	}
 
 	public void bookInfoAddPublisher(FileInfo fi, ArrayList<BookInfoEntry> itemsBook) {
@@ -4474,8 +4542,11 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 							itemsBook.add(new BookInfoEntry("book.symcount", ""+fi.symCount,"text"));
 							itemsBook.add(new BookInfoEntry("book.wordcount", ""+fi.wordCount,"text"));
 							itemsBook.add(new BookInfoEntry("book.sentenceinfo", "_","text"));
-							String sLeft = getReadingTimeLeft(fi,true);
-							itemsBook.add(new BookInfoEntry("book.minleft", sLeft,"text"));
+							String[] sLeft = getReadingTimeLeft(fi,true);
+							if (sLeft.length == 2) {
+								itemsBook.add(new BookInfoEntry("book.minleft", sLeft[0], "text"));
+								itemsBook.add(new BookInfoEntry("book.minlefttochapter", sLeft[1], "text"));
+							}
 							itemsBook.add(new BookInfoEntry("section", "section.book_document","section"));
 							if (!StrUtils.isEmptyStr(fi.docauthor)) {
 								itemsBook.add(new BookInfoEntry("book.docauthor", fi.docauthor,"text"));

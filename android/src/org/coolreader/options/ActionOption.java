@@ -1,5 +1,6 @@
 package org.coolreader.options;
 
+import android.annotation.SuppressLint;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -32,14 +33,15 @@ public class ActionOption extends ListOption {
 		return R.layout.option_value;
 	}
 
+	@SuppressLint("UseCompatLoadingForDrawables")
 	protected void updateItemContents(final View layout, final OptionsDialog.Three item, final ListView listView, final int position ) {
 		super.updateItemContents(layout, item, listView, position);
 		ImageView img = (ImageView) layout.findViewById(R.id.option_value_icon);
 		ImageView imgAddInfo = (ImageView) layout.findViewById(R.id.btn_option_add_info);
 		List<ReaderAction> actions = ReaderAction.getAvailActions(true);
-		for ( ReaderAction a : actions )
+		for (ReaderAction a : actions)
 			if (item.value.equals(a.id)) {
-				if (a.getIconId()!=0) {
+				if (a.getIconId() != 0) {
 					img.setImageDrawable(mActivity.getResources().getDrawable(
 							a.getIconId()));
 					mActivity.tintViewIcons(img, true);

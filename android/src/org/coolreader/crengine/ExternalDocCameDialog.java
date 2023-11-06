@@ -36,7 +36,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -276,7 +275,7 @@ public class ExternalDocCameDialog extends BaseDialog {
 		tl.removeView(trowExists1);
 		tl.removeView(trowExists2);
 		tl.removeView(trowExists3);
-		Utils.hideView(trMoveToLib);
+		Utils.removeView(trMoveToLib);
 	}
 
 	private void hideExistingHttpControls(ViewGroup view) {

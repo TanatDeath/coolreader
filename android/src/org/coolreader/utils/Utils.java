@@ -23,7 +23,6 @@ import java.util.TimeZone;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
-import org.coolreader.crengine.BookInfoEntry;
 import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.DocumentFormat;
@@ -688,6 +687,14 @@ public class Utils {
 		}
 	}
 
+	public static String formatLastPositionShort(Activity activity, Bookmark pos) {
+		if ( pos!=null && pos.getPercent() > 0) {
+			return formatPercent(pos.getPercent());
+		} else {
+			return "";
+		}
+	}
+
 	public static String formatReadingState(Activity activity, FileInfo item) {
 		String state = "";
 		if (item.getRate() > 0 && item.getRate() <= 5) {
@@ -915,6 +922,17 @@ public class Utils {
 		return buf.toString();
 	}
 
+	public static String transcribeFileName(String fileName, int naming) {
+		if (naming == 0) return transcribeFileName(fileName);
+		String[] illegal = new String[]{"#", "<", ">", "$", "+", "%", "!", "`", "&", "*",
+				"'", "\"", "|", "{", "?", "=", "}", "/", "\\", ":", "@"};
+		String res = StrUtils.getNonEmptyStr(fileName, true);
+		for (String s: illegal) {
+			res = res.replace(s, " ");
+		}
+		return res.trim();
+	}
+
 	final static OPDSUtil.SubstTable[] substTables = {
 		new OPDSUtil.SubstTable(0x430, new String[]{"a", "b", "v", "g", "d", "e", "zh", "z", "i", "j", "k", "l", "m", "n", "o", "p", "r", "s", "t", "u", "f", "h", "c", "ch", "sh", "sch", "'", "y", "i", "e", "yu", "ya"}),
 		new OPDSUtil.SubstTable(0x410, new String[]{"A", "B", "V", "G", "D", "E", "Zh", "Z", "I", "J", "K", "L", "M", "N", "O", "P", "R", "S", "T", "U", "F", "H", "C", "Ch", "Sh", "Sch", "'", "Y", "I", "E", "Yu", "Ya"}),
@@ -1133,7 +1151,7 @@ public class Utils {
 		return getFileNameWOExtension(file.getName());
 	}
 
-	public static void hideView(View l) {
+	public static void removeView(View l) {
 		if (l == null) return;
 		try {
 			((ViewGroup) l.getParent()).removeView(l);
@@ -1578,6 +1596,13 @@ public class Utils {
 			}
 		}
 		return new Point(widthPixels, heightPixels);
+	}
+
+	public static void replaceView(View v1, View v2) {
+		ViewGroup parent = (ViewGroup) v1.getParent();
+		int index = parent.indexOfChild(v1);
+		parent.removeView(v1);
+		parent.addView(v2, index);
 	}
 
 }

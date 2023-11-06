@@ -18,7 +18,6 @@ import android.widget.Toast;
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.crengine.BackgroundThread;
-import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BookInfo;
 import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.FileInfo;
@@ -433,7 +432,7 @@ public class FontSelectOption extends ListOption
 					addItem(table, item, sAdd3, mActivity.getString(R.string.font_test_phrase3));
 			}
 		} else {
-			Utils.hideView(table);
+			Utils.removeView(table);
 		}
 	}
 }

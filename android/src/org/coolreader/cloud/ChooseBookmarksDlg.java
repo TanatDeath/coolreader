@@ -5,25 +5,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.yandex.YNDListFiles;
-import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.BaseListView;
-import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.Settings;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.database.DataSetObserver;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -262,8 +257,8 @@ public class ChooseBookmarksDlg extends BaseDialog {
 		btnThisDevice = (frame.findViewById(R.id.btn_this_device));
 		btnDateSort = (frame.findViewById(R.id.btn_date_sort));
 		btnPercentSort = (frame.findViewById(R.id.btn_percent_sort));
-		Utils.hideView(btnDateSort);
-		Utils.hideView(btnPercentSort	);
+		Utils.removeView(btnDateSort);
+		Utils.removeView(btnPercentSort	);
 		btnDeleteAll = (frame.findViewById(R.id.btn_delete_all_pos));
 		btnDeleteAll.setOnClickListener(v -> {
 			mCoolReader.askConfirmation(R.string.are_you_sure, () -> {
@@ -274,7 +269,7 @@ public class ChooseBookmarksDlg extends BaseDialog {
 			});
 		});
 		int iSyncVariant2 = mCoolReader.settings().getInt(Settings.PROP_CLOUD_SYNC_VARIANT, 0);
-		if (iSyncVariant2 != 2) Utils.hideView(btnDeleteAll);
+		if (iSyncVariant2 != 2) Utils.removeView(btnDeleteAll);
 	}
 
 	public ChooseBookmarksDlg(CoolReader activity, File[] matchingFiles)

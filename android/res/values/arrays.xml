@@ -391,6 +391,8 @@
     </integer-array>
 
     <integer-array name="browser_max_group_items">
+        <item>1</item>
+        <item>4</item>
         <item>8</item>
         <item>12</item>
         <item>15</item>
@@ -406,6 +408,8 @@
 
     <integer-array name="browser_max_group_items0">
         <item>0</item>
+        <item>1</item>
+        <item>4</item>
         <item>8</item>
         <item>12</item>
         <item>15</item>

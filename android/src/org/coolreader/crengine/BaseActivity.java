@@ -2004,19 +2004,19 @@ public class BaseActivity extends Activity implements Settings {
 	private boolean simplePopup = false;
 
 	public void showCenterPopup(View surface, String val, boolean forceRecreate) {
-		showPopup(surface, val, 500, forceRecreate, true, false);
+		showPopup(surface, val, 1000, forceRecreate, true, false);
 	}
 
 	public void showBottomPopup(View surface, String val, boolean forceRecreate) {
-		showPopup(surface, val, 500, forceRecreate, false, false);
+		showPopup(surface, val, 1000, forceRecreate, false, false);
 	}
 
 	public void showCenterPopupBrightness(View surface, String val, boolean forceRecreate) {
-		showPopup(surface, val, 500, forceRecreate, true, true);
+		showPopup(surface, val, 1000, forceRecreate, true, true);
 	}
 
 	public void showBottomPopupBrightness(View surface, String val, boolean forceRecreate) {
-		showPopup(surface, val, 500, forceRecreate, false, true);
+		showPopup(surface, val, 1000, forceRecreate, false, true);
 	}
 
 	long lastPopupTime = System.currentTimeMillis();
@@ -3327,6 +3327,7 @@ public class BaseActivity extends Activity implements Settings {
 			props.applyDefault(ReaderView.PROP_SHOW_PAGE_COUNT, "1");
 			props.applyDefault(ReaderView.PROP_SHOW_PAGES_TO_CHAPTER, "1");
 			props.applyDefault(ReaderView.PROP_SHOW_TIME_LEFT, "1");
+			props.applyDefault(ReaderView.PROP_SHOW_TIME_LEFT_TO_CHAPTER, "1");
 			props.applyDefault(ReaderView.PROP_FONT_KERNING_ENABLED, "0");		// by default disabled
 			props.applyDefault(ReaderView.PROP_FONT_SHAPING, "1");				// by default 'Light (HarfBuzz without ligatures)'
 			props.applyDefault(ReaderView.PROP_SHOW_TIME, "1");

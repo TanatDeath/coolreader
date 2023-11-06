@@ -106,6 +106,20 @@ public class FilebrowserOption extends SubmenuOption {
 			R.string.scan_depth2_add_info
 	};
 
+	int[] mCloudSaveFolderNaming = new int[] {
+			0, 1 //, 2, 3
+	};
+
+	int[] mCloudSaveFolderNamingTitles = new int[] {
+			R.string.cloud_save_folder_naming_0, R.string.cloud_save_folder_naming_1 //,
+			//R.string.cloud_save_folder_naming_2, R.string.cloud_save_folder_naming_3
+	};
+
+	int[] mCloudSaveFolderNamingAddInfos = new int[] {
+			R.string.cloud_save_folder_naming_0_add_info, R.string.cloud_save_folder_naming_1_add_info //,
+			//R.string.cloud_save_folder_naming_2_add_info, R.string.cloud_save_folder_naming_3_add_info
+	};
+
 	public static int[] mBrowserMaxGroupItems;
 
 	final BaseActivity mActivity;
@@ -198,6 +212,10 @@ public class FilebrowserOption extends SubmenuOption {
 				add(mZipScan, mZipScanTitles, mZipScanAddInfos).
 				setDefaultValue("0").setIconIdByAttr(R.attr.cr3_browser_folder_zip_drawable, R.drawable.icons8_zip));
 		listView.add(OptionsDialog.getOption(Settings.PROP_APP_FILE_BROWSER_SHOW_HIDDEN_DIRS, this.lastFilteredValue));
+		listView.add(new ListOption(mOwner, mActivity.getString(R.string.cloud_save_folder_naming),
+				Settings.PROP_APP_CLOUD_SAVE_FOLDER_NAMING, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+				add(mCloudSaveFolderNaming, mCloudSaveFolderNamingTitles, mCloudSaveFolderNamingAddInfos).
+				setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_folder_author, R.drawable.icons8_folder_author));
 		dlg.setView(listView);
 		dlg.show();
 	}
@@ -250,6 +268,9 @@ public class FilebrowserOption extends SubmenuOption {
 				mActivity.getString(R.string.detect_zip_2));
 		this.updateFilteredMark(mActivity.getString(R.string.detect_zip_add_info));
 		this.updateFilteredMark(mActivity.getString(R.string.show_hidden_dirs), Settings.PROP_APP_FILE_BROWSER_SHOW_HIDDEN_DIRS,
+				mActivity.getString(R.string.option_add_info_empty_text));
+		this.updateFilteredMark(mActivity.getString(R.string.cloud_save_folder_naming),
+				Settings.PROP_APP_CLOUD_SAVE_FOLDER_NAMING,
 				mActivity.getString(R.string.option_add_info_empty_text));
 		return this.lastFiltered;
 	}

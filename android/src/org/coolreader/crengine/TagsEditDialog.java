@@ -146,7 +146,7 @@ public class TagsEditDialog extends BaseDialog {
 		mTagText = mView.findViewById(R.id.tag_text);
 		mLblTagAction = mView.findViewById(R.id.lbl_tag_action);
 		mLblTagComment = mView.findViewById(R.id.lbl_tag_comment);
-		if (item == null) Utils.hideView(mLblTagComment);
+		if (item == null) Utils.removeView(mLblTagComment);
 		mBtnClearAction = mView.findViewById(R.id.tags_dlg_clear_action);
 		mBtnClearAction.setVisibility(View.INVISIBLE);
 		mBtnClearAction.setOnClickListener(v -> {

@@ -345,6 +345,10 @@ public class FileInfo implements Parcelable {
         return getBitValue(READING_STATE_SHIFT,READING_STATE_MASK);
     }
 
+	public static int getReadingState(FileInfo fi) {
+		return fi.getBitValue(fi, READING_STATE_SHIFT,READING_STATE_MASK);
+	}
+
 	/**
 	 * Set new reading state.
 	 * @param state is new reading state (one of STATE_XXX constants)
@@ -360,6 +364,10 @@ public class FileInfo implements Parcelable {
 	public int getRate() {
         return getBitValue(RATE_SHIFT, RATE_MASK);
     }
+
+	public static int getRate(FileInfo fi) {
+		return fi.getBitValue(fi, RATE_SHIFT, RATE_MASK);
+	}
 
 	/**
 	 * Set new rate.
@@ -420,6 +428,14 @@ public class FileInfo implements Parcelable {
     private int getBitValue(int shift, int mask) {
         return (flags >> shift) & mask;
     }
+
+	public static int getBitValue(FileInfo fi, int shift, int mask) {
+		return (fi.flags >> shift) & mask;
+	}
+
+	public static int getBitValue(int flags, int shift, int mask) {
+		return (flags >> shift) & mask;
+	}
 
     public String getTitleOrFileName() {
 		if (title != null && title.length() > 0)
@@ -1745,7 +1761,7 @@ public class FileInfo implements Parcelable {
 	}
 	
 	public String getAuthors() {
-		if (authors!=null) {
+		if (authors != null) {
 			String[] list = authors.split("\\|");
 			ArrayList<String> arrS = new ArrayList<String>();
 			for (String s : list) {

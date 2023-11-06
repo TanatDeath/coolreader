@@ -208,7 +208,8 @@ public class DeviceInfo {
 						|| BRAND.toLowerCase().contentEquals("maccentre")
 						|| BRAND.toLowerCase().contentEquals("maccenter")) &&
 				MODEL.length() > 0;
-		ONYX_HAVE_COLOR = MODEL.toLowerCase().startsWith("novaair") || MODEL.toLowerCase().contains("color");
+		ONYX_HAVE_COLOR = MODEL.toLowerCase().startsWith("novaair") || MODEL.toLowerCase().contains("color")
+			|| MODEL.toLowerCase().contains("tabultrac");
 		EINK_ENERGYSYSTEM = (
 			(BRAND.toLowerCase().contentEquals("energysistem")||BRAND.toLowerCase().contentEquals("energysystem")) &&  MODEL.toLowerCase().startsWith("ereader"));
 		//MANUFACTURER -DNS, DEVICE -BK6004C, MODEL - DNS Airbook EGH602, PRODUCT - BK6004C

@@ -237,6 +237,17 @@ public class DocView {
 	}
 
 	/**
+	 * Set time left to chapter
+	 * @param time_left_to_chapter
+	 * @return
+	 */
+	public boolean setTimeLeftToChapter(String time_left_to_chapter) {
+		synchronized(mutex) {
+			return setTimeLeftToChapterInternal(time_left_to_chapter);
+		}
+	}
+
+	/**
 	 * Get settings from native object.
 	 * @return
 	 */
@@ -588,5 +599,7 @@ public class DocView {
 	private ReaderCallback readerCallback;  // used from JNI
 
 	private native boolean setTimeLeftInternal(String time_left);
+
+	private native boolean setTimeLeftToChapterInternal(String time_left_to_chapter);
 
 }

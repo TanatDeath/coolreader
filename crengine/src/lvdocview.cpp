@@ -202,7 +202,8 @@ LVDocView::LVDocView(int bitsPerPixel, bool noDefaultDocument) :
 					| PGHDR_BATTERY | PGHDR_PAGE_COUNT | PGHDR_AUTHOR
 					| PGHDR_TITLE
 					| PGHDR_PAGES_TO_CHAPTER
-					| PGHDR_TIME_LEFT), m_showCover(true)
+					| PGHDR_TIME_LEFT
+				    | PGHDR_TIME_LEFT_TO_CHAPTER), m_showCover(true)
 #if CR_INTERNAL_PAGE_ORIENTATION==1
 			, m_rotateAngle(CR_ROTATE_ANGLE_0)
 #endif
@@ -2300,9 +2301,10 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
                     pageinfo += " / ";
                 pageinfo += fmt::decimal(pageCount);
             }
-			if (phi & PGHDR_PAGES_TO_CHAPTER) {
+			if ((phi & PGHDR_PAGES_TO_CHAPTER) || (phi & PGHDR_TIME_LEFT_TO_CHAPTER)) {
 				int curBound = 0;
 				int curChapterLeft = 9999;
+				m_curChapterLeft = 0;
 				int sbound_index = 0;
 				while (sbound_index < sbounds_pages.length()) {
 					curBound = sbounds_pages[sbound_index];
@@ -2311,13 +2313,18 @@ void LVDocView::drawPageHeader(LVDrawBuf * drawbuf, const lvRect & headerRc,
 					sbound_index++;
 				}
 				if ((sbounds_pages.length() > 0) && (curChapterLeft != 9999)) {
-					if ( !pageinfo.empty() ) pageinfo += " / ";
-					pageinfo += "-";
-					pageinfo += fmt::decimal(curChapterLeft);
+					m_curChapterLeft = curChapterLeft;
+					if (phi & PGHDR_PAGES_TO_CHAPTER) {
+						if (!pageinfo.empty()) pageinfo += " / ";
+						pageinfo += "-";
+						pageinfo += fmt::decimal(curChapterLeft);
+					}
 				}
 			}
             if (phi & PGHDR_TIME_LEFT)
 			    if (m_time_left != "") pageinfo += " " + m_time_left;
+			if (phi & PGHDR_TIME_LEFT_TO_CHAPTER)
+				if (m_time_left_to_chapter != "") pageinfo += " " + m_time_left_to_chapter;
 			pageinfo1 = pageinfo;
             if (phi & PGHDR_PERCENT) {
                 if ( !pageinfo.empty() )
@@ -2553,6 +2560,7 @@ void LVDocView::drawPageTo(LVDrawBuf * drawbuf, LVRendPageInfo & page,
                 phi &= ~PGHDR_CLOCK;
                 phi &= ~PGHDR_PAGES_TO_CHAPTER;
                 phi &= ~PGHDR_TIME_LEFT;
+				phi &= ~PGHDR_TIME_LEFT_TO_CHAPTER;
             }
         }
         lvRect info;
@@ -4674,6 +4682,8 @@ bool LVDocView::LoadDocument(const lChar32 * fname, bool metadataOnly) {
 	Clear();
 
     m_time_left = "";
+	m_time_left_to_chapter = "";
+	m_curChapterLeft = 0;
 
     CRLog::debug("LoadDocument(%s) textMode=%s", LCSTR(lString32(fname)), getTextFormatOptions()==txt_format_pre ? "pre" : "autoformat");
 
@@ -4855,6 +4865,8 @@ bool LVDocView::LoadDocument( LVStreamRef stream, const lChar32 * contentPath, b
 		return false;
 
     m_time_left = "";
+	m_time_left_to_chapter = "";
+	m_curChapterLeft = 0;
 
 	Clear();
 
@@ -5003,6 +5015,8 @@ void LVDocView::createDefaultDocument(lString32 title, lString32 message) {
 bool LVDocView::loadDocumentInt(LVStreamRef stream, bool metadataOnly) {
 
     m_time_left = "";
+	m_time_left_to_chapter = "";
+	m_curChapterLeft = 0;
 
 	m_swapDone = false;
 
@@ -7461,6 +7475,7 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
 	props->setBoolDef(PROP_SHOW_POS_PERCENT, false);
 	props->setBoolDef(PROP_STATUS_CHAPTER_MARKS, true);
 	props->setBoolDef(PROP_SHOW_TIME_LEFT, true);
+	props->setBoolDef(PROP_SHOW_TIME_LEFT_TO_CHAPTER, true);
 
 	static int margin_options[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 18, 20, 23, 25, 28, 30, 35, 40, 45, 50, 55,
 								   60, 70, 80, 90, 100, 110, 120, 130, 150, 200, 300};
@@ -7521,10 +7536,11 @@ void LVDocView::propsUpdateDefaults(CRPropRef props) {
 
 void LVDocView::setStatusMode(int pos, bool showClock, bool showTitle,
         bool showBattery, bool showChapterMarks, bool showPercent, bool showPageNumber, bool showPageCount, bool showPagesToChapter,
-			bool showTimeLeft) {
-	CRLog::debug("LVDocView::setStatusMode(%d, %s %s %s %s)", pos,
+			bool showTimeLeft, bool showTimeLeftToChapter) {
+	CRLog::debug("LVDocView::setStatusMode(%d, %s %s %s %s %s %s)", pos,
 			showClock ? "clock" : "", showTitle ? "title" : "",
-			showBattery ? "battery" : "", showChapterMarks ? "marks" : "");
+			showBattery ? "battery" : "", showChapterMarks ? "marks" : "",
+			showTimeLeft ? "timeLeft" : "", showTimeLeftToChapter ? "timeLeftToChapter" : "");
     setPageHeaderPosition(pos);
     setPageHeaderInfo(
         (showPageNumber ? PGHDR_PAGE_NUMBER : 0)
@@ -7537,6 +7553,7 @@ void LVDocView::setStatusMode(int pos, bool showClock, bool showTitle,
         | (showPercent ? PGHDR_PERCENT : 0)
 		| (showPagesToChapter ? PGHDR_PAGES_TO_CHAPTER : 0)
 		| (showTimeLeft ? PGHDR_TIME_LEFT : 0)
+	    | (showTimeLeftToChapter ? PGHDR_TIME_LEFT_TO_CHAPTER : 0)
     );
 }
 
@@ -7704,6 +7721,7 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
                    || name == PROP_SHOW_PAGE_COUNT || name == PROP_SHOW_PAGE_NUMBER
 				   || name == PROP_SHOW_PAGES_TO_CHAPTER
                    || name == PROP_SHOW_TIME_LEFT
+				   || name == PROP_SHOW_TIME_LEFT_TO_CHAPTER
 				   ) {
             m_props->setString(name.c_str(), value);
             setStatusMode(m_props->getIntDef(PROP_STATUS_LINE, 1),
@@ -7715,7 +7733,8 @@ CRPropRef LVDocView::propsApply(CRPropRef props) {
                           m_props->getBoolDef(PROP_SHOW_PAGE_NUMBER, true),
                           m_props->getBoolDef(PROP_SHOW_PAGE_COUNT, true),
 						  m_props->getBoolDef(PROP_SHOW_PAGES_TO_CHAPTER, true),
-                            m_props->getBoolDef(PROP_SHOW_TIME_LEFT, true)
+                          m_props->getBoolDef(PROP_SHOW_TIME_LEFT, true),
+						  m_props->getBoolDef(PROP_SHOW_TIME_LEFT_TO_CHAPTER, true)
                           );
             //} else if ( name==PROP_BOOKMARK_ICONS ) {
             //    enableBookmarkIcons( value==U"1" );

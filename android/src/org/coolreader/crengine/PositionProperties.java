@@ -12,6 +12,7 @@ public class PositionProperties {
 	public int charCount;
 	public int imageCount;
 	public String pageText;
+	public int pagesLeftToChapter;
 	
 	
 	public PositionProperties(PositionProperties v) {
@@ -25,6 +26,7 @@ public class PositionProperties {
 		pageMode = v.pageMode;
 		charCount = v.charCount;
 		imageCount = v.imageCount;
+		pagesLeftToChapter = v.pagesLeftToChapter;
 	}
 
 	public PositionProperties() {

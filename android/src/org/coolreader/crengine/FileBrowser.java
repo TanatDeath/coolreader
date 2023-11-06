@@ -1768,8 +1768,10 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						downloadDir = Services.getScanner().getDownloadDirectory();
 						log.d("onDownloadStart: after getDownloadDirectory()" );
 						String subdir = null;
+						//asdf - transcribe
+						int naming = mActivity.settings().getInt(Settings.PROP_APP_CLOUD_SAVE_FOLDER_NAMING, 0);
 						if (!StrUtils.isEmptyStr(fileOrDir.getAuthors())) {
-							subdir = Utils.transcribeFileName(fileOrDir.getAuthors());
+							subdir = Utils.transcribeFileName(fileOrDir.getAuthors(), naming);
 							if (subdir.length() > MAX_SUBDIR_LEN)
 								subdir = subdir.substring(0, MAX_SUBDIR_LEN);
 						} else {
@@ -2700,9 +2702,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					// CR implementation of genres - commenting
 					//if (item.isBooksByGenreRoot() || item.isBooksByGenreDir())
 					//	image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_browser_folder_authors_drawable, R.drawable.cr3_browser_folder_authors));
-					if (item.isLitresPaginationNextPage())
+					if (item.isLitresPaginationNextPage()) {
 						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_button_next_drawable, R.drawable.icons8_forward));
-					else if (item.isLitresPaginationPrevPage())
+					} else if (item.isLitresPaginationPrevPage())
 						image.setImageResource(Utils.resolveResourceIdByAttr(mActivity, R.attr.cr3_button_prev_drawable, R.drawable.icons8_back));
 					else if (item.isBooksByAuthorDir() || item.isBooksByAuthorRoot() || item.isBooksByLitresPersonDir()
 							|| item.isBooksByLitresPersonRoot() || item.isBooksByCalibreAuthorDir())
@@ -2917,9 +2919,9 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					}
 					if (isSimple) {
 						String fn = item.getFileNameToDisplay2();
-						setText( filename, fn , 0);
+						setText(filename, fn, 0);
 					} else {
-						setText( author, Utils.formatAuthors(item.getAuthors()), colorIcon );
+						setText(author, Utils.formatAuthors(item.getAuthors()), colorIcon);
                         //setText( author, item.authors );
                         String seriesName = Utils.formatSeries(item.series, item.seriesNumber);
 						String genres = Utils.getGenreText(mActivity, item, false);
@@ -3007,17 +3009,22 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 //						field2.setVisibility(VISIBLE);
 //						field3.setVisibility(VISIBLE);
 						String state = Utils.formatReadingState(mActivity, item);
+						String pos = " " + Utils.formatLastPositionShort(mActivity, mHistory.getLastPos(item));
 						if (field1 != null) {
 							if (fieldState == null)	{
-								field1.setText(onlineBookInfo + "  " + state + " " + Utils.formatFileInfo(mActivity, item));
+								field1.setText(onlineBookInfo + "  " + state + pos + " " + Utils.formatFileInfo(mActivity, item));
 								field1.setTextColor(mActivity.getTextColor(colorIcon));
 							} else {
-								field1.setText(onlineBookInfo + " " + Utils.formatFileInfo(mActivity, item));
+								field1.setText(onlineBookInfo  + pos + " " + Utils.formatFileInfo(mActivity, item));
 								field1.setTextColor(mActivity.getTextColor(colorIcon));
 							}
 						}
 						if (fieldState != null) {
-							fieldState.setText(state);
+							if (field1 == null) {
+								fieldState.setText(state + pos);
+							} else {
+								fieldState.setText(state);
+							}
 							int colorBlue = themeColors.get(R.attr.colorThemeBlue);
 							int colorGreen = themeColors.get(R.attr.colorThemeGreen);
 							int colorGray = themeColors.get(R.attr.colorThemeGray);
@@ -3032,12 +3039,12 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 								fieldState.setTextColor(colorGray);
 							}
 						}
-						//field2.setText(formatDate(pos!=null ? pos.getTimeStamp() : item.createTime));
-						if (field2 != null) {
+						if ((field2 != null) && (field1 == null) && (fieldState == null)) {
 							field2.setText(Utils.formatLastPosition(mActivity, mHistory.getLastPos(item)));
 							field2.setTextColor(mActivity.getTextColor(colorIcon));
 							field2.setBackgroundColor(colorGrayCT);
 						}
+						//field2.setText(formatDate(pos!=null ? pos.getTimeStamp() : item.createTime));
 						TextView fld = linkToFile;
 						if (fld == null) fld = field2;
 						if (fld != null) fld.setText("");

@@ -1947,10 +1947,22 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 	public void setTimeLeft() {
 		if (doc != null) {
 			String sLeft = "";
+			String sLeftToChapter = "";
 			if (getBookInfo() != null)
-				if (getBookInfo().getFileInfo() != null)
-					sLeft = mActivity.getReadingTimeLeft(getBookInfo().getFileInfo(), false);
+				if (getBookInfo().getFileInfo() != null) {
+					String[] left = mActivity.getReadingTimeLeft(getBookInfo().getFileInfo(), false);
+					if (left.length == 2) {
+						sLeft = left[0];
+						if (!StrUtils.isEmptyStr(left[1])) {
+							if (left[1].startsWith(" "))
+								sLeftToChapter = " -" + left[1].substring(1);
+							else
+								sLeftToChapter = "-" + left[1];
+						}
+					}
+				}
 			doc.setTimeLeft(sLeft);
+			doc.setTimeLeftToChapter(sLeftToChapter);
 			// for safe mode
 			if (doc.getCurPage()>2) {
 				String sFile = mActivity.getSettingsFileF(0).getParent() + "/cur_pos0.json";

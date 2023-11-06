@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/current_book"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dip"
+        android:layout_marginTop="4dip"
+        android:layout_marginRight="4dip"
+        android:layout_marginBottom="4dip"
+        android:minHeight="?android:attr/listPreferredItemHeight"
+        android:orientation="horizontal">
+
+    <ImageView
+            android:id="@+id/book_cover"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:drawable="?attr/cr3_browser_book_drawable"
+            android:gravity="center_vertical|left"
+            android:maxWidth="150dip"
+            android:maxHeight="200dip"
+            android:minWidth="100dip"
+            android:minHeight="120dip"
+            android:scaleType="center"
+            android:tag="tint" />
+
+
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|left"
+            android:orientation="horizontal">
+
+        <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|left"
+                android:layout_margin="7dip"
+                android:layout_weight="5"
+                android:gravity="center_vertical|left"
+                android:minHeight="?android:attr/listPreferredItemHeight"
+                android:orientation="vertical">
+
+            <!--TextView
+              android:id="@+id/lbl_current_book"
+              style="@style/TextAppearance.Medium"
+              android:text="Now reading:"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"/-->
+            <TextView
+                    android:id="@+id/lbl_book_author"
+                    style="@style/TextAppearance.Small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="2"
+                    android:singleLine="false"
+                    android:text="Author"
+                    android:textColor="?attr/colorIcon" />
+
+            <TextView
+                    android:id="@+id/lbl_book_title"
+                    style="@style/TextAppearance.Medium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="2"
+                    android:singleLine="false"
+                    android:text="Book Title"
+                    android:textColor="?attr/colorIcon" />
+
+            <TextView
+                    android:id="@+id/lbl_book_series"
+                    style="@style/TextAppearance.Small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Book Series"
+                    android:textColor="?attr/colorIcon" />
+
+            <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                <TextView
+                        android:id="@+id/lbl_book_info1"
+                        style="@style/TextAppearance.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="_" />
+
+                <TextView
+                        android:id="@+id/lbl_book_info"
+                        style="@style/TextAppearance.Small"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="File info"
+                        android:textColor="?attr/colorIcon" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ImageButton
+            android:id="@+id/btn_settings"
+            android:src="?attr/cr3_viewer_settings_drawable"
+            android:background="?attr/cr3_toolbar_button_background_drawable"
+            android:layout_gravity="top|right"
+            android:layout_width="?android:attr/listPreferredItemHeight"
+            android:layout_height="?android:attr/listPreferredItemHeight"
+            android:contentDescription="@string/mi_options"
+        /-->
+        <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+            <ImageButton
+                    android:id="@+id/btn_menu"
+                    android:layout_width="?android:attr/listPreferredItemHeight"
+                    android:layout_height="?android:attr/listPreferredItemHeight"
+                    android:layout_gravity="right"
+                    android:layout_weight="1"
+                    android:background="?attr/cr3_toolbar_button_background_drawable"
+                    android:contentDescription="@string/btn_toolbar_more"
+                    android:gravity="right"
+                    android:src="?attr/cr3_button_more_drawable"
+                    android:tag="tint" />
+
+            <ImageButton
+                    android:id="@+id/btn_dic"
+                    android:layout_width="?android:attr/listPreferredItemHeight"
+                    android:layout_height="?android:attr/listPreferredItemHeight"
+                    android:layout_gravity="right"
+                    android:layout_weight="1"
+                    android:background="?attr/cr3_toolbar_button_background_drawable"
+                    android:contentDescription="@string/btn_toolbar_more"
+                    android:gravity="right"
+                    android:src="?attr/attr_icons8_google_translate"
+                    android:tag="tint" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

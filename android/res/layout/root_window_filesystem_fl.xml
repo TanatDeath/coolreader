@@ -1,0 +1,8 @@
+<org.coolreader.layouts.FlowLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/scroll_filesystem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dip"
+            android:orientation="vertical"
+            android:paddingLeft="3dip"
+            android:paddingRight="3dip"></org.coolreader.layouts.FlowLayout>

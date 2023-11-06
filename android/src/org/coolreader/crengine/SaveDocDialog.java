@@ -499,9 +499,11 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 						(edtFileExt.getText().toString().startsWith(".") ? edtFileExt.getText().toString() :
 							"." + edtFileExt.getText().toString());
 			}
-			if (mDoMove)
+			if (mDoMove) {
+				int naming = mActivity.settings().getInt(Settings.PROP_APP_CLOUD_SAVE_FOLDER_NAMING, 0);
 				tryToMoveThenOpen(this, mActivity, mExistingFileName, mFileDir,
-					toFileName, toDir);
+						toFileName, toDir, naming);
+			}
 			else
 				saveFile(toFileName, toDir, mUri);
 		});
@@ -516,7 +518,7 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 		mInflater = LayoutInflater.from(getContext());
 		ViewGroup view = (ViewGroup) mInflater.inflate(R.layout.save_doc_dialog, null);
 		TextView tvPath = view.findViewById(R.id.tv_path);
-		if (!mDoMove) Utils.hideView(tvPath);
+		if (!mDoMove) Utils.removeView(tvPath);
 		else tvPath.setText(mExistingFileName);
 		TableLayout mainTl = view.findViewById(R.id.table);
 		addFoldersNames(mainTl);
@@ -524,7 +526,8 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 		bAddControls = mActivity.settings().getBool(Settings.PROP_APP_SAVE_DOC_EXT_CONTROLS_SHOW, false);
 		setupAddControls(mainTl);
 		setupButtons(mainTl);
-		getAuthorSubdir(this);
+		int naming = mActivity.settings().getInt(Settings.PROP_APP_CLOUD_SAVE_FOLDER_NAMING, 0);
+		getAuthorSubdir(this, naming);
 		paintButtons();
 		setView(view);
 		BackgroundThread.instance().postGUI(() -> {
@@ -532,7 +535,7 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 		}, 300);
 	}
 
-	public static void getAuthorSubdir(BaseDialog bd) {
+	public static void getAuthorSubdir(BaseDialog bd, int naming) {
 		if (!(bd instanceof SaveDocDialog)) return;
 		SaveDocDialog sdd = (SaveDocDialog) bd;
 		if ((StrUtils.isEmptyStr(sdd.mExistingFileName)) || (StrUtils.isEmptyStr(sdd.mFileDir))) return;
@@ -543,7 +546,7 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 			bd.mActivity.getDB().getBookFlags(fileOrDir, fl -> {
 				String subdir = null;
 				if (!StrUtils.isEmptyStr(fileOrDir.getAuthors())) {
-					subdir = Utils.transcribeFileName(fileOrDir.getAuthors());
+					subdir = Utils.transcribeFileName(fileOrDir.getAuthors(), naming);
 					if (subdir.length() > FileBrowser.MAX_SUBDIR_LEN)
 						subdir = subdir.substring(0, FileBrowser.MAX_SUBDIR_LEN);
 				} else {
@@ -633,8 +636,9 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 					return;
 				}
 				if (addAuthorsFolder) {
+					int naming = mActivity.settings().getInt(Settings.PROP_APP_CLOUD_SAVE_FOLDER_NAMING, 0);
 					tryToMoveThenOpen(this, mActivity, result.getAbsolutePath(), result.getParent(),
-							toFileName, toDir);
+							toFileName, toDir, naming);
 				} else {
 					boolean setMarks = ((mChosenRate != 0) || (mChosenState != FileInfo.STATE_NEW));
 					if (setMarks)
@@ -664,7 +668,7 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 
 	public static void tryToMoveThenOpen(BaseDialog bd, CoolReader cr,
 										 String fromFileName, String fromDir,
-										 String toFileName, String toDir) {
+										 String toFileName, String toDir, int naming) {
 		String subdir = "";
 		if (bd instanceof SaveDocDialog) {
 			SaveDocDialog sdd = (SaveDocDialog) bd;
@@ -678,7 +682,7 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 			if (StrUtils.isEmptyStr(fileOrDir.getAuthors()))
 				Services.getEngine().scanBookProperties(fileOrDir);
 			if (!StrUtils.isEmptyStr(fileOrDir.getAuthors())) {
-				subdir = Utils.transcribeFileName(fileOrDir.getAuthors());
+				subdir = Utils.transcribeFileName(fileOrDir.getAuthors(), naming);
 				if (subdir.length() > FileBrowser.MAX_SUBDIR_LEN)
 					subdir = subdir.substring(0, FileBrowser.MAX_SUBDIR_LEN);
 			} else {

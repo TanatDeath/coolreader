@@ -2106,6 +2106,7 @@ JNIEXPORT jobject JNICALL Java_org_coolreader_crengine_DocView_getPositionPropsI
         CRIntField(v, "imageCount").set(p->_docview->getPageImageCount(range));
         CRStringField(v, "pageText").set(text);
     }
+	CRIntField(v,"pagesLeftToChapter").set(p->_docview->m_curChapterLeft);
     return obj;
 }
 
@@ -2568,6 +2569,12 @@ void DocViewNative::setTimeLeft( lString32 time_left )
 	_docview->m_time_left = time_left;
 }
 
+void DocViewNative::setTimeLeftToChapter( lString32 time_left_to_chapter )
+{
+	CRLog::info("Set time left to chapter %s", LCSTR(time_left_to_chapter));
+	_docview->m_time_left_to_chapter = time_left_to_chapter;
+}
+
 /*
  * Class:     org_coolreader_crengine_DocView
  * Method:    setTimeLeft
@@ -2585,6 +2592,26 @@ JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_DocView_setTimeLeftInter
 	DocViewCallback callback( _env, p->_docview, _this );
 	lString32 str = env.fromJavaString(s);
 	p->setTimeLeft(str);
+	return JNI_TRUE;
+}
+
+/*
+ * Class:     org_coolreader_crengine_DocView
+ * Method:    setTimeLeftToChapter
+ * Signature: (Ljava/lang/String;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_DocView_setTimeLeftToChapterInternal
+		(JNIEnv * _env, jobject _this, jstring s)
+{
+	CRJNIEnv env(_env);
+	DocViewNative * p = getNative(_env, _this);
+	if (!p) {
+		CRLog::error("Cannot get native view");
+		return JNI_FALSE;
+	}
+	DocViewCallback callback( _env, p->_docview, _this );
+	lString32 str = env.fromJavaString(s);
+	p->setTimeLeftToChapter(str);
 	return JNI_TRUE;
 }
 

@@ -87,7 +87,7 @@ public class FindNextDlg {
 		if (mSeekBar != null) {
 			mReaderView.getCurrentPositionProperties((props, positionText) -> {
 				if (props == null) {
-					Utils.hideView(mSeekBar);
+					Utils.removeView(mSeekBar);
 					return;
 				}
 				mSeekBar.setMax(props.pageCount);
@@ -173,8 +173,8 @@ public class FindNextDlg {
 		if (isEInk) Utils.setBtnBackground(mPanel.findViewById(R.id.search_goback), null, isEInk);
 
 		if (skim) {
-			Utils.hideView(mPanel.findViewById(R.id.search_btn_prev));
-			Utils.hideView(mPanel.findViewById(R.id.search_btn_next));
+			Utils.removeView(mPanel.findViewById(R.id.search_btn_prev));
+			Utils.removeView(mPanel.findViewById(R.id.search_btn_next));
 		}
 
 		mPanel.findViewById(R.id.search_btn_close).setOnClickListener(v -> {

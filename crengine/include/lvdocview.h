@@ -232,16 +232,17 @@ public:
 /// page header flags
 enum {
     PGHDR_NONE=0,
-    PGHDR_PAGE_NUMBER = 1,      // show current page number
-    PGHDR_PAGE_COUNT = 2,       // show total pages count
-    PGHDR_AUTHOR = 4,           // show book author
-    PGHDR_TITLE = 8,            // show book title
-    PGHDR_CLOCK = 16,           // show current clock
-    PGHDR_BATTERY = 32,         // show current battery charge
-    PGHDR_CHAPTER_MARKS = 64,   // show chapter marks
-    PGHDR_PERCENT = 128,        // show current posistion in percent
-    PGHDR_PAGES_TO_CHAPTER=256, // show pages left to chapter end
-    PGHDR_TIME_LEFT=512         // show time left to book end
+    PGHDR_PAGE_NUMBER = 1,              // show current page number
+    PGHDR_PAGE_COUNT = 2,               // show total pages count
+    PGHDR_AUTHOR = 4,                   // show book author
+    PGHDR_TITLE = 8,                    // show book title
+    PGHDR_CLOCK = 16,                   // show current clock
+    PGHDR_BATTERY = 32,                 // show current battery charge
+    PGHDR_CHAPTER_MARKS = 64,           // show chapter marks
+    PGHDR_PERCENT = 128,                // show current posistion in percent
+    PGHDR_PAGES_TO_CHAPTER=256,         // show pages left to chapter end
+    PGHDR_TIME_LEFT=512,                // show time left to book end
+    PGHDR_TIME_LEFT_TO_CHAPTER=1024     // show time left to book end
 };
 
 
@@ -435,6 +436,9 @@ protected:
     void getSectionBoundsInt( LVArray<int>& bounds, ldomNode* node , lUInt16 section_id, int target_level, int level );
 public:
     lString32 m_time_left;
+    lString32 m_time_left_to_chapter;
+    int m_curChapterLeft;
+
     /// get outer (before margins are applied) page rectangle
     virtual void getPageRectangle( int pageIndex, lvRect & pageRect ) const;
     /// get screen rectangle for specified cursor position, returns false if not visible
@@ -443,7 +447,7 @@ public:
     void setStatusMode( int pos, bool showClock, bool showTitle,
             bool showBattery, bool showChapterMarks, bool showPercent,
             bool showPageNumber, bool showPageCount, bool showPagesToChapter,
-            bool showTimeLeft);
+            bool showTimeLeft, bool showTimeLeftToChapter);
     /// draw to specified buffer by either Y pos or page number (unused param should be -1)
     void Draw( LVDrawBuf & drawbuf, int pageTopPosition, int pageNumber, bool rotate, bool autoresize = true);
     /// ensure current position is set to current bookmark value

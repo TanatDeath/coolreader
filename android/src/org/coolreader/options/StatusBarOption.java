@@ -138,6 +138,10 @@ public class StatusBarOption extends SubmenuOption {
 				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue, false).
 				setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_page_num,
 				R.drawable.icons8_page_num));
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_page_show_titlebar_time_left_to_chapter), Settings.PROP_SHOW_TIME_LEFT_TO_CHAPTER,
+				mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue, false).
+				setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_page_num,
+						R.drawable.icons8_page_num));
 		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_page_show_titlebar_percent), Settings.PROP_SHOW_POS_PERCENT, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue, false).
 				setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_page_percent,
 				R.drawable.icons8_page_percent));

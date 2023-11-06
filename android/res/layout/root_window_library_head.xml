@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/rg_type"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:stretchColumns="*">
+
+    <TableRow android:layout_weight="1"  android:layout_marginBottom="5dip">
+
+        <LinearLayout
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:orientation="horizontal">
+
+            <ImageView
+                    android:id="@+id/iv_item_library"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|left"
+                    android:layout_marginLeft="0dip"
+                    android:layout_marginRight="0dip"
+                    android:src="?attr/attr_cr3_toc_item_expanded"
+                    android:tag="tint" />
+
+            <TextView
+                    android:id="@+id/tv_item_library"
+                    style="@style/TextAppearance.Small"
+                    android:layout_width="0dip"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|left"
+                    android:layout_marginLeft="8dip"
+                    android:layout_marginTop="2dip"
+                    android:layout_marginRight="2dip"
+                    android:layout_marginBottom="2dip"
+                    android:layout_weight="1"
+                    android:gravity="left|center_vertical"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:text="@string/root_item_library"
+                    android:textColor="?attr/colorIcon" />
+        </LinearLayout>
+
+        <Button
+                android:id="@+id/book_state_toread"
+                style="@style/TextAppearance.Smaller"
+                android:layout_width="0dip"
+                android:layout_marginLeft="0dip"
+                android:layout_marginTop="2dip"
+                android:layout_marginRight="1dip"
+                android:layout_marginBottom="2dip"
+                android:layout_weight="2"
+                android:contentDescription="@string/book_state_toread"
+                android:ellipsize="none"
+                android:singleLine="true"
+                android:src="@null"
+                android:tag="notint"
+                android:text="@string/book_state_toread" />
+
+        <Button
+                android:id="@+id/book_state_reading"
+                style="@style/TextAppearance.Smaller"
+                android:layout_width="0dip"
+                android:layout_marginLeft="0dip"
+                android:layout_marginTop="2dip"
+                android:layout_marginRight="1dip"
+                android:layout_marginBottom="2dip"
+                android:layout_weight="2"
+                android:contentDescription="@string/book_state_reading"
+                android:ellipsize="none"
+                android:singleLine="true"
+                android:src="@null"
+                android:tag="notint"
+                android:text="@string/book_state_reading" />
+
+        <Button
+                android:id="@+id/book_state_finished"
+                style="@style/TextAppearance.Smaller"
+                android:layout_width="0dip"
+                android:layout_marginLeft="0dip"
+                android:layout_marginTop="2dip"
+                android:layout_marginRight="0dip"
+                android:layout_marginBottom="2dip"
+                android:layout_weight="2"
+                android:contentDescription="@string/book_state_finished"
+                android:ellipsize="none"
+                android:singleLine="true"
+                android:src="@null"
+                android:tag="notint"
+                android:text="@string/book_state_finished" />
+    </TableRow>
+</TableLayout>

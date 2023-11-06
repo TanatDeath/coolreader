@@ -24,7 +24,6 @@ import org.coolreader.utils.Utils;
 
 import android.app.SearchManager;
 import android.content.Intent;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -147,7 +146,7 @@ public class BookInfoDialog extends BaseDialog {
 			if (StrUtils.isEmptyStr(errorMsg)) {
 				btnPurchase.setText(mCoolReader.getString(R.string.online_store_purchase_success));
 				setLitresDownloadModeChecked(btnDownloadLitresBook);
-				Utils.hideView(btnFragment);
+				Utils.removeView(btnFragment);
 				mPurchased = true;
 				if (LitresConfig.litresAccountInfo != null) LitresConfig.litresAccountInfo.needRefresh = true;
 			} else {
@@ -158,7 +157,7 @@ public class BookInfoDialog extends BaseDialog {
 				if (s.contains("already exists")) {
 					s = mCoolReader.getString(R.string.already_purchased);
 					setLitresDownloadModeChecked(btnDownloadLitresBook);
-					Utils.hideView(btnFragment);
+					Utils.removeView(btnFragment);
 					mPurchased = true;
 				}
 				btnPurchase.setText(s);
@@ -204,6 +203,7 @@ public class BookInfoDialog extends BaseDialog {
 		mLabelMap.put("book.wordcount", R.string.book_info_book_wordcount);
 		mLabelMap.put("book.sentenceinfo", R.string.book_info_save_sentence_info);
 		mLabelMap.put("book.minleft", R.string.book_info_stats_minutes_left);
+		mLabelMap.put("book.minlefttochapter", R.string.book_info_stats_minutes_left_to_chapter);
 		mLabelMap.put("section.book_document", R.string.book_info_section_book_document);
 		mLabelMap.put("book.docauthor", R.string.book_info_book_docauthor);
 		mLabelMap.put("book.docprogram", R.string.book_info_book_docprogram);
@@ -387,7 +387,7 @@ public class BookInfoDialog extends BaseDialog {
 							bi.getFileInfo().wordCount = iWordCnt;
 							mCoolReader.getDB().saveBookInfo(bi);
 							mCoolReader.getDB().flush();
-							Utils.hideView(countButton);
+							Utils.removeView(countButton);
 							if (tvSC != null) tvSC.setText(""+iSymCnt);
 							if (tvWC != null) tvWC.setText(""+iWordCnt);
 							ReadingStatRes sres = mCoolReader.getReaderView().getBookInfo().getFileInfo().calcStats();
@@ -723,7 +723,7 @@ public class BookInfoDialog extends BaseDialog {
 			});
 		}
 		ImageView btnDel = buttonView.findViewById(R.id.tag_flow_value_del);
-		Utils.hideView(btnDel);
+		Utils.removeView(btnDel);
 		TextView tv = new TextView(mActivity);
 		tv.setText(" ");
 		tv.setPadding(5, 0, 0, 0);
@@ -1020,7 +1020,7 @@ public class BookInfoDialog extends BaseDialog {
 		if ((mActionType == OPDS_INFO) && (!isLitres)) sss = mCoolReader.getString(R.string.book_info_action_download1);
 		if (mActionType == OPDS_FINAL_INFO) sss = mCoolReader.getString(R.string.book_info_action_download2);
 		if (StrUtils.isEmptyStr(sss))
-			Utils.hideView(infoPanel);
+			Utils.removeView(infoPanel);
 		else
 			infoText.setText(sss);
 		SpannableString ss = new SpannableString(annot);
@@ -1095,7 +1095,7 @@ public class BookInfoDialog extends BaseDialog {
 			btnDownloadFB2.setBackgroundColor(colorGrayCT);
 			btnDownloadFB3.setBackgroundColor(colorGrayCT);
 			if (mFileInfoCloud.type != 0) {
-				Utils.hideView(tlLitresDownl);
+				Utils.removeView(tlLitresDownl);
 			}
 			btnPurchase = mainView.findViewById(R.id.btn_purchase);
 			btnPurchase.setBackgroundColor(colorGrayCT);
@@ -1140,47 +1140,47 @@ public class BookInfoDialog extends BaseDialog {
 			if (isLitres)
 				if (mFileInfoCloud.lsp.searchType == LitresSearchParams.SEARCH_TYPE_MY_BOOKS) {
 					//Utils.hideView(tlLitresDownl);
-					Utils.hideView(llLitresPurchase);
+					Utils.removeView(llLitresPurchase);
 				}
 		}
 		if ((!isLitres) || (isPerson)) {
-			if (isPerson) Utils.hideView(btnSetAddMarks);
-			Utils.hideView(tlLitresDownl);
-			Utils.hideView(llLitresPurchase);
+			if (isPerson) Utils.removeView(btnSetAddMarks);
+			Utils.removeView(tlLitresDownl);
+			Utils.removeView(llLitresPurchase);
 		}
 
 		if ((StrUtils.isEmptyStr(mAuthors))||(mFileInfoSearchDir==null)) {
-			Utils.hideView(btnFindAuthors);
+			Utils.removeView(btnFindAuthors);
 		}
 		if (actionType == BOOK_INFO) {
-			Utils.hideView(btnBookDownload);
-			Utils.hideView(btnSetAddMarks);
+			Utils.removeView(btnBookDownload);
+			Utils.removeView(btnSetAddMarks);
 		}
 		if (actionType == OPDS_INFO) {
-			Utils.hideView(btnOpenBook);
-			Utils.hideView(btnBookFolderOpen);
-			Utils.hideView(btnBookShortcut);
-			Utils.hideView(btnBookEdit);
-			Utils.hideView(btnSendByEmail);
-			Utils.hideView(btnDeleteBook);
-			Utils.hideView(btnCustomCover);
-			Utils.hideView(btnSendByYnd);
+			Utils.removeView(btnOpenBook);
+			Utils.removeView(btnBookFolderOpen);
+			Utils.removeView(btnBookShortcut);
+			Utils.removeView(btnBookEdit);
+			Utils.removeView(btnSendByEmail);
+			Utils.removeView(btnDeleteBook);
+			Utils.removeView(btnCustomCover);
+			Utils.removeView(btnSendByYnd);
 		}
 		if (isCalibreBook) {
-			Utils.hideView(btnBookFolderOpen);
-			Utils.hideView(btnBookShortcut);
-			Utils.hideView(btnBookEdit);
-			Utils.hideView(btnSendByEmail);
-			Utils.hideView(btnDeleteBook);
-			Utils.hideView(btnCustomCover);
-			Utils.hideView(btnSendByYnd);
+			Utils.removeView(btnBookFolderOpen);
+			Utils.removeView(btnBookShortcut);
+			Utils.removeView(btnBookEdit);
+			Utils.removeView(btnSendByEmail);
+			Utils.removeView(btnDeleteBook);
+			Utils.removeView(btnCustomCover);
+			Utils.removeView(btnSendByYnd);
 		}
 		if (actionType == OPDS_FINAL_INFO) {
-			Utils.hideView(btnBookDownload);
-			Utils.hideView(btnSetAddMarks);
-			Utils.hideView(btnFindAuthors);
+			Utils.removeView(btnBookDownload);
+			Utils.removeView(btnSetAddMarks);
+			Utils.removeView(btnFindAuthors);
 		}
-		if (isLitres) Utils.hideView(btnBookDownload);
+		if (isLitres) Utils.removeView(btnBookDownload);
 		for ( BookInfoEntry item : items ) {
 			String name = item.infoTitle;
 			String value = item.infoValue;

@@ -393,7 +393,7 @@ public class BaseDialog extends Dialog {
 		mActivity.onDialogCreated(this);
 	}
 	
-	protected void onClose() {
+	public void onClose() {
 		// when dialog is closed
 		if (mActivity instanceof CoolReader) {
 			CoolReader cr = (CoolReader) mActivity;

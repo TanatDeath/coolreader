@@ -7,7 +7,6 @@ import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.Browser;
@@ -39,17 +38,13 @@ import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseListView;
 import org.coolreader.crengine.Bookmark;
-import org.coolreader.crengine.CustomLog;
 import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.DownloadImageTask;
 import org.coolreader.crengine.Engine;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.MaxHeightLinearLayout;
 import org.coolreader.crengine.MaxHeightScrollView;
-import org.coolreader.crengine.ReaderCommand;
-import org.coolreader.crengine.Selection;
 import org.coolreader.crengine.Settings;
-import org.coolreader.layouts.FlowLayout;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.crengine.Services;
 import org.coolreader.tts.OnTTSStatusListener;
@@ -764,10 +759,10 @@ public class DicToastView {
                         ((t.dicType == IS_OFFLINE) && (t.mCurDict != null)));
                 llUpperRowRecent.addView(recentDicsPanel);
             }
-            Utils.hideView(btnDicExtended);
-            Utils.hideView(btnRemove1sym);
-            Utils.hideView(btnRemove2sym);
-            Utils.hideView(btnRemove3sym);
+            Utils.removeView(btnDicExtended);
+            Utils.removeView(btnRemove1sym);
+            Utils.removeView(btnRemove2sym);
+            Utils.removeView(btnRemove3sym);
             mActivity.tintViewIcons(btnSpeak,true);
             btnSpeak.setOnClickListener(view -> sayTTS(mActivity, t.sFindText));
             autoSpeak = mActivity.settings().getBool(Settings.PROP_APP_DICT_AUTO_SPEAK, false);
@@ -818,8 +813,8 @@ public class DicToastView {
                     Dictionaries.wikiSearch.WIKI_FIND_LIST, t.mUseFirstLink, null);
             doDismiss();
         });
-        if (t.dicType != IS_WIKI) Utils.hideView(tvMore);
-            else Utils.hideView(llUpperRowRecent);
+        if (t.dicType != IS_WIKI) Utils.removeView(tvMore);
+            else Utils.removeView(llUpperRowRecent);
         tvClose.setOnClickListener(v -> doDismiss());
         tvFull.setOnClickListener(v -> {
             if (Dictionaries.wikiSearch == null) Dictionaries.wikiSearch = new WikiSearch();
@@ -1072,7 +1067,7 @@ public class DicToastView {
                     doDismiss();
                 });
                 if ((cr.getReaderView() == null) || (cr.mCurrentFrame != cr.mReaderFrame))
-                    Utils.hideView(btnTransl);
+                    Utils.removeView(btnTransl);
                 btnToUserDic.setOnClickListener(v -> {
                     if (cr.getReaderView().mBookInfo!=null) {
                         if (cr.getReaderView().lastSelection!=null) {
@@ -1086,7 +1081,7 @@ public class DicToastView {
                     doDismiss();
                 });
                 if ((cr.getReaderView() == null) || (cr.mCurrentFrame != cr.mReaderFrame))
-                    Utils.hideView(btnToUserDic);
+                    Utils.removeView(btnToUserDic);
                 btnCopyToCb.setOnClickListener(v -> {
                     String s = StrUtils.getNonEmptyStr(t.msg,true);
                     if (cr.getReaderView() != null)
@@ -1274,8 +1269,8 @@ public class DicToastView {
                     // do nothing
                 }
             });
-            if ((t.dicType != IS_OFFLINE) || (t.mCurDict == null)) Utils.hideView(btnDicExtended);
-            if ((findText.length() <= 1) || (t.mCurDict == null)) Utils.hideView(btnRemove1sym);
+            if ((t.dicType != IS_OFFLINE) || (t.mCurDict == null)) Utils.removeView(btnDicExtended);
+            if ((findText.length() <= 1) || (t.mCurDict == null)) Utils.removeView(btnRemove1sym);
             else
                 btnRemove1sym.setOnClickListener(v -> {
                     if (findText.length() > 1) {
@@ -1293,7 +1288,7 @@ public class DicToastView {
                         }
                     }
                 });
-            if ((findText.length() <= 2) || (t.mCurDict == null)) Utils.hideView(btnRemove2sym);
+            if ((findText.length() <= 2) || (t.mCurDict == null)) Utils.removeView(btnRemove2sym);
             else
                 btnRemove2sym.setOnClickListener(v -> {
                     if (findText.length() > 2) {
@@ -1311,7 +1306,7 @@ public class DicToastView {
                         }
                     }
                 });
-            if ((findText.length() <= 3) || (t.mCurDict == null)) Utils.hideView(btnRemove3sym);
+            if ((findText.length() <= 3) || (t.mCurDict == null)) Utils.removeView(btnRemove3sym);
             else
                 btnRemove3sym.setOnClickListener(v -> {
                     if (findText.length() > 3) {
@@ -1332,7 +1327,7 @@ public class DicToastView {
         }
         if (fullScreen) {
             mActivity.tintViewIcons(dad.mBody, false);
-            Utils.hideView(body);
+            Utils.removeView(body);
             dad.show();
         } else {
             PopupWindow window = (PopupWindow) toastWindow;
@@ -1340,7 +1335,7 @@ public class DicToastView {
             t.anchor.getLocationOnScreen(location);
             int popupY = location[1] + t.anchor.getHeight() - ll1.getHeight();
             mActivity.tintViewIcons(window, false);
-            Utils.hideView(body2);
+            Utils.removeView(body2);
             window.showAtLocation(t.anchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
         }
     }
@@ -1521,10 +1516,10 @@ public class DicToastView {
             tvTerm.setTextColor(mActivity.getTextColor(themeColors.get(R.attr.colorIcon)));
             setBtnBackgroundColor(tvClose, colr2);
             final String findText = StrUtils.getNonEmptyStr(t.sFindText, true);
-            Utils.hideView(btnDicExtended);
-            Utils.hideView(btnRemove1sym);
-            Utils.hideView(btnRemove2sym);
-            Utils.hideView(btnRemove3sym);
+            Utils.removeView(btnDicExtended);
+            Utils.removeView(btnRemove1sym);
+            Utils.removeView(btnRemove2sym);
+            Utils.removeView(btnRemove3sym);
             mActivity.tintViewIcons(btnSpeak,true);
             btnSpeak.setOnClickListener(view -> sayTTS(mActivity, t.sFindText));
             autoSpeak = mActivity.settings().getBool(Settings.PROP_APP_DICT_AUTO_SPEAK, false);
@@ -1546,7 +1541,7 @@ public class DicToastView {
             } else
                 btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_off));
             mActivity.tintViewIcons(btnSpeak, true);
-            if ((fullScreen) || (t.mCurDict != null) || (StrUtils.isEmptyStr(t.msg))) Utils.hideView(edtDicTranls);
+            if ((fullScreen) || (t.mCurDict != null) || (StrUtils.isEmptyStr(t.msg))) Utils.removeView(edtDicTranls);
             if (!StrUtils.isEmptyStr(t.msg)) {
                 if (edtDicTranls != null) {
                     edtDicTranls.setText(t.msg);
@@ -1571,8 +1566,8 @@ public class DicToastView {
             body.addView(t.mExtDicList);
         if (fullScreen) {
             mActivity.tintViewIcons(dad.mBody, false);
-            Utils.hideView(upperRow);
-            Utils.hideView(body);
+            Utils.removeView(upperRow);
+            Utils.removeView(body);
             dad.show();
         } else {
             PopupWindow window = (PopupWindow) toastWindow;
@@ -1580,7 +1575,7 @@ public class DicToastView {
             t.anchor.getLocationOnScreen(location);
             int popupY = location[1] + t.anchor.getHeight() - ll1.getHeight();
             mActivity.tintViewIcons(window, false);
-            Utils.hideView(body2);
+            Utils.removeView(body2);
             window.showAtLocation(t.anchor, Gravity.TOP | Gravity.CENTER_HORIZONTAL, location[0], popupY);
         }
     }

@@ -264,7 +264,8 @@
     <string name="options_page_show_titlebar_percent">Show position percent</string>
     <string name="options_page_show_titlebar_page_count">Page count</string>
     <string name="options_page_show_titlebar_pages_to_chapter">Pages left in chapter</string>
-    <string name="options_page_show_titlebar_time_left">Time left</string>
+    <string name="options_page_show_titlebar_time_left">Time left (book)</string>
+    <string name="options_page_show_titlebar_time_left_to_chapter">Time left (chapter)</string>
     <string name="options_show_titlebar_page_number">Page number</string>
     <string name="options_controls_flick_brightness">Brightness control by flick</string>
     <string name="options_controls_flick_warm">Warm backlight control by flick</string>
@@ -466,6 +467,7 @@
     <string name="options_page_animation_dim">Dim</string>
     <string name="progress_downloading">Downloading</string>
     <string name="mi_book_opds_root">Online catalogs</string>
+    <string name="mi_book_opds_root_short">Online</string>
     <string name="mi_book_calibre_root">Calibre library</string>
     <string name="opds_search">Search in catalog...</string>
     <string name="mi_tts_play">Read Aloud</string>
@@ -669,7 +671,8 @@
     <string name="win_title_confirm_folder_delete">Do you really want to delete this folder along with all the books?</string>
     <string name="book_info_book_language">Language</string>
     <string name="book_info_book_translation">Translation (e.g. ru or zh-cn)</string>
-    <string name="book_info_stats_minutes_left">Reading time left</string>
+    <string name="book_info_stats_minutes_left">Reading time left (book)</string>
+    <string name="book_info_stats_minutes_left_to_chapter">Reading time left (chapter)</string>
     <string name="book_info_book_genre">Genre</string>
     <string name="book_info_book_srclang">Source language</string>
     <string name="book_info_book_translator">Translator</string>
@@ -1295,6 +1298,7 @@
     <string name="dictionary_settings">Dictionaries</string>
     <string name="filebrowser_settings">File browser and library</string>
     <string name="rare_settings">Rare and experimental</string>
+    <string name="root_screen_settings">Main screen customization</string>
     <string name="add_dics_settings">Additional dictionaries</string>
     <string name="user_dic_settings">User dictionary and translate history</string>
     <string name="dic_online_services_settings">Online services</string>
@@ -2137,4 +2141,29 @@
     <string name="screen_type_force_0">Auto</string>
     <string name="screen_type_force_1">Black and white E-Ink screen</string>
     <string name="screen_type_force_2">Color E-Ink screen</string>
+    <string name="cloud_save_folder_naming">Save from cloud - folder naming</string>
+    <string name="cloud_save_folder_naming_0">Transcribe author</string>
+    <string name="cloud_save_folder_naming_0_add_info">E.g. Alexandr_Sergeevich_Pushkin</string>
+    <string name="cloud_save_folder_naming_1">Author - as is</string>
+    <string name="cloud_save_folder_naming_1_add_info">E.g. Александр Сергеевич Пушкин</string>
+    <string name="cloud_save_folder_naming_2">Transcribe author - format "Last First Middle"</string>
+    <string name="cloud_save_folder_naming_2_add_info">E.g. Pushkin Alexandr Sergeevich</string>
+    <string name="cloud_save_folder_naming_3">Author - format "Last First Middle"</string>
+    <string name="cloud_save_folder_naming_3_add_info">E.g. Пушкин Александр Сергеевич</string>
+    <string name="root_screen_section_pos_1">Topmost</string>
+    <string name="root_screen_section_pos_2">Below topmost</string>
+    <string name="root_screen_section_pos_3">In the middle</string>
+    <string name="root_screen_section_pos_4">Above bottommost</string>
+    <string name="root_screen_section_pos_5">Bottommost</string>
+    <string name="root_screen_section_pos_hide">Hidden</string>
+    <string name="options_screen_section_pos_current_book">\'Current book\' section position</string>
+    <string name="options_screen_section_pos_recent">\'Recent\' section position</string>
+    <string name="options_screen_section_pos_file_system">\'File system\' section position</string>
+    <string name="options_screen_section_pos_library">\'Library\' section position</string>
+    <string name="options_screen_section_pos_online_catalogs">\'Online catalogs\' section position</string>
+    <string name="options_screen_section_type_file_system">\'File system\' section type</string>
+    <string name="options_screen_section_type_library">\'Library\' section type</string>
+    <string name="options_screen_section_type_online_catalogs">\'Online catalogs\' section type</string>
+    <string name="root_screen_section_type_1">Flow</string>
+    <string name="root_screen_section_type_2">Scroll</string>
 </resources>

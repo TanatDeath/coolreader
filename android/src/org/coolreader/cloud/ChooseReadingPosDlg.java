@@ -5,25 +5,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import org.coolreader.CoolReader;
 import org.coolreader.R;
 import org.coolreader.cloud.yandex.YNDListFiles;
-import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.BaseListView;
-import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.Settings;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.database.DataSetObserver;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -405,7 +400,7 @@ public class ChooseReadingPosDlg extends BaseDialog {
 			});
 		});
 		int iSyncVariant2 = mCoolReader.settings().getInt(Settings.PROP_CLOUD_SYNC_VARIANT, 0);
-		if (iSyncVariant2 != 2) Utils.hideView(btnDeleteAll);
+		if (iSyncVariant2 != 2) Utils.removeView(btnDeleteAll);
 	}
 
 	public ChooseReadingPosDlg(CoolReader activity, YNDListFiles matchingFiles)

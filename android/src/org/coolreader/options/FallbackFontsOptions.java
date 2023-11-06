@@ -63,7 +63,7 @@ public class FallbackFontsOptions extends SubmenuOption {
 		if (!enabled)
 			return;
 		BaseDialog dlg = new BaseDialog("dlgFallbackFontsOptions", mActivity, label, false, false) {
-			protected void onClose()
+			public void onClose()
 			{
 				updateMainPropertyValue();
 				this.setView(null);

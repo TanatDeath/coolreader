@@ -10,6 +10,7 @@ import org.coolreader.R;
 import org.coolreader.crengine.BackgroundThread;
 import org.coolreader.crengine.Bookmark;
 import org.coolreader.crengine.Engine;
+import org.coolreader.crengine.FileInfo;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.crengine.Settings;
 import org.coolreader.utils.FileUtils;
@@ -82,7 +83,7 @@ public class CloudSync {
         String fileMark = "";
         if (cfile.name.contains("_rpos_")) fileMark = "_rpos_";
         if (cfile.name.contains("_bmk_")) fileMark = "_bmk_";
-        if ((arrS.length>=5)&&(!StrUtils.isEmptyStr(fileMark))) {
+        if ((arrS.length >= 5) && (!StrUtils.isEmptyStr(fileMark))) {
             String sBookCRC = arrS[3];
             String sDevId = arrS[4].replace(".json","");
             if ((!StrUtils.isEmptyStr(sBookCRC))&&(!StrUtils.isEmptyStr(sDevId))&&(!StrUtils.isEmptyStr(fileMark))) {
@@ -571,8 +572,8 @@ public class CloudSync {
             return;
         }
         String prettyJson = "";
-        Bookmark bmk = null;
-        ArrayList<Bookmark> abmk = null;
+        Bookmark bmk;
+        ArrayList<Bookmark> abmk;
         String fileMark = "";
         String descr = "";
         final Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -600,6 +601,11 @@ public class CloudSync {
             addName = addName.replace(",", ".");
             descr = sPerc + sBookFName + " ~from " + cr.getModel();
             bmk.setAddCommentText(descr);
+            if (rv.getOpenedFileInfo() != null) {
+                bmk.setFlags(rv.getOpenedFileInfo().flags);
+            } else {
+                bmk.setFlags(-1);
+            }
             prettyJson = gson.toJson(bmk);
         }
         if (iSaveType == CLOUD_SAVE_BOOKMARKS) {
@@ -616,9 +622,12 @@ public class CloudSync {
                 cr.showToast(cr.getString(R.string.no_bookmarks));
                 return;
             }
-            descr = String.valueOf(abmk.size()) + " bookmark(s) of " + sBookFName + " ~from " + cr.getModel();
+            descr = abmk.size() + " bookmark(s) of " + sBookFName + " ~from " + cr.getModel();
             addName = "_" + String.valueOf(abmk.size()).trim();
-            for (Bookmark bmk2: abmk) bmk2.setAddCommentText(descr);
+            for (Bookmark bmk2: abmk) {
+                bmk2.setAddCommentText(descr);
+                bmk2.setFlags(-1);
+            }
             prettyJson = gson.toJson(abmk);
         }
         if (toFile) {
@@ -752,6 +761,14 @@ public class CloudSync {
                 checkKnownDevices(cr, StrUtils.getNonEmptyStr(bmk.getAddCommentText(),true), name);
                 bmk.setTimeStamp(System.currentTimeMillis());
                 rv.savePositionBookmark(bmk);
+                FileInfo curFile = rv.getOpenedFileInfo();
+                if ((curFile != null) && (bmk.flags > 0)) {
+                    cr.setBookRateAndReadingState(curFile,
+                        FileInfo.getBitValue(bmk.flags,
+                            FileInfo.RATE_SHIFT, FileInfo.RATE_MASK),
+                        FileInfo.getBitValue(bmk.flags,
+                            FileInfo.READING_STATE_SHIFT, FileInfo.READING_STATE_MASK));
+                }
                 if ( rv.getBookInfo()!=null )
                     rv.getBookInfo().setLastPosition(bmk);
                 rv.goToBookmark(bmk);

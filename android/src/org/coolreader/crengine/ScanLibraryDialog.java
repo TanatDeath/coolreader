@@ -764,12 +764,12 @@ public class ScanLibraryDialog extends BaseDialog {
 		});
 
 		mBtnMaintShowStatistics.setBackgroundColor(colorGrayC);
-		Utils.hideView(mBtnMaintShowStatistics); // temporarily, while not implemented
+		Utils.removeView(mBtnMaintShowStatistics); // temporarily, while not implemented
 
 		mLibraryMaintenance.setOnClickListener(v -> {
 			llScanLibrary.addView(tlm);
 			mActivity.tintViewIcons(tlm);
-			Utils.hideView(mLibraryMaintenance);
+			Utils.removeView(mLibraryMaintenance);
 		});
 
 		addFoldersNames();

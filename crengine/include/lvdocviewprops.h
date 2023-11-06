@@ -62,6 +62,7 @@
 #define PROP_SHOW_PAGE_COUNT         "window.status.pos.page.count"
 #define PROP_SHOW_PAGES_TO_CHAPTER   "window.status.pos.pages.to.chapter"
 #define PROP_SHOW_TIME_LEFT          "window.status.pos.time.left"
+#define PROP_SHOW_TIME_LEFT_TO_CHAPTER "window.status.pos.time.left.to.chapter"
 #define PROP_SHOW_PAGE_NUMBER        "window.status.pos.page.number"
 #define PROP_SHOW_BATTERY_PERCENT    "window.status.battery.percent"
 #define PROP_LANDSCAPE_PAGES         "window.landscape.pages"

@@ -1,6 +1,5 @@
 package org.coolreader.userdic;
 
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
@@ -121,7 +120,7 @@ public class UserDicEditDialog extends BaseDialog {
 					StrUtils.updateText(word_translate, true), DicToastView.IS_USERDIC,
 					"", null, finalDsl, true);
 		});
-		if (dsl == null) Utils.hideView(btnTranslMore);
+		if (dsl == null) Utils.removeView(btnTranslMore);
 		btnIsUd = view.findViewById(R.id.btn_is_ud);
 		btnIsUd.setOnClickListener(v -> { setCheckedTag(btnIsUd); paintScopeButtons(); });
 		btnIsCite = view.findViewById(R.id.btn_is_cite);

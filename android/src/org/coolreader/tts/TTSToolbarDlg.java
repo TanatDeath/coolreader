@@ -1344,9 +1344,9 @@ public class TTSToolbarDlg implements Settings {
 				if (wordTimingPath.matches(".*\\.wordtiming$")) {
 					wordTimingFile = new File(wordTimingPath);
 					sentenceInfoCacheFile = new File(sentenceInfoPath);
-					if (!wordTimingFile.exists()) Utils.hideView(llAudioFile);
+					if (!wordTimingFile.exists()) Utils.removeView(llAudioFile);
 				} else {
-					Utils.hideView(llAudioFile);
+					Utils.removeView(llAudioFile);
 				}
 			}
 		}

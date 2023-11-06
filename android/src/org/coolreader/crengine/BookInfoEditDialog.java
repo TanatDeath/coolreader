@@ -166,7 +166,7 @@ public class BookInfoEditDialog extends BaseDialog {
 			});
 		}
 		ImageView btnDel = buttonView.findViewById(R.id.tag_flow_value_del);
-		Utils.hideView(btnDel);
+		Utils.removeView(btnDel);
 		TextView tv = new TextView(mActivity);
 		tv.setText(" ");
 		tv.setPadding(5, 0, 0, 0);
@@ -637,7 +637,7 @@ public class BookInfoEditDialog extends BaseDialog {
 				dismiss();
 			});
         } else {
-        	Utils.hideView(btnRemoveRecent);
+        	Utils.removeView(btnRemoveRecent);
         	//parent.removeView(btnOpenFolder);
         }
 		btnOpenFolder.setOnClickListener(v -> {

@@ -130,7 +130,7 @@ public class ExtDicList extends BaseListView {
 				if (DicToastView.isEInk) Utils.setSolidButtonEink(btnOpen);
 				if (!StrUtils.isEmptyStr(curToast.sFindText))
 					Utils.setHighLightedText(labelView, curToast.sFindText, mColorIconL);
-				if  (mArticleMode) Utils.hideView(btnOpen);
+				if  (mArticleMode) Utils.removeView(btnOpen);
 				ImageView ivSpeak = view.findViewById(R.id.btn_speak);
 				mCoolReader.tintViewIconsForce(ivSpeak);
 				String finalText = text;

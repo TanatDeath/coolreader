@@ -26,7 +26,6 @@ import org.coolreader.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabContentFactory, ActionClickedCallback {
@@ -267,7 +266,7 @@ public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabCon
 					groupButtonClick();
 				}
 			} else {
-				Utils.hideView(tlNums);
+				Utils.removeView(tlNums);
 			}
 			updateButtonsView(forWhat);
 			Button btnDef = ll.findViewById(R.id.btn_def);
@@ -278,7 +277,7 @@ public class ReaderToolbarOption extends SubmenuOption implements TabHost.TabCon
 				addButton("", finalForWhat, 6);
 				updateButtonsView(finalForWhat);
 			});
-			if (forWhat == ForWhat.forGroup) Utils.hideView(btnDef);
+			if (forWhat == ForWhat.forGroup) Utils.removeView(btnDef);
 			Button btnClear = ll.findViewById(R.id.btn_clear);
 			btnClear.setBackgroundColor(Color.argb(150, Color.red(colorGray), Color.green(colorGray), Color.blue(colorGray)));
 			btnClear.setOnClickListener(v -> {

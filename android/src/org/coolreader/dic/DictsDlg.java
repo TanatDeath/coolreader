@@ -3,15 +3,12 @@ package org.coolreader.dic;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import org.coolreader.CoolReader;
 import org.coolreader.crengine.BackgroundThread;
-import org.coolreader.crengine.BaseActivity;
 import org.coolreader.crengine.BaseDialog;
 import org.coolreader.crengine.BaseListView;
-import org.coolreader.crengine.DeviceInfo;
 import org.coolreader.crengine.Properties;
 import org.coolreader.crengine.Settings;
 import org.coolreader.options.OptionsDialog;
@@ -361,7 +358,7 @@ public class DictsDlg extends BaseDialog {
 		if (!isEmptyQuick)
 			fillQuickButtons(sQuickDirs);
 		else
-			Utils.hideView(flQuickTransl);
+			Utils.removeView(flQuickTransl);
 		bDictType0 = mCoolReader.settings().getBool(Settings.PROP_APP_DICT_TYPE_SELECTED0, true);
 		bDictType1 = mCoolReader.settings().getBool(Settings.PROP_APP_DICT_TYPE_SELECTED1, true);
 		bDictType2 = mCoolReader.settings().getBool(Settings.PROP_APP_DICT_TYPE_SELECTED2, false);

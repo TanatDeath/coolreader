@@ -30,7 +30,6 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.zip.CRC32;
 
 public class BookmarkEditDialog extends BaseDialog {
@@ -791,7 +790,7 @@ public class BookmarkEditDialog extends BaseDialog {
 		});
 		int selAction = -1;
 		if (mCoolReader.getReaderView() != null) selAction = mCoolReader.getReaderView().mBookmarkActionSendTo;
-		if (selAction == -1) Utils.hideView(btnSendTo2);
+		if (selAction == -1) Utils.removeView(btnSendTo2);
 		else {
 			int titleSendTo =  SelectionModesOption.getSelectionActionTitle(selAction);
 			String sText = "[undefined]";
@@ -799,7 +798,7 @@ public class BookmarkEditDialog extends BaseDialog {
 			if (curDict != null) sText = curDict.name;
 			//if (titleSendTo != 0) sText = OptionsDialog.updDicValue(mCoolReader.getString(titleSendTo), mCoolReader.settings(), mCoolReader, true);
 			btnSendTo2.setText(sText);
-			if (sText.endsWith("NONE")) Utils.hideView(btnSendTo2);
+			if (sText.endsWith("NONE")) Utils.removeView(btnSendTo2);
 		}
 		setView(view);
 		btnFake.requestFocus();

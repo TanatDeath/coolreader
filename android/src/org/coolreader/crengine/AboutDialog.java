@@ -1,7 +1,6 @@
 package org.coolreader.crengine;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -69,7 +68,7 @@ public class AboutDialog extends BaseDialog implements TabContentFactory {
 		btn.setText("$" + amount);
 		btn.setBackgroundColor(colorGrayC);
 		btn.setTextColor(this.mActivity.getTextColor(colorIcon));
-		Utils.hideView(btn);
+		Utils.removeView(btn);
 	}
 
 	private void updateTotalDonations() {

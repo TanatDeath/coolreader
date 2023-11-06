@@ -32,6 +32,7 @@ public class Bookmark implements Parcelable {
 		customColor=v.customColor;
 		shortContext=v.shortContext;
 		fullContext=v.fullContext;
+		flags = v.flags;
 	}
 
 	protected Bookmark(Parcel in) {
@@ -92,6 +93,8 @@ public class Bookmark implements Parcelable {
 				+ ((shortContext == null) ? 0 : shortContext.hashCode());
 		result = prime * result
 				+ ((fullContext == null) ? 0 : fullContext.hashCode());
+		result = prime * result
+				+ (String.valueOf(flags).hashCode());
 		return result;
 	}
 
@@ -170,6 +173,8 @@ public class Bookmark implements Parcelable {
 		} else if (!titleText.equals(other.titleText))
 			return false;
 		if (type != other.type)
+			return false;
+		if (flags != other.flags)
 			return false;
 		return true;
 	}
@@ -259,6 +264,10 @@ public class Bookmark implements Parcelable {
 	public String getAddCommentText() {
 		return StrUtils.getNonEmptyStr(addCommentText,true);
 	}
+
+	public int getFlags() {
+		return flags;
+	}
 	private boolean changed( String v1, String v2 ) {
 		if ( v1==null && v2==null )
 			return false;
@@ -276,6 +285,13 @@ public class Bookmark implements Parcelable {
 		if ( !changed(this.addCommentText, addCommentText) )
 			return false;
 		this.addCommentText = addCommentText;
+		return true;
+	}
+
+	public boolean setFlags(int flags) {
+		if (this.flags == flags)
+			return false;
+		this.flags = flags;
 		return true;
 	}
 	public boolean setIsCustomColor(int isCustomColor) {
@@ -379,6 +395,8 @@ public class Bookmark implements Parcelable {
 	public int icustomColor;
 	public String shortContext;
 	public String fullContext;
+
+	public int flags; // for use in cloud save / restore pos - to save rate and state
 	@Override
 	public String toString() {
 		return "Bookmark[t=" + type + ", start=" + startPos + "]";

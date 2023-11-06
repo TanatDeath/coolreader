@@ -46,6 +46,7 @@ public:
     bool closeImage();
     void updateBatteryIcons();
 	void setTimeLeft( lString32 time_left );
+	void setTimeLeftToChapter( lString32 time_left_to_chapter );
 };
 
 extern CRTimerUtil _timeoutControl;

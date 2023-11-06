@@ -11,6 +11,7 @@ import org.coolreader.crengine.FileBrowser;
 import org.coolreader.crengine.FileInfo;
 import org.coolreader.crengine.ProgressDialog;
 import org.coolreader.crengine.Services;
+import org.coolreader.crengine.Settings;
 import org.coolreader.utils.StrUtils;
 import org.coolreader.utils.Utils;
 import org.json.JSONException;
@@ -465,7 +466,8 @@ public class LitresPerformAction {
         String subdir = "NoAuthor";
         if (ca.fi != null) {
             if (ca.fi.getAuthors() != null) {
-                subdir = Utils.transcribeFileName(ca.fi.getAuthors());
+                int naming = mCoolReader.settings().getInt(Settings.PROP_APP_CLOUD_SAVE_FOLDER_NAMING, 0);
+                subdir = Utils.transcribeFileName(ca.fi.getAuthors(), naming);
                 if (subdir.length() > FileBrowser.MAX_SUBDIR_LEN)
                     subdir = subdir.substring(0, FileBrowser.MAX_SUBDIR_LEN);
             } else {

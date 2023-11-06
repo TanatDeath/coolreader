@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical">
+
+    <LinearLayout
+            android:id="@+id/ll_main_rootwindow"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dip"
+            android:orientation="vertical">
+
+        <!-- root_window_current_book.xml -->
+
+        <!-- root_window_delim.xml -->
+
+        <!-- root_window_recent_head.xml -->
+
+        <!-- root_window_recent_scroll.xml -->
+
+        <!-- root_window_delim.xml -->
+
+        <!-- root_window_filesystem_head.xml -->
+
+        <!-- root_window_filesystem_fl.xml -->
+
+        <!-- root_window_delim.xml -->
+
+        <!-- root_window_library_head.xml -->
+
+        <!-- root_window_library_fl.xml -->
+
+        <!-- root_window_library_qsearch.xml -->
+
+        <!-- root_window_delim.xml -->
+
+        <!-- root_window_opds_head.xml -->
+
+        <!-- root_window_opds_fl.xml -->
+
+        <!-- root_window_delim.xml -->
+
+    </LinearLayout>
+</ScrollView><!-- /LinearLayout-->

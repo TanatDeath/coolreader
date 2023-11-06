@@ -84,6 +84,7 @@
     int charCount;
     int imageCount;
     java.lang.String pageText;
+    int pagesLeftToChapter;
 }
 
 -keep class org.coolreader.crengine.ImageInfo {

@@ -102,6 +102,7 @@ public interface Settings {
     String PROP_SHOW_PAGE_NUMBER        ="window.status.pos.page.number";
 	String PROP_SHOW_PAGES_TO_CHAPTER   ="window.status.pos.pages.to.chapter";
 	String PROP_SHOW_TIME_LEFT   		="window.status.pos.time.left";
+	String PROP_SHOW_TIME_LEFT_TO_CHAPTER ="window.status.pos.time.left.to.chapter";
 	String PROP_FONT_SHAPING            ="font.shaping.mode";
     String PROP_FONT_KERNING_ENABLED    ="font.kerning.enabled";
     String PROP_FLOATING_PUNCTUATION    ="crengine.style.floating.punctuation.enabled";
@@ -254,6 +255,15 @@ public interface Settings {
 	String PROP_APP_ROOT_VIEW_LIB_SECTION_HIDE = "app.rootview.lib_section.hide";
 	String PROP_APP_ROOT_VIEW_OPDS_SECTION_HIDE = "app.rootview.opds_section.hide";
 	String PROP_APP_ROOT_VIEW_OPDS_SECTION_SORT_AZ = "app.rootview.opds_section.sort.az";
+	String PROP_APP_ROOT_VIEW_CURRENT_BOOK_SECTION_POS = "app.rootview.current_book_section.pos";
+	String PROP_APP_ROOT_VIEW_RECENT_SECTION_POS = "app.rootview.recent_section.pos";
+	String PROP_APP_ROOT_VIEW_FS_SECTION_POS = "app.rootview.fs.pos";
+	String PROP_APP_ROOT_VIEW_LIBRARY_SECTION_POS = "app.rootview.library_section.pos";
+	String PROP_APP_ROOT_VIEW_OPDS_SECTION_POS = "app.rootview.opds_section.pos";
+
+	String PROP_APP_ROOT_VIEW_FS_SECTION_TYPE = "app.rootview.fs.type";
+	String PROP_APP_ROOT_VIEW_LIBRARY_SECTION_TYPE = "app.rootview.library_section.type";
+	String PROP_APP_ROOT_VIEW_OPDS_SECTION_TYPE = "app.rootview.opds_section.type";
 	String PROP_APP_OPTIONS_PAGE_SELECTED = "app.options.page.selected";
 	String PROP_APP_OPTIONS_EXT_SELECTION_TOOLBAR = "app.options.ext.selection.toolbar";
 	String PROP_APP_OPTIONS_SELECTION_TOOLBAR_BACKGROUND = "app.options.selection.toolbar.background";
@@ -325,6 +335,8 @@ public interface Settings {
 	String PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_ENABLED = "app.browser.authors.aliases.enabled";
 	String PROP_APP_EXT_DOC_CAME_TIMEOUT = "app.ext.doc.came.timeout";
 	String PROP_APP_FILE_BROWSER_ZIP_SCAN = "app.browser.zip.scan";
+
+	String PROP_APP_CLOUD_SAVE_FOLDER_NAMING = "app.cloud.save.folder.naming";
 	String PROP_APP_FILE_BROWSER_SHOW_HIDDEN_DIRS = "app.browser.show.hidden.dirs";
 
     String PROP_APP_SCREEN_UPDATE_MODE = "app.screen.update.mode";
@@ -388,6 +400,8 @@ public interface Settings {
 	String PROP_FILEBROWSER_TITLE = "window.filebrowser.title";
 	String PROP_FILEBROWSER_SEC_GROUP = "window.filebrowser.sec.group";
 	String PROP_RARE_TITLE = "window.rare.title";
+
+	String PROP_ROOT_SCREEN_TITLE = "window.root.screen.title";
 	String PROP_TTS_TITLE = "window.tts.title";
 	String PROP_BACKLIGHT_TITLE = "window.backlight.title";
 	String PROP_SELECTION_MODES_TITLE = "window.selection.modes.title";

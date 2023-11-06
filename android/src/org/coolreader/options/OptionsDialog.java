@@ -1810,6 +1810,11 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 			mOptionsApplication.add(new ThemeOptions(this.mActivity,this, getString(R.string.options_app_ui_theme), getString(R.string.options_app_ui_theme_add_info), filter).setIconIdByAttr(R.attr.attr_icons8_change_theme_1,
 					R.drawable.icons8_change_theme_1));
 		}
+		RootScreenOption rootso = (RootScreenOption) new RootScreenOption(this.mActivity, OptionsDialog.this,this, getString(R.string.root_screen_settings),
+				getString(R.string.option_add_info_empty_text), filter)
+				.setIconIdByAttr(R.attr.attr_icons8_touchscreen, R.drawable.icons8_touchscreen);
+		rootso.updateFilterEnd();
+		mOptionsApplication.add(rootso);
 		mOptionsApplication.add(new FlowListOption(this, getString(R.string.ui_font_scale), PROP_APP_FONT_SCALE,
 				getString(R.string.ui_font_scale_restart_app), filter).
 				add(mUIFontScale, mUIFontScaleTitles, mUIFontScaleAddInfos).setDefaultValue("10").
@@ -1832,6 +1837,16 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				.setOnChangeHandler(() -> {
 					mActivity.showToast(R.string.force_eink_warn);
 				}));
+
+		// asdf - for further work with keys
+//		mOptionsApplication.add(new HardwareKeySelectOption(this, getString(R.string.options_screen_force_eink),
+//				PROP_APP_SCREEN_FORCE_EINK+"asdf",
+//				getString(R.string.options_screen_force_eink_add_info) + devFlags, filter).
+//				setIconIdByAttr(R.attr.attr_icons8_eink, R.drawable.icons8_eink).
+//				setDefaultValue("0")
+//				.setOnChangeHandler(() -> {
+//					mActivity.showToast(R.string.force_eink_warn);
+//				}));
 
 		mOptionsApplication.add(new ListOption(this, getString(R.string.save_pos_timeout),
 				PROP_SAVE_POS_TIMEOUT, getString(R.string.save_pos_timeout_add_info), filter).add(mMotionTimeouts1, mMotionTimeoutsTitles1, mMotionTimeoutsAddInfos1).setDefaultValue(Integer.toString(mMotionTimeouts1[2])).
@@ -2182,6 +2197,10 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		mActivity.asCoolReader().backupSettings();
 		if (mActivity.asCoolReader().getmReaderView() != null)
 			mActivity.asCoolReader().getmReaderView().skipFallbackWarning = false;
+		if (mActivity.mHomeFrame != null) {
+			mActivity.mHomeFrame.createViews();
+			mActivity.mHomeFrame.refreshView();
+		}
 		dismiss();
 	}
 

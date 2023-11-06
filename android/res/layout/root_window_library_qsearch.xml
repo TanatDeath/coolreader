@@ -1,0 +1,43 @@
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dip"
+        android:layout_marginBottom="2dip"
+        android:stretchColumns="1">
+
+    <TableRow>
+
+        <TextView
+                style="@style/TextAppearance.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dip"
+                android:layout_marginRight="8dip"
+                android:text="@string/book_quick_search"
+                android:textColor="?attr/colorIcon" />
+
+        <EditText
+                android:id="@+id/quick_search"
+                style="@style/TextAppearance.Widget.EditText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/colorThemeGray2Contrast"
+                android:editable="true"
+                android:singleLine="true"
+                android:text=""
+                android:textColor="?attr/colorIcon" />
+
+        <ImageButton
+                android:id="@+id/btn_quick_search"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_marginLeft="10dip"
+                android:layout_marginTop="2dip"
+                android:layout_marginRight="20dip"
+                android:layout_marginBottom="2dip"
+                android:background="@null"
+                android:src="?attr/attr_icons8_forward_small"
+                android:tag="tint" />
+
+    </TableRow>
+</TableLayout>

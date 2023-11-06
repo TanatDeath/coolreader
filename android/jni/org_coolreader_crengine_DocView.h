@@ -359,6 +359,14 @@ JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_DocView_setTimeLeftInter
 
 /*
  * Class:     org_coolreader_crengine_DocView
+ * Method:    setTimeLeftToChapterInternal
+ * Signature: (Ljava/lang/String;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_org_coolreader_crengine_DocView_setTimeLeftToChapterInternal
+        (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     org_coolreader_crengine_DocView
  * Method:    isTimeChangedInternal
  * Signature: ()Z
  */

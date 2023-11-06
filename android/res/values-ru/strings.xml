@@ -246,7 +246,8 @@
     <string name="options_page_show_titlebar_percent">Процент прочитанного</string>
     <string name="options_page_show_titlebar_page_count">Всего страниц</string>
     <string name="options_page_show_titlebar_pages_to_chapter">Осталось страниц до конца главы</string>
-    <string name="options_page_show_titlebar_time_left">Осталось времени</string>
+    <string name="options_page_show_titlebar_time_left">Осталось времени (книга)</string>
+    <string name="options_page_show_titlebar_time_left_to_chapter">Осталось времени (глава)</string>
     <string name="options_show_titlebar_page_number">Номер страницы</string>
     <string name="options_controls_flick_brightness">Управление яркостью скольжением по экрану</string>
     <string name="options_controls_flick_warm">Управление яркостью теплой подсветки скольжением по экрану</string>
@@ -444,6 +445,7 @@
     <string name="options_page_animation_dim">Затемнение</string>
     <string name="progress_downloading">Загружаю</string>
     <string name="mi_book_opds_root">Онлайн-каталоги</string>
+    <string name="mi_book_opds_root_short">Онлайн</string>
     <string name="mi_book_calibre_root">Библиотека Calibre</string>
     <string name="opds_search">Поиск в каталоге...</string>
     <string name="mi_tts_play">Читать вслух</string>
@@ -699,7 +701,8 @@
     <string name="dlg_goto_input_percent">Введите процент для перехода:</string>
     <string name="book_info_book_language">Язык</string>
     <string name="book_info_book_translation">Перевод (например ru или zh-cn)</string>
-    <string name="book_info_stats_minutes_left">Осталось времени чтения</string>
+    <string name="book_info_stats_minutes_left">Осталось времени чтения (книга)</string>
+    <string name="book_info_stats_minutes_left_to_chapter">Осталось времени чтения (глава)</string>
     <string name="book_info_book_genre">Жанр</string>
     <string name="book_info_book_srclang">Язык оригинала</string>
     <string name="book_info_book_translator">Переводчик</string>
@@ -1268,6 +1271,7 @@
     <string name="dictionary_settings">Словари</string>
     <string name="filebrowser_settings">Файловый браузер и библиотека</string>
     <string name="rare_settings">Экспериментальные / редкие параметры</string>
+    <string name="root_screen_settings">Настройки главного экрана</string>
     <string name="add_dics_settings">Дополнительные словари</string>
     <string name="user_dic_settings">Личный словарь и история переводов</string>
     <string name="dic_online_services_settings">Онлайн службы</string>
@@ -2094,5 +2098,33 @@
     <string name="add_this_key">Добавить кнопку в список</string>
     <string name="key_already_added">Кнопка уже добавлена</string>
     <string name="first_sentence_failed">Невозможно выделить первое предложение - страница не содержит текста</string>
+    <string name="screen_type_force_0">Авто</string>
+    <string name="screen_type_force_1">Черно-белый E-Ink экран</string>
+    <string name="screen_type_force_2">Цветной E-Ink экран</string>
+    <string name="cloud_save_folder_naming">Сохранение из облака - наименование папок</string>
+    <string name="cloud_save_folder_naming_0">Транслитерация автора латиницей</string>
+    <string name="cloud_save_folder_naming_0_add_info">например Alexandr_Sergeevich_Pushkin</string>
+    <string name="cloud_save_folder_naming_1">Автор - как есть</string>
+    <string name="cloud_save_folder_naming_1_add_info">например Александр Сергеевич Пушкин</string>
+    <string name="cloud_save_folder_naming_2">Транслитерация автора латиницей - формат "Фамилия Имя Отчетство"</string>
+    <string name="cloud_save_folder_naming_2_add_info">например Pushkin Alexandr Sergeevich</string>
+    <string name="cloud_save_folder_naming_3">Автор - формат "Фамилия Имя Отчетство"</string>
+    <string name="cloud_save_folder_naming_3_add_info">E.g. Пушкин Александр Сергеевич</string>
+    <string name="root_screen_section_pos_1">В самом верху</string>
+    <string name="root_screen_section_pos_2">Сверху, чуть ниже</string>
+    <string name="root_screen_section_pos_3">В середине</string>
+    <string name="root_screen_section_pos_4">Внизу, но не в самом</string>
+    <string name="root_screen_section_pos_5">В самом низу</string>
+    <string name="root_screen_section_pos_hide">Спрятать</string>
+    <string name="options_screen_section_pos_current_book">Позиция секции \'Открытая крига\'</string>
+    <string name="options_screen_section_pos_recent">Позиция секции \'Недавние\'</string>
+    <string name="options_screen_section_pos_file_system">Позиция секции \'Файловая система\'</string>
+    <string name="options_screen_section_pos_library">Позиция секции \'Библиотека\'</string>
+    <string name="options_screen_section_pos_online_catalogs">Позиция секции \'Онлайн каталоги\'</string>
+    <string name="options_screen_section_type_file_system">Тип секции \'Файловая система\'</string>
+    <string name="options_screen_section_type_library">Тип секции \'Библиотека\'</string>
+    <string name="options_screen_section_type_online_catalogs">Тип секции \'Онлайн каталоги\'</string>
+    <string name="root_screen_section_type_1">Заполнение</string>
+    <string name="root_screen_section_type_2">Прокрутка</string>
 </resources>
 
