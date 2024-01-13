@@ -3,7 +3,6 @@ package org.coolreader.crengine;
 import android.util.Log;
 
 import org.coolreader.R;
-import org.coolreader.readerview.ReaderView;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -312,7 +311,7 @@ public interface Settings {
 
 	String PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS = "app.browser.hide.empty.folders";
 	String PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES = "app.browser.hide.empty.genres";
-	String PROP_APP_FILE_BROWSER_SIMPLE_MODE = "app.browser.simple.mode";
+	String PROP_APP_FILE_BROWSER_ITEM_TYPE = "app.browser.item.type";
 
 	String PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE = "app.browser.max.group.size";
 	String PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_AUTHOR = "app.browser.max.group.size.author";
@@ -452,6 +451,8 @@ public interface Settings {
 	int SELECTION_ACTION_TOOLBAR_SHORT = 20;
 	int SELECTION_ACTION_COPY_WITH_PUNCT = 24;
 
+	int SELECTION_ACTION_SPEAK_SELECTION = 25;
+
 	// available options for PROP_APP_SECONDARY_TAP_ACTION_TYPE setting
     int TAP_ACTION_TYPE_LONGPRESS = 0;
     int TAP_ACTION_TYPE_DOUBLE = 1;
@@ -469,6 +470,10 @@ public interface Settings {
 	int BACKLIGHT_CONTROL_FLICK_LEFT_BOTH_RIGHT_COLD = 8;
 	int BACKLIGHT_CONTROL_FLICK_RIGHT_BOTH_LEFT_COLD = 9;
 	int BACKLIGHT_CONTROL_FLICK_BOTH_BOTH = 10;
+	int BACKLIGHT_CONTROL_FLICK_LEFT_SYSTEM = 11;
+	int BACKLIGHT_CONTROL_FLICK_RIGHT_SYSTEM = 12;
+	int BACKLIGHT_CONTROL_FLICK_BOTH_SYSTEM = 13;
+
 
 	int APP_STARTUP_ACTION_LAST_BOOK = 0;
     int APP_STARTUP_ACTION_ROOT = 1;

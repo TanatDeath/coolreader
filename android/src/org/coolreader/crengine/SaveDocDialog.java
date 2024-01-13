@@ -82,6 +82,8 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 	Uri mUri;
 	String mSType;
 	private EditText edtFileName;
+	private String mFileNameInitial;
+	private String mFileExtInitial;
 	private EditText edtFileExt;
 	boolean addAuthorsFolder = true;
 	FolderControls addAuthorsFC;
@@ -314,6 +316,12 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 	private void setupFileNameControls(TableLayout mainTl) {
 		View viewTitle = mInflater.inflate(R.layout.save_doc_title, null);
 		TextView tvTitle = viewTitle.findViewById(R.id.txt_title);
+		Button btnInitial = viewTitle.findViewById(R.id.btn_initial);
+		btnInitial.setBackgroundColor(colorGrayCT2);
+		btnInitial.setTextColor(colorIcon);
+		Button btnFromMD = viewTitle.findViewById(R.id.btn_from_metadata);
+		btnFromMD.setBackgroundColor(colorGrayCT2);
+		btnFromMD.setTextColor(colorIcon);
 		tvTitle.setText(mActivity.getString(R.string.select_file_name));
 		mainTl.addView(viewTitle);
 		View viewFname = mInflater.inflate(R.layout.save_doc_select_fname, null);
@@ -329,6 +337,33 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 				sName = sName.substring(0,i);
 			}
 		}
+		mFileNameInitial = sName;
+		mFileExtInitial = sExt;
+		btnInitial.setOnClickListener(view1 -> {
+			edtFileName.setText(mFileNameInitial);
+			edtFileExt.setText(mFileExtInitial);
+		});
+		btnFromMD.setOnClickListener(view1 -> {
+			SaveDocDialog sdd = this;
+			if ((StrUtils.isEmptyStr(sdd.mExistingFileName)) || (StrUtils.isEmptyStr(sdd.mFileDir))) return;
+			FileInfo fileOrDir = FileUtils.getFileProps(null,
+					new File(sdd.mExistingFileName), new FileInfo(sdd.mFileDir), true);
+			if (StrUtils.isEmptyStr(fileOrDir.getAuthors())) Services.getEngine().scanBookProperties(fileOrDir);
+			sdd.mActivity.waitForCRDBService(() -> {
+				sdd.mActivity.getDB().getBookFlags(fileOrDir, fl -> {
+					if (!StrUtils.isEmptyStr(fileOrDir.getAuthors())) {
+						String fname = Utils.transcribeFileName(fileOrDir.getTitle(),
+								mActivity.settings().getInt(Settings.PROP_APP_CLOUD_SAVE_FOLDER_NAMING, 0));
+						if (!StrUtils.isEmptyStr(fname)) {
+							if (mFileNameInitial.toLowerCase().endsWith(".fb2"))
+								edtFileName.setText(fname + ".fb2");
+							else
+								edtFileName.setText(fname);
+						}
+					}
+				});
+			});
+		});
 		edtFileName.setText(sName);
 		edtFileExt.setText(sExt);
 		mainTl.addView(viewFname);
@@ -715,11 +750,11 @@ public class SaveDocDialog extends BaseDialog implements FolderSelectedCallback 
 			File result = new File(resultDir.getAbsolutePath() + "/" + toName);
 			String fn = f.getName();
 			String rdn = resultDir.getAbsolutePath();
-			if ((
-				(StrUtils.getNonEmptyStr(fn, true).equals(StrUtils.getNonEmptyStr(toName, true)))
-				&&
-				(StrUtils.getNonEmptyStr(fromDir, true).equals(StrUtils.getNonEmptyStr(rdn, true)))
-			) || (StrUtils.isEmptyStr(toDir))) {
+			boolean namesAreSame =
+					(StrUtils.getNonEmptyStr(fn, true).equals(StrUtils.getNonEmptyStr(toName, true)))
+					&&
+					(StrUtils.getNonEmptyStr(fromDir, true).equals(StrUtils.getNonEmptyStr(rdn, true)));
+			if (namesAreSame && StrUtils.isEmptyStr(toDir)) {
 				if (setMarks) {
 					doSetMarks(sdd, cr, result);
 					BackgroundThread.instance().postGUI(() ->

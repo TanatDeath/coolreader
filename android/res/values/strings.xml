@@ -280,6 +280,9 @@
     <string name="options_controls_flick_brightness_left_both_cold">Left - both, right - cold</string>
     <string name="options_controls_flick_brightness_right_both_cold">Right - both, left - cold</string>
     <string name="options_controls_flick_brightness_both_both">Both edges - both lights</string>
+    <string name="options_controls_flick_brightness_left_system">Left - system dialog</string>
+    <string name="options_controls_flick_brightness_right_system">Right - system dialog</string>
+    <string name="options_controls_flick_brightness_both_system">Both edges - system dialog</string>
     <string name="options_page_show_titlebar_page_number">Page number</string>
     <string name="options_app_dictionary">Dictionary</string>
     <string name="options_app_dictionary_not_installed">(not installed)</string>
@@ -450,7 +453,13 @@
     <string name="dlg_about_copyright">© KnownReader team, 2020</string>
     <string name="dlg_about_contributors_">and contributors…</string>
     <string name="mi_book_browser_normal_mode">Normal mode</string>
-    <string name="mi_book_browser_simple_mode">Simple file list</string>
+    <string name="mi_book_browser_simple_mode">Simple mode</string>
+    <string name="mi_book_browser_mode">Book list kind</string>
+    <string name="mi_book_browser_mode_0">Common book list</string>
+    <string name="mi_book_browser_mode_1">Extended - add file name</string>
+    <string name="mi_book_browser_mode_2">Extended - add file name, archive name</string>
+    <string name="mi_book_browser_mode_3">Extended - archive name</string>
+    <string name="mi_book_browser_mode_4">Simple file list</string>
     <string name="mi_book_browser_max_group_size">Maximum group size</string>
     <string name="mi_book_browser_max_group_size_add_info">If the number is greater - items will be grouped into subfolders</string>
     <string name="mi_book_browser_max_group_size_author">Maximum group size - authors</string>
@@ -468,6 +477,7 @@
     <string name="progress_downloading">Downloading</string>
     <string name="mi_book_opds_root">Online catalogs</string>
     <string name="mi_book_opds_root_short">Online</string>
+    <string name="mi_book_system_dialog_short">From system</string>
     <string name="mi_book_calibre_root">Calibre library</string>
     <string name="opds_search">Search in catalog...</string>
     <string name="mi_tts_play">Read Aloud</string>
@@ -1703,6 +1713,7 @@
     <string name="online_combo_add_info">Online combo is the complex action - it allows to translate text (via online dictionary), then save the result to user dic</string>
     <string name="online_super_combo">Online super combo</string>
     <string name="online_super_combo_add_info">Online super combo is the complex action - it allows to translate text (via online dictionary), save the result to user dic, then send it to external app</string>
+    <string name="speak_selection">Speak selection</string>
     <string name="options_bookmark_action_send_to_option">Bookmark dialog: send action</string>
     <string name="options_bookmark_action_send_to">\"Send to\"</string>
     <string name="options_bookmark_action_send_to_add_info">You can define quick action to send your bookmark to external app</string>
@@ -2166,4 +2177,7 @@
     <string name="options_screen_section_type_online_catalogs">\'Online catalogs\' section type</string>
     <string name="root_screen_section_type_1">Flow</string>
     <string name="root_screen_section_type_2">Scroll</string>
+    <string name="cannot_open_file">Cannot open file</string>
+    <string name="initial_name">Initial</string>
+    <string name="name_from_metadata">Metadata</string>
 </resources>

@@ -134,7 +134,7 @@ public class ExtDicList extends BaseListView {
 				ImageView ivSpeak = view.findViewById(R.id.btn_speak);
 				mCoolReader.tintViewIconsForce(ivSpeak);
 				String finalText = text;
-				ivSpeak.setOnClickListener(view1 -> DicToastView.sayTTS(mCoolReader, finalText));
+				ivSpeak.setOnClickListener(view1 -> DicToastView.sayTTS(mCoolReader, finalText, null));
 				return view;
 			}
 
@@ -208,7 +208,7 @@ public class ExtDicList extends BaseListView {
 				ImageView ivSpeak = view.findViewById(R.id.btn_speak);
 				mCoolReader.tintViewIconsForce(ivSpeak);
 				String text = StrUtils.getNonEmptyStr(el.line, true);
-				ivSpeak.setOnClickListener(view1 -> DicToastView.sayTTS(mCoolReader, text));
+				ivSpeak.setOnClickListener(view1 -> DicToastView.sayTTS(mCoolReader, text, null));
 				labelView.setText(text);
 				if (mArticleMode) labelView.setMaxLines(999);
 				if (!StrUtils.isEmptyStr(curToast.sFindText))
@@ -251,7 +251,7 @@ public class ExtDicList extends BaseListView {
 				ImageView ivSpeak1 = view.findViewById(R.id.btn_speak1);
 				mCoolReader.tintViewIconsForce(ivSpeak1);
 				String text = StrUtils.getNonEmptyStr(lp.leftPart, true);
-				ivSpeak1.setOnClickListener(view1 -> DicToastView.sayTTS(mCoolReader, text));
+				ivSpeak1.setOnClickListener(view1 -> DicToastView.sayTTS(mCoolReader, text, null));
 				labelView.setText(text);
 				if (mArticleMode) labelView.setMaxLines(999);
 				if (!StrUtils.isEmptyStr(curToast.sFindText))
@@ -261,7 +261,7 @@ public class ExtDicList extends BaseListView {
 				mCoolReader.tintViewIconsForce(ivSpeak2);
 				String text2 = StrUtils.getNonEmptyStr(lp.rightPart, true);
 				labelView2.setText(text2);
-				ivSpeak2.setOnClickListener(view1 -> DicToastView.sayTTS(mCoolReader, text2));
+				ivSpeak2.setOnClickListener(view1 -> DicToastView.sayTTS(mCoolReader, text2, null));
 				if (mArticleMode) labelView.setMaxLines(999);
 				if (!StrUtils.isEmptyStr(curToast.sFindText))
 					Utils.setHighLightedText(labelView2, curToast.sFindText, mColorIconL);

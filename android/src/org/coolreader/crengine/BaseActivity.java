@@ -578,7 +578,8 @@ public class BaseActivity extends Activity implements Settings {
 						 R.attr.attr_icons8_8,
 						 R.attr.attr_icons8_9,
 						 R.attr.attr_icons8_10,
-				         R.attr.attr_icons8_speaker_stop
+				         R.attr.attr_icons8_speaker_stop,
+						 R.attr.cr3_button_tts_drawable
 		};
 		TypedArray a = getTheme().obtainStyledAttributes(attrs);
 		int btnPrevDrawableRes = a.getResourceId(0, 0);
@@ -710,6 +711,8 @@ public class BaseActivity extends Activity implements Settings {
 		int br10 = a.getResourceId(114, 0);
 
 		int brSpeakerStop = a.getResourceId(115, 0);
+
+		int brTtsDrawable = a.getResourceId(116, 0);
 
 		a.recycle();
 		if (btnPrevDrawableRes != 0) {
@@ -911,6 +914,8 @@ public class BaseActivity extends Activity implements Settings {
 		if (br10 != 0) ReaderAction.COMMAND_GROUP_10.setIconId(br10);
 
 		if (brSpeakerStop != 0) ReaderAction.TTS_STOP.setIconId(brSpeakerStop);
+
+		if (brTtsDrawable != 0) ReaderAction.SPEAK_SELECTION.setIconId(brTtsDrawable);
 	}
 
 	public void setCurrentTheme(InterfaceTheme theme) {
@@ -3410,7 +3415,7 @@ public class BaseActivity extends Activity implements Settings {
 			props.setProperty(ReaderView.PROP_MIN_FILE_SIZE_TO_CACHE, "100000");
 			props.setProperty(ReaderView.PROP_FORCED_MIN_FILE_SIZE_TO_CACHE, "32768");
 			props.applyDefault(ReaderView.PROP_HYPHENATION_DICT, Engine.HyphDict.RUSSIAN.toString());
-			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_SIMPLE_MODE, "0");
+			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_ITEM_TYPE, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE, "8");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_AUTHOR, "0");
 			props.applyDefault(ReaderView.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_SERIES, "0");

@@ -478,6 +478,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 	private static final int ODT_CMD_DEL_FOLDER = 2;
 	private static final int ODT_CMD_SAVE_LOGCAT = 3;
 	public static final int ODT_CMD_SELECT_OTG = 4;
+	public static final int ODT_CMD_OPEN_FILE = 5;
 
 	private final BroadcastReceiver batteryChangeReceiver = new BroadcastReceiver() {
 		@Override
@@ -1009,9 +1010,9 @@ public class CoolReader extends BaseActivity implements SensorEventListener
         } else if (key.equals(PROP_APP_COVERPAGE_SIZE)) {
 			if (mBrowser != null)
 				mBrowser.setCoverPageSizeOption(Utils.parseInt(value, 0, 0, 2));
-        } else if (key.equals(PROP_APP_FILE_BROWSER_SIMPLE_MODE)) {
+        } else if (key.equals(PROP_APP_FILE_BROWSER_ITEM_TYPE)) {
         	if (mBrowser != null)
-        		mBrowser.setSimpleViewMode(flg);
+        		mBrowser.setFileBrowserModeSelected(Utils.parseInt(value, 0, 0, 4));
         } else if (key.equals(PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED)) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 				mSyncGoogleDriveEnabledPrev = mGoogleDriveSyncOpts.Enabled;
@@ -2785,7 +2786,7 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				mBrowser.setCoverPageFontFace(settings().getProperty(ReaderView.PROP_FONT_FACE, DeviceInfo.DEF_FONT_FACE));
 				mBrowser.setCoverPageSizeOption(settings().getInt(ReaderView.PROP_APP_COVERPAGE_SIZE, 1));
 				mBrowser.setSortOrder(settings().getProperty(ReaderView.PROP_APP_BOOK_SORT_ORDER));
-				mBrowser.setSimpleViewMode(settings().getBool(ReaderView.PROP_APP_FILE_BROWSER_SIMPLE_MODE, false));
+				mBrowser.setFileBrowserModeSelected(settings().getInt(ReaderView.PROP_APP_FILE_BROWSER_ITEM_TYPE, 1));
 				mBrowser.init();
 
 				LayoutInflater inflater = LayoutInflater.from(CoolReader.this);// activity.getLayoutInflater();
@@ -3218,7 +3219,14 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 							}
 							mOpenDocumentTreeArg = null;
 							break;
-
+						case ODT_CMD_OPEN_FILE:
+							if (intent != null) {
+								intent.setAction(Intent.ACTION_VIEW);
+								processIntent(intent);
+							} else {
+								showToast(R.string.cannot_open_file);
+							}
+							break;
 					}
 					mOpenDocumentTreeArg = null;
 				}

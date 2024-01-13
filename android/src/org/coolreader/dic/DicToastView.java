@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
@@ -764,7 +765,7 @@ public class DicToastView {
             Utils.removeView(btnRemove2sym);
             Utils.removeView(btnRemove3sym);
             mActivity.tintViewIcons(btnSpeak,true);
-            btnSpeak.setOnClickListener(view -> sayTTS(mActivity, t.sFindText));
+            btnSpeak.setOnClickListener(view -> sayTTS(mActivity, t.sFindText, null));
             autoSpeak = mActivity.settings().getBool(Settings.PROP_APP_DICT_AUTO_SPEAK, false);
             btnSpeak.setOnLongClickListener((v) -> {
                 autoSpeak = !autoSpeak;
@@ -779,7 +780,7 @@ public class DicToastView {
             if (autoSpeak) {
                 btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_on));
                 BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
-                    sayTTS(mActivity, t.sFindText);
+                    sayTTS(mActivity, t.sFindText, null);
                 }, 500));
             } else
                 btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_off));
@@ -1162,7 +1163,7 @@ public class DicToastView {
             body2 = window.getContentView().findViewById(R.id.articles_list2);
         }
         mActivity.tintViewIcons(btnSpeak,true);
-        btnSpeak.setOnClickListener(view -> sayTTS(mActivity, t.sFindText));
+        btnSpeak.setOnClickListener(view -> sayTTS(mActivity, t.sFindText, null));
         autoSpeak = mActivity.settings().getBool(Settings.PROP_APP_DICT_AUTO_SPEAK, false);
         btnSpeak.setOnLongClickListener((v) -> {
             autoSpeak = !autoSpeak;
@@ -1177,7 +1178,7 @@ public class DicToastView {
         if (autoSpeak) {
             btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_on));
             BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
-                sayTTS(mActivity, t.sFindText);
+                sayTTS(mActivity, t.sFindText, null);
             }, 500));
         } else
             btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_off));
@@ -1348,7 +1349,10 @@ public class DicToastView {
         })/*, true*/);
     }
 
-    public static void sayTTS(CoolReader cr, String textToSay) {
+    public interface SaidCallback {
+        void said();
+    }
+    public static void sayTTS(CoolReader cr, String textToSay, SaidCallback callback) {
         if (curToast != null) curToast.wasSpeaking = true;
         cr.initTTS(ttsacc -> BackgroundThread.instance().executeGUI(() -> {
             ttsacc.bind(ttsbinder -> {
@@ -1394,6 +1398,7 @@ public class DicToastView {
                                     ttsacc.unbind();
                                 Intent intent = new Intent(cr, TTSControlService.class);
                                 cr.stopService(intent);
+                                if (callback != null) callback.said();
                             });
                         });
                     }
@@ -1411,6 +1416,7 @@ public class DicToastView {
                                         ttsacc.unbind();
                                     Intent intent = new Intent(cr, TTSControlService.class);
                                     cr.stopService(intent);
+                                    if (callback != null) callback.said();
                                 });
                             });
                         });
@@ -1521,7 +1527,7 @@ public class DicToastView {
             Utils.removeView(btnRemove2sym);
             Utils.removeView(btnRemove3sym);
             mActivity.tintViewIcons(btnSpeak,true);
-            btnSpeak.setOnClickListener(view -> sayTTS(mActivity, t.sFindText));
+            btnSpeak.setOnClickListener(view -> sayTTS(mActivity, t.sFindText, null));
             autoSpeak = mActivity.settings().getBool(Settings.PROP_APP_DICT_AUTO_SPEAK, false);
             btnSpeak.setOnLongClickListener((v) -> {
                 autoSpeak = !autoSpeak;
@@ -1536,7 +1542,7 @@ public class DicToastView {
             if (autoSpeak) {
                 btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_on));
                 BackgroundThread.instance().postBackground(() -> BackgroundThread.instance().postGUI(() -> {
-                    sayTTS(mActivity, t.sFindText);
+                    sayTTS(mActivity, t.sFindText, null);
                 }, 500));
             } else
                 btnSpeak.setImageDrawable(mActivity.getResources().getDrawable(R.drawable.icons8_speaker_small_off));

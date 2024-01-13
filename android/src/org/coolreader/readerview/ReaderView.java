@@ -868,6 +868,12 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				}
 				break;
 
+			case SELECTION_ACTION_SPEAK_SELECTION:
+				if (sel != null)
+					if (!StrUtils.isEmptyStr(sel.text))
+						DicToastView.sayTTS(mActivity, sel.text, null);
+				break;
+
 			default:
 				clearSelection();
 				break;
@@ -3320,7 +3326,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 					|| PROP_APP_FILE_BROWSER_HIDE_EMPTY_FOLDERS.equals(key)
 					|| PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES.equals(key)
 					|| PROP_APP_SELECTION_ACTION.equals(key)
-					|| PROP_APP_FILE_BROWSER_SIMPLE_MODE.equals(key)
+					|| PROP_APP_FILE_BROWSER_ITEM_TYPE.equals(key)
 					|| PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE.equals(key)
 					|| PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_AUTHOR.equals(key)
 					|| PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE_SERIES.equals(key)
@@ -4521,6 +4527,14 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		}, delay);
 	}
 
+	boolean getSystemBrightnessCall(int backLightSetting, boolean leftOk, boolean rightOk) {
+		if ((!leftOk) && (!rightOk)) return false;
+		if ((backLightSetting == BACKLIGHT_CONTROL_FLICK_LEFT_SYSTEM) && (leftOk)) return true;
+		if ((backLightSetting == BACKLIGHT_CONTROL_FLICK_RIGHT_SYSTEM) && (rightOk)) return true;
+		if (backLightSetting == BACKLIGHT_CONTROL_FLICK_BOTH_SYSTEM) return true;
+		return false;
+	}
+
 	boolean getBacklightEnabled(int backLightSetting, boolean isLeft, boolean isCold) {
 		if ((isLeft) && (isCold))
 			if (
@@ -4632,6 +4646,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 		} else {
 			log.i("updateBrightnessControl: device is onyx");
 			if (DeviceInfo.EINK_HAVE_FRONTLIGHT) {
+				log.i("updateBrightnessControl: device is onyx, have frontlight");
 				bOnyxLight = true;
 				if (null != mEinkScreen)
 					levelListCold = mEinkScreen.getFrontLightLevels(mActivity);
@@ -4640,6 +4655,7 @@ public class ReaderView implements android.view.SurfaceHolder.Callback, Settings
 				}
 			}
 			if (DeviceInfo.EINK_HAVE_NATURAL_BACKLIGHT) {
+				log.i("updateBrightnessControl: device is onyx, have naturallight");
 				bOnyxWarmLight = true;
 				if (null != mEinkScreen)
 					levelListWarm = mEinkScreen.getWarmLightLevels(mActivity);

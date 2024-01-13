@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
 $TARGET_DIR = "../android/res/";
+$THIS_DIR = "/home/plotn/github/knownreader/coolreader/icons8/";
 $TEMP_DIR = "../icons_temp/";
 
 #                      dpi: 120       160       240        320         480            640
@@ -11,32 +12,11 @@ my %ic_launcher_sizes = (ldpi=>36, mdpi=>48, hdpi=>72, xhdpi=>96, xxhdpi=>144, x
 my %ic_bigicons_sizes = (ldpi=>36, mdpi=>48, hdpi=>72, xhdpi=>96, xxhdpi=>144, xxxhdpi=>192);
 
 my %ic_smaller_list=(
-        'icons8_minus_minus_small.svg' => 'icons8_minus_minus_small.png',
-        'icons8_visible.svg' => 'icons8_visible.png',
-        'icons8_tear_off_calendar.svg' => 'icons8_tear_off_calendar.png',
-        'icons8_speaker.svg' => 'icons8_speaker_small.png',
-        'icons8_speaker_on.svg' => 'icons8_speaker_small_on.png',
-        'icons8_speaker_off.svg' => 'icons8_speaker_small_off.png',
-        'icons8_fullscreen.svg' => 'icons8_fullscreen_small.png'
+        'icons8_minus_minus_small.svg' => 'icons8_minus_minus_small.png'
 );
 
 my %ic_actions_list=(
-        'icons8_1.svg' => 'icons8_1.png',
-        'icons8_2.svg' => 'icons8_2.png',
-        'icons8_3.svg' => 'icons8_3.png',
-        'icons8_4.svg' => 'icons8_4.png',
-        'icons8_5.svg' => 'icons8_5.png',
-        'icons8_6.svg' => 'icons8_6.png',
-        'icons8_7.svg' => 'icons8_7.png',
-        'icons8_8.svg' => 'icons8_8.png',
-        'icons8_9.svg' => 'icons8_9.png',
-        'icons8_10.svg' => 'icons8_10.png',
-        'icons8_download_database.svg' => 'icons8_download_database.png',
-        'icons8_dic_panel.svg' => 'icons8_dic_panel.png',
-        'icons8_speaker_on.svg' => 'icons8_speaker_on.png',
-        'icons8_speaker_off.svg' => 'icons8_speaker_off.png',
-        'icons8_page_turn.svg' => 'icons8_page_turn.png',
-        'icons8_page_turn_back.svg' => 'icons8_page_turn_back.png'
+        'icons8_system_folder.svg' => 'icons8_system_folder.png'
 );
 
 my %ic_menu_list=(
@@ -65,7 +45,7 @@ while (($srcfile, $dstfile) = each(%ic_smaller_list))
 		if (-d $folder)
 		{
 			$resfile = "${folder}/${dstfile}";
-			$cmd = "inkscape -z --export-filename ${resfile} -w ${size} -h ${size} ${srcfile}";
+			$cmd = "inkscape -z --export-filename ${resfile} -w ${size} -h ${size} ${THIS_DIR}${srcfile}";
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;
@@ -82,7 +62,7 @@ while (($srcfile, $dstfile) = each(%ic_actions_list))
 		if (-d $folder)
 		{
 			$resfile = "${folder}/${dstfile}";
-			$cmd = "inkscape -z --export-filename ${resfile} -w ${size} -h ${size} ${srcfile}";
+			$cmd = "inkscape -z --export-filename ${resfile} -w ${size} -h ${size} ${THIS_DIR}${srcfile}";
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;
@@ -99,7 +79,7 @@ while (($srcfile, $dstfile) = each(%ic_menu_list))
 		if (-d $folder)
 		{
 			$resfile = "${folder}/${dstfile}";
-			$cmd = "inkscape -z --export-filename ${resfile} -w ${size} -h ${size} ${srcfile}";
+			$cmd = "inkscape -z --export-filename ${resfile} -w ${size} -h ${size} ${THIS_DIR}${srcfile}";
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;
@@ -117,7 +97,7 @@ while (($srcfile, $dstfile) = each(%ic_launcher_list))
 		if (-d $folder)
 		{
 			$resfile = "${folder}/${dstfile}";
-			$cmd = "inkscape -z --export-filename ${resfile} -w ${size} -h ${size} ${srcfile}";
+			$cmd = "inkscape -z --export-filename ${resfile} -w ${size} -h ${size} ${THIS_DIR}${srcfile}";
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;
@@ -135,7 +115,7 @@ while (($srcfile, $dstfile) = each(%ic_bigicons_list))
 		if (-d $folder)
 		{
 			$resfile = "${folder}/${dstfile}";
-			$cmd = "inkscape -z --export-filename ${resfile} -w ${size} -h ${size} ${srcfile}";
+			$cmd = "inkscape -z --export-filename ${resfile} -w ${size} -h ${size} ${THIS_DIR}${srcfile}";
 			print "$cmd\n";
 			$ret = system($cmd);
 			print "Failed!\n" if $ret != 0;

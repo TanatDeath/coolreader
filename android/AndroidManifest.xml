@@ -47,7 +47,9 @@
             android:theme="@android:style/Theme.NoTitleBar"
             android:launchMode="singleInstance"
             android:windowSoftInputMode="stateAlwaysHidden"
-            android:screenOrientation="sensor">
+            android:screenOrientation="sensor"
+            android:exported="true"
+            >
             
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -192,6 +194,7 @@
 
         <!-- Stop TTS on incoming call -->
         <receiver android:name="org.coolreader.PhoneStateReceiver">
+            android:exported="true"
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
             </intent-filter>

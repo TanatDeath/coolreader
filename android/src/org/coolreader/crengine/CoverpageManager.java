@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.zip.CRC32;
 
@@ -31,10 +32,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import androidx.annotation.ColorInt;
+
 public class CoverpageManager {
 
 	public static final Logger log = L.create("cp");
-
+	HashMap<Integer, Integer> themeColors;
 	public CoolReader getmCoolReader() {
 		return mCoolReader;
 	}
@@ -660,6 +663,87 @@ public class CoverpageManager {
 					canvas.drawRect(b, paint);
 			}
 		}
+
+		@ColorInt
+		int darkenColor(@ColorInt int color) {
+			float[] hsv = new float[3];
+			Color.colorToHSV(color, hsv);
+			hsv[2] *= 0.7f;
+			return Color.HSVToColor(hsv);
+		}
+
+		public void drawMarkers(Canvas canvas, Rect bookRect, ImageItem book) {
+			themeColors = Utils.getThemeColors(getmCoolReader(), isEInk);
+			int colorBlue = themeColors.get(R.attr.colorThemeBlue);
+			int colorGreen = themeColors.get(R.attr.colorThemeGreen);
+			int colorGray = themeColors.get(R.attr.colorThemeGray);
+			int diff = bookRect.right - bookRect.left;
+			int diff5 = (int) ((double) diff / 5.0D);
+			Paint paint = new Paint();
+			paint.setStrokeWidth(1);
+			Paint paintBlack = new Paint();
+			paint.setStrokeWidth(1);
+			int t = 0;
+			if (book.file.getReadingState() == FileInfo.STATE_READING) {
+				paint.setColor(colorGreen);
+				paintBlack.setColor(darkenColor(colorGreen));
+				for (int i = diff5; i > 0; i--) {
+					Rect l = new Rect(bookRect.left, bookRect.top + t,
+							bookRect.left + i, bookRect.top + t + 2);
+					canvas.drawRect(l, paint);
+					Rect lFrame = new Rect(bookRect.left + i, bookRect.top + t,
+							bookRect.left + i + 1, bookRect.top + t + 2);
+					canvas.drawRect(lFrame, paintBlack);
+					t++;
+				}
+			}
+			else if (book.file.getReadingState() == FileInfo.STATE_TO_READ) {
+				paint.setColor(colorBlue);
+				paintBlack.setColor(darkenColor(colorBlue));
+				for (int i = 2; i < diff5 + 2; i++) {
+					int half = diff5 / 2;
+					Rect l;
+					Rect lFrame1;
+					Rect lFrame2;
+					if (i < half) {
+						l = new Rect(bookRect.left + half - i, bookRect.top + t,
+								bookRect.left + half + i, bookRect.top + t + 1);
+						lFrame1 = new Rect(bookRect.left + half - i - 2, bookRect.top + t,
+								bookRect.left + half - i, bookRect.top + t + 1);
+						lFrame2 = new Rect(bookRect.left + half + i, bookRect.top + t,
+								bookRect.left + half + i + 2, bookRect.top + t + 1);
+					} else {
+						l = new Rect(bookRect.left + half - (diff5 - i), bookRect.top + t,
+								bookRect.left + half + (diff5 - i), bookRect.top + t + 1);
+						lFrame1 = new Rect(bookRect.left + half - (diff5 - i) - 2, bookRect.top + t,
+								bookRect.left + half - (diff5 - i), bookRect.top + t + 1);
+						lFrame2 = new Rect(bookRect.left + half + (diff5 - i), bookRect.top + t,
+								bookRect.left + half + (diff5 - i) + 2, bookRect.top + t + 1);
+					}
+					canvas.drawRect(l, paint);
+					canvas.drawRect(lFrame1, paintBlack);
+					canvas.drawRect(lFrame2, paintBlack);
+					t++;
+				}
+			}
+			else if (book.file.getReadingState() == FileInfo.STATE_FINISHED) {
+				paint.setColor(colorGray);
+				paintBlack.setColor(darkenColor(colorGray));
+				for (int i = diff5; i >= 0; i--) {
+					Rect l = new Rect(bookRect.left, bookRect.top + t,
+							bookRect.left + diff5, bookRect.top + t + 1);
+					Rect lFrame = new Rect(bookRect.left + diff5, bookRect.top + t,
+							bookRect.left + diff5 + 2, bookRect.top + t + 1);
+					canvas.drawRect(lFrame, paintBlack);
+					canvas.drawRect(l, paint);
+					t++;
+				}
+				Rect l = new Rect(bookRect.left, bookRect.top + t,
+						bookRect.left + diff5, bookRect.top + t + 2);
+				canvas.drawRect(l, paintBlack);
+			}
+		}
+
 		boolean checkShadowSize(int bookSize, int shadowSize) {
 			if (bookSize < 10)
 				return false;
@@ -718,6 +802,7 @@ public class CoverpageManager {
 								if (shadowSizePercent > 0) {
 									Rect shadowRect = new Rect(rc.left + shadowW, rc.top + shadowH, rc.right + shadowW, rc.bottom + shadowW);
 									drawShadow(canvas, rc, shadowRect);
+									drawMarkers(canvas, rc, book);
 								}
 								isCustomCover = true;
                                 return;
@@ -747,6 +832,7 @@ public class CoverpageManager {
 							if (shadowSizePercent > 0) {
 								Rect shadowRect = new Rect(rc.left + shadowW, rc.top + shadowH, rc.right + shadowW, rc.bottom + shadowW);
 								drawShadow(canvas, rc, shadowRect);
+								drawMarkers(canvas, rc, book);
 							}
 							return;
 						} else {
@@ -767,6 +853,7 @@ public class CoverpageManager {
 							bmp = getBookCoverWithTitleBitmap(sTitle, sAuthors,
 									rc.width(), rc.height());
 							canvas.drawBitmap(bmp, null, rc, defPaint);
+							drawMarkers(canvas, rc, book);
 						}
 					}
 				}

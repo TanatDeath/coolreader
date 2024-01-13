@@ -178,7 +178,7 @@
                 android:layout_marginRight="1dip"
                 android:src="?attr/attr_icons8_combo"
                 android:tag="tint"/>
-        <ImageButton android:id="@+id/btn_super_combo"
+        <ImageButton android:id="@+id/btn_speak_selection"
                 android:layout_width="0dip" android:layout_weight="3"
                 android:layout_height="match_parent"
                 android:minHeight="?android:attr/listPreferredItemHeightSmall"
@@ -187,7 +187,7 @@
                 android:layout_marginBottom="2dip"
                 android:layout_marginLeft="1dip"
                 android:layout_marginRight="1dip"
-                android:src="?attr/attr_icons8_super_combo"
+                android:src="?attr/cr3_button_tts_drawable"
                 android:tag="tint"/>
     </LinearLayout>
 </LinearLayout>

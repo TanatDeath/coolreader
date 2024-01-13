@@ -205,7 +205,7 @@
     <string name="action_brightness_down">Яркость ниже</string>
     <string name="action_brightness_up">Яркость выше</string>
     <string name="action_brightness_warm_down">Яркость ниже (теплая)</string>
-    <string name="action_brightness_warm_up">Яроксть выше (теплая)</string>
+    <string name="action_brightness_warm_up">Яркость выше (теплая)</string>
     <string name="options_app_scan_book_props">Сканировать свойства книг в папке</string>
     <string name="options_page_titlebar">Настройки колонтитула</string>
     <string name="options_page_titlebar_short">колонтитул</string>
@@ -262,6 +262,9 @@
     <string name="options_controls_flick_brightness_left_both_cold">Слева - обе, справа - холодная</string>
     <string name="options_controls_flick_brightness_right_both_cold">Справа - обе, слева - холодная</string>
     <string name="options_controls_flick_brightness_both_both">Оба края - обе подсветки</string>
+    <string name="options_controls_flick_brightness_left_system">Слева - системный диалог</string>
+    <string name="options_controls_flick_brightness_right_system">Справа - системный диалог</string>
+    <string name="options_controls_flick_brightness_both_system">Оба края - системный диалог</string>
     <string name="options_page_show_titlebar_page_number">Номер страницы</string>
     <string name="options_app_dictionary">Словарь</string>
     <string name="options_app_dictionary2">Словарь 2</string>
@@ -428,7 +431,13 @@
     <string name="dlg_about_cloudsync_dirs">Каталоги облачной синхронизации:</string>
     <string name="dlg_about_icons_dirs">Каталоги для иконок:</string>
     <string name="mi_book_browser_normal_mode">Нормальный режим</string>
-    <string name="mi_book_browser_simple_mode">Простой список файлов</string>
+    <string name="mi_book_browser_simple_mode">Простой режим</string>
+    <string name="mi_book_browser_mode">Вид списка книг</string>
+    <string name="mi_book_browser_mode_0">Обычный список</string>
+    <string name="mi_book_browser_mode_1">Расширенный - добавить имя файла</string>
+    <string name="mi_book_browser_mode_2">Расширенный - добавить имя файла, имя архива</string>
+    <string name="mi_book_browser_mode_3">Расширенный - добавить имя архива</string>
+    <string name="mi_book_browser_mode_4">Простой список</string>
     <string name="mi_book_browser_max_group_size">Максимальный размер группы</string>
     <string name="mi_book_browser_max_group_size_add_info">Если число элементов будет больше - они будут группироваться в подпапки</string>
     <string name="mi_book_browser_max_group_size_author">Максимальный размер группы - авторы</string>
@@ -446,6 +455,7 @@
     <string name="progress_downloading">Загружаю</string>
     <string name="mi_book_opds_root">Онлайн-каталоги</string>
     <string name="mi_book_opds_root_short">Онлайн</string>
+    <string name="mi_book_system_dialog_short">Из системы</string>
     <string name="mi_book_calibre_root">Библиотека Calibre</string>
     <string name="opds_search">Поиск в каталоге...</string>
     <string name="mi_tts_play">Читать вслух</string>
@@ -473,7 +483,7 @@
     <string name="options_screen_update_mode_onyx_regal">SNOW Field (Regal)</string>
     <string name="options_screen_update_interval">Интервал полного обновления</string>
     <string name="options_screen_blackpage_interval">Интервал принудительной отрисовки черной страницы</string>
-    <string name="options_screen_blackpage_interval_add_info">Для минимизации артефактов на (неподдеживаемых) E-Ink экранах, область чтения будет заливаться черным цветом, через каждые N страниц</string>
+    <string name="options_screen_blackpage_interval_add_info">Для минимизации артефактов на (неподдерживаемых) E-Ink экранах, область чтения будет заливаться черным цветом, через каждые N страниц</string>
     <string name="options_screen_blackpage_duration">Длительность отрисовки черной страницы, мс</string>
     <string name="options_screen_blackpage_duration_add_info">Время (в мс) на которое будет показана черная заливка области чтения</string>
     <string name="options_screen_force_eink">Оптимизация для E-Ink</string>
@@ -1661,6 +1671,7 @@
     <string name="online_combo_add_info">Онлайн комбо - это комплексное действие: сначала вы переводите текст в словаре (онлайн), затем результат сохраняется в личном словаре</string>
     <string name="online_super_combo">Онлайн суперкомбо</string>
     <string name="online_super_combo_add_info">Онлайн суперкомбо - это комплексное действие: сначала вы переводите текст в словаре (онлайн), затем результат сохраняется в личном словаре, после чего передается во внешнее приложение</string>
+    <string name="speak_selection">Произнести выделенное</string>
     <string name="options_bookmark_action_send_to_option">Диалог закладки: действие для отправки</string>
     <string name="options_bookmark_action_send_to">\"Отправить в\"</string>
     <string name="options_bookmark_action_send_to_add_info">Вы можете настроить быстрое действие для отправки закладки в стороннее приложение</string>
@@ -1823,8 +1834,8 @@
     <string name="options_eink_app_optimization_enabled">отключено, так как включена оптимизация приложения</string>
     <string name="options_legacy_rendering_enabled">отключено, так как включен устаревший рендеринг</string>
     <string name="options_disabled_document_styles">встроенные стили документа отключены (или документ этого типа не поддерживает встроенные стили)</string>
-    <string name="options_multilingual_enabled">отключено, так как включена поддежка мультиязычных документов</string>
-    <string name="options_multilingual_disabled">отключено, так как отключена поддежка мультиязычных документов или включен устаревший рендеринг</string>
+    <string name="options_multilingual_enabled">отключено, так как включена поддержка мультиязычных документов</string>
+    <string name="options_multilingual_disabled">отключено, так как отключена поддержка мультиязычных документов или включен устаревший рендеринг</string>
     <string name="filter_by_book_language_s">Отфильтровать по языку книги (%s)</string>
     <string name="scanning_font_files">Сканирование файлов шрифтов…</string>
     <string name="undetermined">Неопределенный</string>
@@ -1891,7 +1902,7 @@
     <string name="eink_onyx_bypass1">Включено</string>
     <string name="eink_onyx_bypass2">Выключено</string>
     <string name="eink_onyx_deepgc">Интервал глубокого полного обновления</string>
-    <string name="eink_onyx_deepgc_add_info">Полное обновление высокого (в два прохода) качества (работает на некоторых моделя Onyx, например Poke 3). 0 = отключено</string>
+    <string name="eink_onyx_deepgc_add_info">Полное обновление высокого (в два прохода) качества (работает на некоторых моделях Onyx, например Poke 3). 0 = отключено</string>
     <string name="eink_onyx_add_delay_full_refresh">Дополнительная задержка перед полным обновлением экрана</string>
     <string name="eink_onyx_add_delay_full_refresh_auto">Авто</string>
     <string name="eink_onyx_add_delay_full_refresh_0">Отключено</string>
@@ -2106,9 +2117,9 @@
     <string name="cloud_save_folder_naming_0_add_info">например Alexandr_Sergeevich_Pushkin</string>
     <string name="cloud_save_folder_naming_1">Автор - как есть</string>
     <string name="cloud_save_folder_naming_1_add_info">например Александр Сергеевич Пушкин</string>
-    <string name="cloud_save_folder_naming_2">Транслитерация автора латиницей - формат "Фамилия Имя Отчетство"</string>
+    <string name="cloud_save_folder_naming_2">Транслитерация автора латиницей - формат "Фамилия Имя Отчество"</string>
     <string name="cloud_save_folder_naming_2_add_info">например Pushkin Alexandr Sergeevich</string>
-    <string name="cloud_save_folder_naming_3">Автор - формат "Фамилия Имя Отчетство"</string>
+    <string name="cloud_save_folder_naming_3">Автор - формат "Фамилия Имя Отчество"</string>
     <string name="cloud_save_folder_naming_3_add_info">E.g. Пушкин Александр Сергеевич</string>
     <string name="root_screen_section_pos_1">В самом верху</string>
     <string name="root_screen_section_pos_2">Сверху, чуть ниже</string>
@@ -2116,7 +2127,7 @@
     <string name="root_screen_section_pos_4">Внизу, но не в самом</string>
     <string name="root_screen_section_pos_5">В самом низу</string>
     <string name="root_screen_section_pos_hide">Спрятать</string>
-    <string name="options_screen_section_pos_current_book">Позиция секции \'Открытая крига\'</string>
+    <string name="options_screen_section_pos_current_book">Позиция секции \'Открытая книга\'</string>
     <string name="options_screen_section_pos_recent">Позиция секции \'Недавние\'</string>
     <string name="options_screen_section_pos_file_system">Позиция секции \'Файловая система\'</string>
     <string name="options_screen_section_pos_library">Позиция секции \'Библиотека\'</string>
@@ -2126,5 +2137,8 @@
     <string name="options_screen_section_type_online_catalogs">Тип секции \'Онлайн каталоги\'</string>
     <string name="root_screen_section_type_1">Заполнение</string>
     <string name="root_screen_section_type_2">Прокрутка</string>
+    <string name="cannot_open_file">Невозможно открыть файл</string>
+    <string name="initial_name">Начальное</string>
+    <string name="name_from_metadata">Метаданные</string>
 </resources>
 

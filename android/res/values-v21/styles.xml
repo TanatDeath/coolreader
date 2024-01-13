@@ -668,6 +668,7 @@
         <item name="attr_icons8_9">@drawable/icons8_9</item>
         <item name="attr_icons8_10">@drawable/icons8_10</item>
         <item name="attr_icons8_download_database">@drawable/icons8_download_database</item>
+        <item name="attr_icons8_system_folder">@drawable/icons8_system_folder</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
@@ -1137,6 +1138,7 @@
         <item name="attr_icons8_9">@drawable/icons8_9</item>
         <item name="attr_icons8_10">@drawable/icons8_10</item>
         <item name="attr_icons8_download_database">@drawable/icons8_download_database</item>
+        <item name="attr_icons8_system_folder">@drawable/icons8_system_folder</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
@@ -2345,6 +2347,7 @@
         <item name="attr_icons8_9">@drawable/icons8_9</item>
         <item name="attr_icons8_10">@drawable/icons8_10</item>
         <item name="attr_icons8_download_database">@drawable/icons8_download_database</item>
+        <item name="attr_icons8_system_folder">@drawable/icons8_system_folder</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>
@@ -2802,6 +2805,7 @@
         <item name="attr_icons8_9">@drawable/icons8_9</item>
         <item name="attr_icons8_10">@drawable/icons8_10</item>
         <item name="attr_icons8_download_database">@drawable/icons8_download_database</item>
+        <item name="attr_icons8_system_folder">@drawable/icons8_system_folder</item>
         <item name="attr_icons8_group">@drawable/icons8_group</item>
         <item name="attr_icons8_group2">@drawable/icons8_group2</item>
         <item name="attr_icons8_airplane_mode_on">@drawable/icons8_airplane_mode_on</item>

@@ -56,7 +56,6 @@ import android.widget.TextView;
 public class OptionsDialog extends BaseDialog implements TabContentFactory, OptionOwner, Settings {
 
 	public static int toastShowCnt = 0;
-
 	ReaderView mReaderView;
 	CoolReader mActivity;
 	String optionFilter;
@@ -71,12 +70,12 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 	public static HashMap<String, OptionBase> ALL_OPTIONS = new HashMap<>();
 
 	public static int[] mFontSizes = new int[] {
-			9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-			31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
-			61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
-			91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120,
-			121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150,
-			170, 200, 230, 260, 300, 340
+		9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+		31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
+		61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
+		91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120,
+		121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150,
+		170, 200, 230, 260, 300, 340
 	};
 
 	public static int getFontSizeShift(int curSize, int shift) {
@@ -1380,9 +1379,6 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 				Settings.PROP_APP_BOOK_PROPERTY_SCAN_ENABLED,
 				mActivity.getString(R.string.options_app_scan_book_props_add_info), "", true).
 				setDefaultValue("1").setIconIdByAttr(R.attr.attr_icons8_book_scan_properties,R.drawable.icons8_book_scan_properties);
-		new BoolOption(this, mActivity.getString(R.string.mi_book_browser_simple_mode), Settings.PROP_APP_FILE_BROWSER_SIMPLE_MODE,
-				mActivity.getString(R.string.mi_book_browser_simple_mode_add_info), "", true).
-				setIconIdByAttr(R.attr.attr_icons8_file,R.drawable.icons8_file);
 		new BoolOption(this, mActivity.getString(R.string.authors_aliases_enabled), Settings.PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_ENABLED,
 				mActivity.getString(R.string.authors_aliases_enabled_add_info), "", true).
 				setIconIdByAttr(R.attr.attr_icons8_anon, R.drawable.icons8_anon);

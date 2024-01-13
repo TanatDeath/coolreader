@@ -79,6 +79,18 @@
                     android:layout_marginRight="2dip"
                     android:src="?attr/attr_icons8_plus_plus_small"
                     />
+            <ImageButton android:id="@+id/btn_to_next_sent_b"
+                    android:layout_width="0dip"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/colorThemeGray2Contrast"
+                    android:tag="tint"
+                    android:layout_marginTop="2dip"
+                    android:layout_marginBottom="2dip"
+                    android:layout_marginLeft="2dip"
+                    android:layout_marginRight="2dip"
+                    android:src="?attr/attr_icons8_forward_small"
+                    />
         </TableRow>
     </TableLayout>
 </LinearLayout>

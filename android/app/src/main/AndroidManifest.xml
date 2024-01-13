@@ -1246,6 +1246,7 @@
         <activity
                 android:name=".ProcessTextAct"
                 android:label="${appLabel}"
+                android:exported="true"
                 >
             <intent-filter>
                 <action android:name="android.intent.action.PROCESS_TEXT" />

@@ -2332,8 +2332,8 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 	}
 
 
-	public boolean isSimpleViewMode() {
-		return isSimpleViewMode;
+	public int isFileBrowserModeSelected() {
+		return fileBrowserModeSelected;
 	}
 
 	private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
@@ -2361,10 +2361,10 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		}
 	}
 
-	public void setSimpleViewMode( boolean isSimple ) {
-		if (isSimpleViewMode != isSimple) {
-			isSimpleViewMode = isSimple;
-			if (isSimple) {
+	public void setFileBrowserModeSelected(int modeSelected) {
+		if (fileBrowserModeSelected != modeSelected) {
+			fileBrowserModeSelected = modeSelected;
+			if (modeSelected == 4) {
 				mSortOrder = FileInfo.SortOrder.FILENAME;
 				mActivity.saveSetting(ReaderView.PROP_APP_BOOK_SORT_ORDER, mSortOrder.name());
 			}
@@ -2374,7 +2374,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 		}
 	}
 
-	private boolean isSimpleViewMode = true;
+	private int fileBrowserModeSelected = 0;
 
 	private FileListAdapter currentListAdapter;
 	
@@ -2459,7 +2459,7 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 					if (fi.isLitresPrefix())
 						return VIEW_TYPE_FILE;
 				}
-				return isSimpleViewMode ? VIEW_TYPE_FILE_SIMPLE : VIEW_TYPE_FILE;
+				return (fileBrowserModeSelected == 4) ? VIEW_TYPE_FILE_SIMPLE : VIEW_TYPE_FILE;
 			}
 			return Adapter.IGNORE_ITEM_VIEW_TYPE;
 		}
@@ -2935,10 +2935,15 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 						String filename1 = StrUtils.getNonEmptyStr(item.getFilename(),true);
 						String filename2 = StrUtils.getNonEmptyStr(item.isArchive && item.arcname != null /*&& !item.isDirectory */
 								? new File(item.arcname).getName() : null, true);
-						if (!StrUtils.isEmptyStr(filename1.trim()))
-							filename2 = StrUtils.getNonEmptyStr(filename2, true).replace(filename1.trim(), "*");
-						if (!StrUtils.isEmptyStr(title))
+						if (!StrUtils.isEmptyStr(filename1.trim())) {
+							if (fileBrowserModeSelected == 2)
+								filename2 = StrUtils.getNonEmptyStr(filename2, true).replace(filename1.trim(), "*");
+							else
+								filename2 = StrUtils.getNonEmptyStr(filename2, true);
+						}
+						if (!StrUtils.isEmptyStr(title)) {
 							filename1 = StrUtils.getNonEmptyStr(filename1, true).replace(title, "*");
+						}
 						String onlineBookInfo = "";
 						if (item.getOnlineStoreBookInfo() != null) {
 							OnlineStoreBook book = item.getOnlineStoreBookInfo();
@@ -2985,9 +2990,11 @@ public class FileBrowser extends LinearLayout implements FileInfoChangeListener 
 								seriesName = "(" + filename1 + ")";
 								wasFN1 = true;
 							}
-							if ((!wasFN1) && (!StrUtils.isEmptyStr(filename1)))
-								seriesName = (StrUtils.getNonEmptyStr(seriesName, true) + "; (" + filename1 + ")").trim();
-							if ((!wasFN2) && (!StrUtils.isEmptyStr(filename2)))
+							if ((fileBrowserModeSelected == 1) || (fileBrowserModeSelected == 2))
+							  if ((!wasFN1) && (!StrUtils.isEmptyStr(filename1)))
+							  	seriesName = (StrUtils.getNonEmptyStr(seriesName, true) + "; (" + filename1 + ")").trim();
+							if ((fileBrowserModeSelected == 2) || (fileBrowserModeSelected == 3))
+							  if ((!wasFN2) && (!StrUtils.isEmptyStr(filename2)))
 								seriesName = (StrUtils.getNonEmptyStr(seriesName, true) + " [" + filename2 + "]").trim();
 							if (seriesName.startsWith(";"))
 								seriesName = seriesName.substring(1).trim();

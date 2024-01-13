@@ -63,7 +63,7 @@ public class BacklightOption extends SubmenuOption {
 	};
 
 	int[] mFlickBrightness2 = new int[] {
-			0, 4, 5, 6, 7, 8, 9, 10
+			0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13
 	};
 	int[] mFlickBrightness2Titles = new int[] {
 			R.string.options_controls_flick_brightness_none,
@@ -73,10 +73,16 @@ public class BacklightOption extends SubmenuOption {
 			R.string.options_controls_flick_brightness_right_both_warm,
 			R.string.options_controls_flick_brightness_left_both_cold,
 			R.string.options_controls_flick_brightness_right_both_cold,
-			R.string.options_controls_flick_brightness_both_both
+			R.string.options_controls_flick_brightness_both_both,
+			R.string.options_controls_flick_brightness_left_system,
+			R.string.options_controls_flick_brightness_right_system,
+			R.string.options_controls_flick_brightness_both_system
 	};
 
 	int[] mFlickBrightness2AddInfos = new int[] {
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,
 			R.string.option_add_info_empty_text,

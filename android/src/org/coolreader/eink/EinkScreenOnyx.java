@@ -412,6 +412,7 @@ public class EinkScreenOnyx implements EinkScreen {
 	}
 
 	private void onyxRepaintEveryThing(View view, boolean invalidate, boolean needDeep) {
+		Log.i("TAG", "onyxRepaintEveryThing: ");
 		switch (com.onyx.android.sdk.device.Device.currentDeviceIndex()) {
 			case Rk31xx:
 			case Rk32xx:

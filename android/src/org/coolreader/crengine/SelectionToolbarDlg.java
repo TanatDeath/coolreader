@@ -1,6 +1,7 @@
 package org.coolreader.crengine;
 
 import org.coolreader.CoolReader;
+import org.coolreader.dic.DicToastView;
 import org.coolreader.dic.DictsDlg;
 import org.coolreader.readerview.ReaderView;
 import org.coolreader.dic.Dictionaries;
@@ -128,11 +129,19 @@ public class SelectionToolbarDlg {
 			mReaderView.setViewModeNonPermanent(ViewMode.PAGES);
 		}
 	}
+
+	int MOVE_START = 1;
+	int MOVE_END = 2;
+	int MOVE_NEXT_SENTENCE = 3;
+	int MOVE_PREV_SENTENCE = 4;
 	
-	private void changeSelectionBound(boolean start, int delta) {
-		L.d("changeSelectionBound(" + (start?"start":"end") + ", " + delta + ")");
+	private void changeSelectionBound(int moveType, int delta) {
+		L.d("changeSelectionBound(moveType = " + moveType + ", " + delta + ")");
 		setReaderMode();
-		ReaderCommand cmd = start ? ReaderCommand.DCMD_SELECT_MOVE_LEFT_BOUND_BY_WORDS : ReaderCommand.DCMD_SELECT_MOVE_RIGHT_BOUND_BY_WORDS;
+		ReaderCommand cmd = ReaderCommand.DCMD_SELECT_MOVE_LEFT_BOUND_BY_WORDS;
+		if (moveType == MOVE_END) cmd = ReaderCommand.DCMD_SELECT_MOVE_RIGHT_BOUND_BY_WORDS;
+		if (moveType == MOVE_NEXT_SENTENCE) cmd = ReaderCommand.DCMD_SELECT_NEXT_SENTENCE;
+		if (moveType == MOVE_PREV_SENTENCE) cmd = ReaderCommand.DCMD_SELECT_PREV_SENTENCE;
 		mReaderView.moveSelection(cmd, delta, new ReaderView.MoveSelectionCallback() {
 			
 			@Override
@@ -184,7 +193,7 @@ public class SelectionToolbarDlg {
 			int diff = (progress - lastProgress) / SELECTION_CONTROL_STEP * SELECTION_CONTROL_STEP;
 			if (diff!=0) {
 				lastProgress += diff;
-				changeSelectionBound(start, diff/SELECTION_CONTROL_STEP);
+				changeSelectionBound(start? MOVE_START: MOVE_END, diff/SELECTION_CONTROL_STEP);
 			}
 		}
 	};
@@ -366,6 +375,45 @@ public class SelectionToolbarDlg {
 			});
 			llAddButtons.findViewById(R.id.btn_combo).setBackground(c);
 			if (mCoolReader.isEInk) Utils.setBtnBackground(llAddButtons.findViewById(R.id.btn_combo), null, mCoolReader.isEInk);
+			llAddButtons.findViewById(R.id.btn_combo).setOnLongClickListener(v -> {
+				if (!FlavourConstants.PREMIUM_FEATURES) {
+					mCoolReader.showToast(R.string.only_in_premium);
+					return true;
+				}
+				Dictionaries.DictInfo di = mCoolReader.getCurOrFirstOnlineDic();
+				if (di != null) {
+					if (!StrUtils.isEmptyStr(selection.text)) {
+						mCoolReader.mDictionaries.setAdHocDict(di);
+						mCoolReader.findInDictionary(selection.text, false,null,
+								new CoolReader.DictionaryCallback() {
+
+									@Override
+									public boolean showDicToast() {
+										return false;
+									}
+
+									@Override
+									public boolean saveToHist() {
+										return false;
+									}
+
+									@Override
+									public void done(String result, String dslStruct) {
+										saveUserDic(false, result, selection, mCoolReader, mReaderView, dslStruct);
+										sendTo2(result, selection, mCoolReader);
+										closeDialog(true);
+									}
+
+									@Override
+									public void fail(Exception e, String msg) {
+										mCoolReader.showToast(msg);
+									}
+								});
+					}
+				}
+				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
+				return true;
+			});
 			llAddButtons.findViewById(R.id.btn_combo).setOnClickListener(v -> {
 				if (!FlavourConstants.PREMIUM_FEATURES) {
 					mCoolReader.showToast(R.string.only_in_premium);
@@ -403,46 +451,22 @@ public class SelectionToolbarDlg {
 				}
 				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
 			});
-			llAddButtons.findViewById(R.id.btn_super_combo).setBackground(c);
-			if (mCoolReader.isEInk) Utils.setBtnBackground((ImageButton) llAddButtons.findViewById(R.id.btn_super_combo), null, mCoolReader.isEInk);
-			llAddButtons.findViewById(R.id.btn_super_combo).setOnClickListener(v -> {
-				if (!FlavourConstants.PREMIUM_FEATURES) {
-					mCoolReader.showToast(R.string.only_in_premium);
-					return;
+			llAddButtons.findViewById(R.id.btn_speak_selection).setBackground(c);
+			if (mCoolReader.isEInk) Utils.setBtnBackground(llAddButtons.findViewById(R.id.btn_speak_selection), null, mCoolReader.isEInk);
+			llAddButtons.findViewById(R.id.btn_speak_selection).setOnClickListener(v -> {
+					if (!StrUtils.isEmptyStr(selection.text)) DicToastView.sayTTS(mCoolReader, selection.text, null);
 				}
-				Dictionaries.DictInfo di = mCoolReader.getCurOrFirstOnlineDic();
-				if (di != null) {
+			);
+			llAddButtons.findViewById(R.id.btn_speak_selection).setOnLongClickListener(v -> {
 					if (!StrUtils.isEmptyStr(selection.text)) {
-						mCoolReader.mDictionaries.setAdHocDict(di);
-						mCoolReader.findInDictionary(selection.text, false,null,
-								new CoolReader.DictionaryCallback() {
-
-							@Override
-							public boolean showDicToast() {
-								return false;
-							}
-
-							@Override
-							public boolean saveToHist() {
-								return false;
-							}
-
-							@Override
-							public void done(String result, String dslStruct) {
-								saveUserDic(false, result, selection, mCoolReader, mReaderView, dslStruct);
-								sendTo2(result, selection, mCoolReader);
-								closeDialog(true);
-							}
-
-							@Override
-							public void fail(Exception e, String msg) {
-								mCoolReader.showToast(msg);
-							}
+						DicToastView.sayTTS(mCoolReader, selection.text, () -> {
+							if (isVisibleNow)
+								changeSelectionBound(MOVE_NEXT_SENTENCE, 0);
 						});
 					}
+					return true;
 				}
-				closeDialog(!mReaderView.getSettings().getBool(ReaderView.PROP_APP_SELECTION_PERSIST, false));
-			});
+			);
 		} else {
 			if (llButtonsRow2 != null)
 				llButtonsRow2.removeAllViews();
@@ -681,7 +705,7 @@ public class SelectionToolbarDlg {
 		if (llSliderTop != null) new BoundControlListener(llSliderTop.findViewById(R.id.selection_bound_control_t), true);
 		if (llSliderBottom != null) new BoundControlListener(llSliderBottom.findViewById(R.id.selection_bound_control_b), false);
 		RepeatOnTouchListener lsnrStartSmallStepPlus = new RepeatOnTouchListener(500, 150,
-				v -> changeSelectionBound(true, SELECTION_SMALL_STEP));
+				v -> changeSelectionBound(MOVE_START, SELECTION_SMALL_STEP));
 		if (llSliderTop != null) llSliderTop.findViewById(R.id.btn_next_t).setOnTouchListener(lsnrStartSmallStepPlus);
 		llMiddleContents.findViewById(R.id.middle_contents_top_h3).setOnTouchListener(lsnrStartSmallStepPlus);
 		if ((!mCoolReader.isEInk) && (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0))
@@ -689,7 +713,7 @@ public class SelectionToolbarDlg {
 		if (llSliderTop != null)
 			if (mCoolReader.isEInk) Utils.setBtnBackground(llSliderTop.findViewById(R.id.btn_next_t), null, mCoolReader.isEInk);
 		RepeatOnTouchListener lsnrStartSmallStepMinus = new RepeatOnTouchListener(500, 150,
-				v -> changeSelectionBound(true, -SELECTION_SMALL_STEP));
+				v -> changeSelectionBound(MOVE_START, -SELECTION_SMALL_STEP));
 		if (llSliderTop != null) llSliderTop.findViewById(R.id.btn_prev_t).setOnTouchListener(lsnrStartSmallStepMinus);
 		llMiddleContents.findViewById(R.id.middle_contents_top_h2).setOnTouchListener(lsnrStartSmallStepMinus);
 		if ((!mCoolReader.isEInk) && (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0))
@@ -697,19 +721,28 @@ public class SelectionToolbarDlg {
 		if (llSliderTop != null)
 			if (mCoolReader.isEInk) Utils.setBtnBackground(llSliderTop.findViewById(R.id.btn_prev_t), null, mCoolReader.isEInk);
 		RepeatOnTouchListener lsnrStartSentenceStepPlus = new RepeatOnTouchListener(500, 150,
-				v -> changeSelectionBound(true, SELECTION_NEXT_SENTENCE_STEP));
+				v -> changeSelectionBound(MOVE_START, SELECTION_NEXT_SENTENCE_STEP));
 		if (llSliderTop != null) llSliderTop.findViewById(R.id.btn_next_sent_t).setOnTouchListener(lsnrStartSentenceStepPlus);
 		llMiddleContents.findViewById(R.id.middle_contents_top_h4).setOnTouchListener(lsnrStartSentenceStepPlus);
 		if (llSliderTop != null)
 			if (mCoolReader.isEInk) Utils.setBtnBackground(llSliderTop.findViewById(R.id.btn_next_sent_t), null, mCoolReader.isEInk);
 		RepeatOnTouchListener lsnrStartSentenceStepMinus = new RepeatOnTouchListener(500, 150,
-				v -> changeSelectionBound(true, -SELECTION_NEXT_SENTENCE_STEP));
-		if (llSliderTop != null) llSliderTop.findViewById(R.id.btn_prev_sent_t).setOnTouchListener(lsnrStartSentenceStepMinus);
+				v -> changeSelectionBound(MOVE_START, -SELECTION_NEXT_SENTENCE_STEP));
+		RepeatOnTouchListener lsnrPrevSent = new RepeatOnTouchListener(500, 150,
+				v -> changeSelectionBound(MOVE_PREV_SENTENCE, -1));
+		if (llSliderTop != null) {
+			llSliderTop.findViewById(R.id.btn_prev_sent_t).setOnTouchListener(lsnrStartSentenceStepMinus);
+			llSliderTop.findViewById(R.id.btn_to_prev_sent_t).setOnTouchListener(lsnrPrevSent);
+		}
 		llMiddleContents.findViewById(R.id.middle_contents_top_h1).setOnTouchListener(lsnrStartSentenceStepMinus);
-		if (llSliderTop != null)
-			if (mCoolReader.isEInk) Utils.setBtnBackground(llSliderTop.findViewById(R.id.btn_prev_sent_t), null, mCoolReader.isEInk);
+		if (llSliderTop != null) {
+			if (mCoolReader.isEInk) {
+				Utils.setBtnBackground(llSliderTop.findViewById(R.id.btn_prev_sent_t), null, mCoolReader.isEInk);
+				Utils.setBtnBackground(llSliderTop.findViewById(R.id.btn_to_prev_sent_t), null, mCoolReader.isEInk);
+			}
+		}
 		RepeatOnTouchListener lsnrFinishSmallStepPlus = new RepeatOnTouchListener(500, 150,
-				v -> changeSelectionBound(false, SELECTION_SMALL_STEP));
+				v -> changeSelectionBound(MOVE_END, SELECTION_SMALL_STEP));
 		if (llSliderBottom != null) llSliderBottom.findViewById(R.id.btn_next_b).setOnTouchListener(lsnrFinishSmallStepPlus);
 		llMiddleContents.findViewById(R.id.middle_contents_bottom_h3).setOnTouchListener(lsnrFinishSmallStepPlus);
 		if ((!mCoolReader.isEInk) && (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0))
@@ -717,7 +750,7 @@ public class SelectionToolbarDlg {
 		if (llSliderBottom != null)
 			if (mCoolReader.isEInk) Utils.setBtnBackground(llSliderBottom.findViewById(R.id.btn_next_b), null, mCoolReader.isEInk);
 		RepeatOnTouchListener lsnrFinishSmallStepMinus = new RepeatOnTouchListener(500, 150,
-				v -> changeSelectionBound(false, -SELECTION_SMALL_STEP));
+				v -> changeSelectionBound(MOVE_END, -SELECTION_SMALL_STEP));
 		if (llSliderBottom != null) llSliderBottom.findViewById(R.id.btn_prev_b).setOnTouchListener(lsnrFinishSmallStepMinus);
 		llMiddleContents.findViewById(R.id.middle_contents_bottom_h2).setOnTouchListener(lsnrFinishSmallStepMinus);
 		if ((!mCoolReader.isEInk) && (DeviceInfo.getSDKLevel() >= DeviceInfo.LOLLIPOP_5_0))
@@ -725,14 +758,22 @@ public class SelectionToolbarDlg {
 		if (llSliderBottom != null)
 			if (mCoolReader.isEInk) Utils.setBtnBackground(llSliderBottom.findViewById(R.id.btn_prev_b), null, mCoolReader.isEInk);
 		RepeatOnTouchListener lsnrFinishSentenceStepPlus = new RepeatOnTouchListener(500, 150,
-				v -> changeSelectionBound(false, SELECTION_NEXT_SENTENCE_STEP));
-		if (llSliderBottom != null)
+				v -> changeSelectionBound(MOVE_END, SELECTION_NEXT_SENTENCE_STEP));
+		RepeatOnTouchListener lsnrNextSent = new RepeatOnTouchListener(500, 150,
+				v -> changeSelectionBound(MOVE_NEXT_SENTENCE, 1));
+		if (llSliderBottom != null) {
 			llSliderBottom.findViewById(R.id.btn_next_sent_b).setOnTouchListener(lsnrFinishSentenceStepPlus);
+			llSliderBottom.findViewById(R.id.btn_to_next_sent_b).setOnTouchListener(lsnrNextSent);
+		}
 		llMiddleContents.findViewById(R.id.middle_contents_bottom_h4).setOnTouchListener(lsnrFinishSentenceStepPlus);
-		if (llSliderBottom != null)
-			if (mCoolReader.isEInk) Utils.setBtnBackground(llSliderBottom.findViewById(R.id.btn_next_sent_b), null, mCoolReader.isEInk);
+		if (llSliderBottom != null) {
+			if (mCoolReader.isEInk) {
+				Utils.setBtnBackground(llSliderBottom.findViewById(R.id.btn_next_sent_b), null, mCoolReader.isEInk);
+				Utils.setBtnBackground(llSliderBottom.findViewById(R.id.btn_to_next_sent_b), null, mCoolReader.isEInk);
+			}
+		}
 		RepeatOnTouchListener lsnrFinishSentenceStepMinus = new RepeatOnTouchListener(500, 150,
-				v -> changeSelectionBound(false, -SELECTION_NEXT_SENTENCE_STEP));
+				v -> changeSelectionBound(MOVE_END, -SELECTION_NEXT_SENTENCE_STEP));
 		if (llSliderBottom != null) llSliderBottom.findViewById(R.id.btn_prev_sent_b).setOnTouchListener(lsnrFinishSentenceStepMinus);
 		llMiddleContents.findViewById(R.id.middle_contents_bottom_h1).setOnTouchListener(lsnrFinishSentenceStepMinus);
 		if (llSliderBottom != null)

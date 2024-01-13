@@ -741,7 +741,7 @@ public class CRRootView extends ViewGroup {
 			ImageView iconOpds = viewOpds.findViewById(R.id.item_icon);
 			TextView labelOpds = viewOpds.findViewById(R.id.item_name);
 			setImageResource(iconOpds, Utils.resolveResourceIdByAttr(mActivity,
-					R.attr.attr_icons8_opds, R.drawable.icons8_opds),
+							R.attr.cr3_browser_folder_opds_drawable, R.drawable.icons8_internet_folder_2),
 					fsType == 2);
 			mActivity.tintViewIcons(iconOpds,true);
 			labelOpds.setText(R.string.mi_book_opds_root_short);
@@ -752,6 +752,25 @@ public class CRRootView extends ViewGroup {
 				mActivity.showOnlineCatalogs();
 			});
 			mFilesystemContainer.addView(viewOpds);
+			View viewExternal = inflater.inflate(itemLayout, null);
+			ImageView iconExternal = viewExternal.findViewById(R.id.item_icon);
+			TextView labelExternal = viewExternal.findViewById(R.id.item_name);
+			setImageResource(iconExternal, Utils.resolveResourceIdByAttr(mActivity,
+							R.attr.attr_icons8_system_folder, R.drawable.icons8_system_folder),
+					fsType == 2);
+			mActivity.tintViewIcons(iconExternal,true);
+			labelExternal.setText(R.string.mi_book_system_dialog_short);
+			addTextViewSpacing(mFilesystemContainer);
+			labelExternal.setTextColor(mActivity.getTextColor(colorIcon));
+			labelExternal.setMaxWidth(coverWidth * 25 / 10);
+			viewExternal.setOnClickListener(v -> {
+				Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+				intent.addCategory(Intent.CATEGORY_OPENABLE);
+				intent.setType("*/*");
+				mActivity.mOpenDocumentTreeCommand = mActivity.ODT_CMD_OPEN_FILE;
+				mActivity.startActivityForResult(intent, mActivity.REQUEST_CODE_OPEN_DOCUMENT_TREE);
+			});
+			mFilesystemContainer.addView(viewExternal);
 			addTextViewSpacing(mFilesystemContainer);
 			mFilesystemContainer.invalidate();
 		}

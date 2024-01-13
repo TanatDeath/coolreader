@@ -120,6 +120,19 @@ public class FilebrowserOption extends SubmenuOption {
 			//R.string.cloud_save_folder_naming_2_add_info, R.string.cloud_save_folder_naming_3_add_info
 	};
 
+	int[] mItemType = new int[] {
+			0, 1, 2, 3, 4
+	};
+	int[] mItemTypeTitles = new int[] {
+			R.string.mi_book_browser_mode_0, R.string.mi_book_browser_mode_1, R.string.mi_book_browser_mode_2,
+			R.string.mi_book_browser_mode_3, R.string.mi_book_browser_mode_4
+	};
+	int[] mItemTypeAddInfos = new int[] {
+			R.string.option_add_info_empty_text, R.string.option_add_info_empty_text, R.string.option_add_info_empty_text,
+			R.string.option_add_info_empty_text, R.string.mi_book_browser_simple_mode_add_info
+	};
+
+
 	public static int[] mBrowserMaxGroupItems;
 
 	final BaseActivity mActivity;
@@ -157,7 +170,10 @@ public class FilebrowserOption extends SubmenuOption {
 		//CR implementation
 		//listView.add(new BoolOption(mOwner, mActivity.getString(R.string.options_app_browser_hide_empty_genres), Settings.PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES,
 		//		mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).setDefaultValue("0").noIcon());
-		listView.add(OptionsDialog.getOption(Settings.PROP_APP_FILE_BROWSER_SIMPLE_MODE, this.lastFilteredValue));
+		listView.add(new ListOption(mOwner, mActivity.getString(R.string.mi_book_browser_mode),
+				Settings.PROP_APP_FILE_BROWSER_ITEM_TYPE, mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue).
+				add(mItemType, mItemTypeTitles, mItemTypeAddInfos).
+				setDefaultValue("0").setIconIdByAttr(R.attr.attr_icons8_file,R.drawable.icons8_file));
 		listView.add(new ClickOption(mOwner, mActivity.getString(R.string.authors_aliases_load),
 				Settings.PROP_APP_FILE_BROWSER_AUTHOR_ALIASES_LOAD, mActivity.getString(R.string.authors_aliases_load_add_info), this.lastFilteredValue,
 				(view, optionLabel, optionValue) ->
@@ -234,7 +250,7 @@ public class FilebrowserOption extends SubmenuOption {
 		this.updateFilteredMark(mActivity.getString(R.string.options_hide_empty_dirs_slowdown));
 		this.updateFilteredMark(mActivity.getString(R.string.options_app_browser_hide_empty_genres), Settings.PROP_APP_FILE_BROWSER_HIDE_EMPTY_GENRES,
 				mActivity.getString(R.string.option_add_info_empty_text));
-		this.updateFilteredMark(mActivity.getString(R.string.mi_book_browser_simple_mode), Settings.PROP_APP_FILE_BROWSER_SIMPLE_MODE,
+		this.updateFilteredMark(mActivity.getString(R.string.mi_book_browser_simple_mode), Settings.PROP_APP_FILE_BROWSER_ITEM_TYPE,
 				mActivity.getString(R.string.mi_book_browser_simple_mode_add_info));
 		this.updateFilteredMark(mActivity.getString(R.string.mi_book_browser_max_group_size), Settings.PROP_APP_FILE_BROWSER_MAX_GROUP_SIZE,
 				mActivity.getString(R.string.mi_book_browser_max_group_size_add_info));

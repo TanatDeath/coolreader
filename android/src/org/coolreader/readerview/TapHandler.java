@@ -1,5 +1,6 @@
 package org.coolreader.readerview;
 
+import android.content.Intent;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -652,15 +653,22 @@ public class TapHandler {
 						boolean bRightCold = mReaderView.getBacklightEnabled(mReaderView.isBacklightControlFlick, false, true);
 						boolean leftOk = (start_x >= nonSensL) && (start_x < nonSensL + (dragThreshold * 170 / 100));
 						boolean rightOk = (start_x <= width - nonSensR) && (start_x > (width - (dragThreshold * 170 / 100) - nonSensR));
-						if (
-							((leftOk && bLeftCold) || (rightOk && bRightCold)) && (isVertical)
-						) {
-							// brightness
-							state = STATE_BRIGHTNESS;
-							brightness_side = mReaderView.BRIGHTNESS_TYPE_RIGHT_SIDE;
-							if (leftOk) brightness_side = mReaderView.BRIGHTNESS_TYPE_LEFT_SIDE;
-							mReaderView.startBrightnessControl(start_x, start_y, brightness_side);
-							return true;
+						boolean callSystem = mReaderView.getSystemBrightnessCall(mReaderView.isBacklightControlFlick, leftOk, rightOk);
+						if (callSystem) {
+							if (DeviceInfo.EINK_ONYX) {
+								mActivity.sendBroadcast(new Intent("action.show.brightness.dialog"));
+							}
+						} else {
+							if (
+								((leftOk && bLeftCold) || (rightOk && bRightCold)) && (isVertical)
+							) {
+								// brightness
+								state = STATE_BRIGHTNESS;
+								brightness_side = mReaderView.BRIGHTNESS_TYPE_RIGHT_SIDE;
+								if (leftOk) brightness_side = mReaderView.BRIGHTNESS_TYPE_LEFT_SIDE;
+								mReaderView.startBrightnessControl(start_x, start_y, brightness_side);
+								return true;
+							}
 						}
 					}
 					if (DeviceInfo.EINK_HAVE_NATURAL_BACKLIGHT && mReaderView.isBacklightControlFlick != mReaderView.BACKLIGHT_CONTROL_FLICK_NONE && ady > adx) {

@@ -267,6 +267,8 @@ public class ReaderAction {
 	public final static ReaderAction ONLINE_COMBO = new ReaderAction("ONLINE_COMBO", 0, R.string.online_combo, ReaderCommand.DCMD_ONLINE_COMBO, 0, 0, null, R.string.online_combo_add_info).setIconId(R.drawable.icons8_combo);
 	public final static ReaderAction ONLINE_SUPER_COMBO = new ReaderAction("ONLINE_SUPER_COMBO", 0, R.string.online_super_combo, ReaderCommand.DCMD_ONLINE_SUPER_COMBO, 0, 0, ONLINE_COMBO, R.string.online_super_combo_add_info).setIconId(R.drawable.icons8_super_combo);
 
+	public final static ReaderAction SPEAK_SELECTION = new ReaderAction("SPEAK_SELECTION", 0, R.string.speak_selection, ReaderCommand.DCMD_SPEAK_SELECTION, 0, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.cr3_button_tts);
+
 	public final static ReaderAction GDRIVE_SYNCTO = new ReaderAction("GDRIVE_SYNCTO", 0, R.string.googledrive_sync_to, ReaderCommand.DCMD_GOOGLEDRIVE_SYNC, 0, 0, null, R.string.option_add_info_empty_text).setIconId(R.drawable.google_drive);
 	public final static ReaderAction GDRIVE_SYNCFROM = new ReaderAction("GDRIVE_SYNCFROM", 0, R.string.googledrive_sync_from, ReaderCommand.DCMD_GOOGLEDRIVE_SYNC, 1, 0, GDRIVE_SYNCTO, R.string.option_add_info_empty_text).setIconId(R.drawable.google_drive);
 
@@ -512,7 +514,8 @@ public class ReaderAction {
 				COMMAND_GROUP_7,
 				COMMAND_GROUP_8,
 				COMMAND_GROUP_9,
-				COMMAND_GROUP_10
+				COMMAND_GROUP_10,
+				SPEAK_SELECTION
 				// calibre will only be available from rootview
 		};
 		if (BuildConfig.GSUITE_AVAILABLE && DeviceInfo.getSDKLevel() >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
