@@ -112,6 +112,18 @@ public class CRRootView extends ViewGroup {
 	private int libType;
 	private int opdsType;
 	public ArrayList<FileInfo> lastRecentFiles = new ArrayList<>();
+	public static boolean showYndInFilesystemContainer = true;
+	public static boolean showDbxInFilesystemContainer = true;
+
+
+	public static void setShowYndInFilesystemContainer(boolean val){
+		showYndInFilesystemContainer = val;
+		log.d("PROP_APP_SHOW showYndInFilesystemContainer: " +  val);
+	}
+	public static void setShowDbxInFilesystemContainer(boolean val){
+		showDbxInFilesystemContainer = val;
+		log.d("PROP_APP_SHOW showDbxInFilesystemContainer: " +  val);
+	}
 
 	public CRRootView(CoolReader activity) {
 		super(activity);
@@ -570,7 +582,7 @@ public class CRRootView extends ViewGroup {
 		if (dirs.size() != 0) {
 			int itemLayout = R.layout.root_item_library_h;
 			if (fsType == 2) itemLayout = R.layout.root_item_dir;
-					LayoutInflater inflater = LayoutInflater.from(mActivity);
+			LayoutInflater inflater = LayoutInflater.from(mActivity);
 			mFilesystemContainer.removeAllViews();
 			int idx = 0;
 			ImageView icon;
@@ -581,9 +593,9 @@ public class CRRootView extends ViewGroup {
 			ImageView iconGD = viewGD.findViewById(R.id.item_icon);
 			TextView labelGD = viewGD.findViewById(R.id.item_name);
 			setImageResource(iconGD, Utils.resolveResourceIdByAttr(mActivity,
-						R.attr.attr_icons8_google_drive_2, R.drawable.icons8_google_drive_2),
-						fsType == 2);
-			mActivity.tintViewIcons(iconGD,true);
+							R.attr.attr_icons8_google_drive_2, R.drawable.icons8_google_drive_2),
+					fsType == 2);
+			mActivity.tintViewIcons(iconGD, true);
 			labelGD.setText(R.string.open_book_from_gd_short);
 			labelGD.setTextColor(mActivity.getTextColor(colorIcon));
 			labelGD.setMaxWidth(coverWidth * 25 / 10);
@@ -604,66 +616,69 @@ public class CRRootView extends ViewGroup {
 			});
 			//plotn //not now
 			//mFilesystemScroll.addView(viewGD);
-
-			View viewDBX = inflater.inflate(itemLayout, null);
-			ImageView iconDBX = viewDBX.findViewById(R.id.item_icon);
-			TextView labelDBX = viewDBX.findViewById(R.id.item_name);
-			setImageResource(iconDBX, Utils.resolveResourceIdByAttr(mActivity,
-					R.attr.attr_icons8_dropbox_filled, R.drawable.icons8_dropbox_filled),
-					fsType == 2);
-			mActivity.tintViewIcons(iconDBX,true);
-			labelDBX.setText(R.string.open_book_from_dbx_short);
-			labelDBX.setTextColor(mActivity.getTextColor(colorIcon));
-			labelDBX.setMaxWidth(coverWidth * 25 / 10);
-			viewDBX.setOnClickListener(v -> {
-				if (!FlavourConstants.PREMIUM_FEATURES) {
-					mActivity.showToast(R.string.only_in_premium);
-					return;
-				}
-				CloudAction.dbxOpenBookDialog(mActivity);
-			});
-			viewDBX.setOnLongClickListener(v -> {
-				if (!FlavourConstants.PREMIUM_FEATURES) {
-					mActivity.showToast(R.string.only_in_premium);
+			if(showDbxInFilesystemContainer) {
+				View viewDBX = inflater.inflate(itemLayout, null);
+				ImageView iconDBX = viewDBX.findViewById(R.id.item_icon);
+				TextView labelDBX = viewDBX.findViewById(R.id.item_name);
+				setImageResource(iconDBX, Utils.resolveResourceIdByAttr(mActivity,
+								R.attr.attr_icons8_dropbox_filled, R.drawable.icons8_dropbox_filled),
+						fsType == 2);
+				mActivity.tintViewIcons(iconDBX, true);
+				labelDBX.setText(R.string.open_book_from_dbx_short);
+				labelDBX.setTextColor(mActivity.getTextColor(colorIcon));
+				labelDBX.setMaxWidth(coverWidth * 25 / 10);
+				viewDBX.setOnClickListener(v -> {
+					if (!FlavourConstants.PREMIUM_FEATURES) {
+						mActivity.showToast(R.string.only_in_premium);
+						return;
+					}
+					CloudAction.dbxOpenBookDialog(mActivity);
+				});
+				viewDBX.setOnLongClickListener(v -> {
+					if (!FlavourConstants.PREMIUM_FEATURES) {
+						mActivity.showToast(R.string.only_in_premium);
+						return true;
+					}
+					mActivity.dbxInputTokenDialog = new DBXInputTokenDialog(mActivity);
+					mActivity.dbxInputTokenDialog.show();
 					return true;
-				}
-				mActivity.dbxInputTokenDialog = new DBXInputTokenDialog(mActivity);
-				mActivity.dbxInputTokenDialog.show();
-				return true;
-			});
-			mFilesystemContainer.addView(viewDBX);
-			addTextViewSpacing(mFilesystemContainer);
+				});
+				mFilesystemContainer.addView(viewDBX);
+				addTextViewSpacing(mFilesystemContainer);
+			}
+			if(showYndInFilesystemContainer) {
 
-			View viewYandex = inflater.inflate(itemLayout, null);
-			ImageView iconYandex = viewYandex.findViewById(R.id.item_icon);
-			TextView labelYandex = viewYandex.findViewById(R.id.item_name);
-			setImageResource(iconYandex, Utils.resolveResourceIdByAttr(mActivity,
-					R.attr.attr_icons8_yandex, R.drawable.icons8_yandex_logo),
-					fsType == 2);
-			mActivity.tintViewIcons(iconYandex,true);
-			labelYandex.setText(R.string.open_book_from_y_short);
-			addTextViewSpacing(mFilesystemContainer);
-			labelYandex.setTextColor(mActivity.getTextColor(colorIcon));
-			labelYandex.setMaxWidth(coverWidth * 25 / 10);
-			viewYandex.setOnClickListener(v -> {
-				if (!FlavourConstants.PREMIUM_FEATURES) {
-					mActivity.showToast(R.string.only_in_premium);
-					return;
-				}
-				CloudAction.yndOpenBookDialog(mActivity, null,true);
-			});
-			viewYandex.setOnLongClickListener(v -> {
-				if (!FlavourConstants.PREMIUM_FEATURES) {
-					mActivity.showToast(R.string.only_in_premium);
+				//if (Settings.BACKLIGHT_CONTROL_FLICK_NONE == 1)
+				View viewYandex = inflater.inflate(itemLayout, null);
+				ImageView iconYandex = viewYandex.findViewById(R.id.item_icon);
+				TextView labelYandex = viewYandex.findViewById(R.id.item_name);
+				setImageResource(iconYandex, Utils.resolveResourceIdByAttr(mActivity,
+								R.attr.attr_icons8_yandex, R.drawable.icons8_yandex_logo),
+						fsType == 2);
+				mActivity.tintViewIcons(iconYandex, true);
+				labelYandex.setText(R.string.open_book_from_y_short);
+				addTextViewSpacing(mFilesystemContainer);
+				labelYandex.setTextColor(mActivity.getTextColor(colorIcon));
+				labelYandex.setMaxWidth(coverWidth * 25 / 10);
+				viewYandex.setOnClickListener(v -> {
+					if (!FlavourConstants.PREMIUM_FEATURES) {
+						mActivity.showToast(R.string.only_in_premium);
+						return;
+					}
+					CloudAction.yndOpenBookDialog(mActivity, null, true);
+				});
+				viewYandex.setOnLongClickListener(v -> {
+					if (!FlavourConstants.PREMIUM_FEATURES) {
+						mActivity.showToast(R.string.only_in_premium);
+						return true;
+					}
+					mActivity.yndInputTokenDialog = new YNDInputTokenDialog(mActivity);
+					mActivity.yndInputTokenDialog.show();
 					return true;
-				}
-				mActivity.yndInputTokenDialog = new YNDInputTokenDialog(mActivity);
-				mActivity.yndInputTokenDialog.show();
-				return true;
-			});
-			mFilesystemContainer.addView(viewYandex);
-			addTextViewSpacing(mFilesystemContainer);
-
+				});
+				mFilesystemContainer.addView(viewYandex);
+				addTextViewSpacing(mFilesystemContainer);
+			}
 			for (final FileInfo item : dirs) {
 				if (item == null)
 					continue;

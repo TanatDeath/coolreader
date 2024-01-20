@@ -55,6 +55,11 @@ public class CloudOption extends SubmenuOption {
 						mActivity.showToast(mActivity.getString(R.string.ynd_home_folder_hint), Toast.LENGTH_LONG, view, true, 0), false).
 				setDefaultValue("/").
 				setIconIdByAttr(R.attr.cr3_browser_folder_root_drawable, R.drawable.cr3_browser_folder_root));
+
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.show_ynd_in_file_systems_list), Settings.PROP_APP_SHOW_YND_IN_FILESYSTEM_CONTAINER_ENABLE,
+				mActivity.getString(R.string.show_ynd_in_file_systems_list), this.lastFilteredValue, false).setDefaultValue("1").
+				noIcon());
+
 		listView.add(new ClickOption(mOwner, mActivity.getString(R.string.dropbox_settings),
 				Settings.PROP_CLOUD_DBX_SETTINGS, mActivity.getString(R.string.dropbox_settings_v), this.lastFilteredValue,
 				(view, optionLabel, optionValue) ->
@@ -63,6 +68,11 @@ public class CloudOption extends SubmenuOption {
 					mActivity.dbxInputTokenDialog.show();
 				}, true).setDefaultValue(mActivity.getString(R.string.dropbox_settings)).
 				setIconIdByAttr(R.attr.attr_icons8_dropbox_filled, R.drawable.icons8_dropbox_filled));
+
+		listView.add(new BoolOption(mOwner, mActivity.getString(R.string.show_dbx_in_file_systems_list), Settings.PROP_APP_SHOW_DBX_IN_FILESYSTEM_CONTAINER_ENABLE,
+				mActivity.getString(R.string.show_dbx_in_file_systems_list), this.lastFilteredValue, false).setDefaultValue("1").
+				noIcon());
+
 		listView.add(new ClickOption(mOwner, mActivity.getString(R.string.litres_settings),
 				Settings.PROP_CLOUD_LITRES_SETTINGS, mActivity.getString(R.string.litres_settings_add_info), this.lastFilteredValue,
 				(view, optionLabel, optionValue) ->
@@ -70,6 +80,7 @@ public class CloudOption extends SubmenuOption {
 					mActivity.litresCredentialsDialog = new LitresCredentialsDialog(mActivity);
 					mActivity.litresCredentialsDialog.show();
 				}, true).setDefaultValue(mActivity.getString(R.string.litres_settings_add_info)).setIconIdByAttr(R.attr.attr_litres_en_logo_2lines, R.drawable.litres_en_logo_2lines));
+
 		OptionBase optSaveToCloud = new ClickOption(mOwner, mActivity.getString(R.string.save_settings_to_cloud),
 				mActivity.getString(R.string.save_settings_to_cloud_v), mActivity.getString(R.string.option_add_info_empty_text), this.lastFilteredValue,
 				(view, optionLabel, optionValue) -> {

@@ -186,6 +186,12 @@ public interface Settings {
 
 	String PROP_APP_HARDWARE_KEYS = "app.hardware.keys";
 	String PROP_APP_DEVICE_TURN_ENABLE     ="app.device.turn.enable";
+
+
+	String PROP_APP_SHOW_YND_IN_FILESYSTEM_CONTAINER_ENABLE = "app.show.ynd.in.filesystem.container.enable";
+
+	String PROP_APP_SHOW_DBX_IN_FILESYSTEM_CONTAINER_ENABLE = "app.show.dbx.in.filesystem.container.enable";
+
 	String PROP_APP_KEY_ACTIONS_PRESS     ="app.key.action.press";
     String PROP_APP_TRACKBALL_DISABLED    ="app.trackball.disabled";
     String PROP_APP_SCREEN_BACKLIGHT_LOCK    ="app.screen.backlight.lock.enabled";
@@ -350,6 +356,7 @@ public interface Settings {
 	String PROP_APP_GESTURE_PAGE_FLIPPING_NEW = "app.touch.gesture.page.flipping.new";
 	String PROP_APP_GESTURE_PAGE_FLIPPING_SENSIVITY = "app.touch.gesture.page.flipping.sensivity";
 	String PROP_APP_GESTURE_PAGE_FLIPPING_PAGE_COUNT = "app.touch.gesture.page.flipping.page.count";
+
 	String PROP_APP_DISABLE_TWO_POINTER_GESTURES = "app.touch.gesture.twopointer.disable";
 
     String PROP_APP_VIEW_AUTOSCROLL_SPEED  ="app.view.autoscroll.speed";
@@ -511,6 +518,8 @@ public interface Settings {
 	int CLOUD_SYNC_VARIANT_DISABLED = 0;
 	int CLOUD_SYNC_VARIANT_FILESYSTEM = 1;
 	int CLOUD_SYNC_VARIANT_YANDEX = 2;
+
+
 
 	enum Lang {
     	DEFAULT("system", R.string.options_app_locale_system, R.raw.help_template_en),

@@ -1390,6 +1390,9 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 		new BoolOption(this,getString(R.string.device_page_turn_enable), PROP_APP_DEVICE_TURN_ENABLE,
 				getString(R.string.option_add_info_empty_text), "", true).
 				setIconIdByAttr(R.attr.attr_icons8_page_turn, R.drawable.icons8_page_turn);
+//		new BoolOption(this,getString(R.string.show_ynd_in_file_systems_list), PROP_APP_SHOW_YND_IN_FILESYSTEM_CONTAINER_ENABLE,
+//				getString(R.string.option_add_info_empty_text), "", true).
+//				setIconIdByAttr(R.attr.attr_icons8_yandex, R.drawable.icons8_yandex_logo);
 	}
 	
 	private void setupBrowserOptions(String filter)
@@ -1918,7 +1921,7 @@ public class OptionsDialog extends BaseDialog implements TabContentFactory, Opti
 //				mGoogleDriveAutoSavePeriodOption.setEnabled(syncEnabled);
 //				// mCloudSyncBookmarksKeepAliveOptions should be enabled regardless of PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED
 //			};
-//			mOptionsCloudSync.add(new BoolOption(this, getString(R.string.options_app_googledrive_sync_auto), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED).setDefaultValue("0").noIcon()
+//			mOptionsCloudSync.add(new (this, getString(R.string.options_app_googledrive_sync_auto), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_ENABLED).setDefaultValue("0").noIcon()
 //					.setOnChangeHandler(onGoogleDriveEnable));
 //			mCloudSyncAskConfirmationsOption = new BoolOption(this, getString(R.string.options_app_cloudsync_confirmations), PROP_APP_CLOUDSYNC_CONFIRMATIONS).setDefaultValue("1").noIcon();
 //			mGoogleDriveEnableSettingsOption = new BoolOption(this, getString(R.string.options_app_googledrive_sync_settings), PROP_APP_CLOUDSYNC_GOOGLEDRIVE_SETTINGS).setDefaultValue("0").noIcon();

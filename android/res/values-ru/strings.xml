@@ -2140,5 +2140,14 @@
     <string name="cannot_open_file">Невозможно открыть файл</string>
     <string name="initial_name">Начальное</string>
     <string name="name_from_metadata">Метаданные</string>
+    <string name="book_info_book_series_comment">Комментарий</string>
+    <string name="folder_name_books_by_state_thrown">Брошенные</string>
+    <string name="folder_name_books_by_state_expected_to_continue">Ожидается \n продолжение</string>
+    <string name="folder_name_books_by_state_last_added">Последние \n добавленные</string>
+    <string name="book_state_thrown">Брошена</string>
+    <string name="book_state_expected_to_continue">Ожидаю продолжение</string>
+    <string name="show_ynd_in_file_systems_list">Отображать Yandex.Disk в списке файловых систем</string>
+    <string name="show_dbx_in_file_systems_list">Отображать Dropbox в списке файловых систем</string>
+
 </resources>
 

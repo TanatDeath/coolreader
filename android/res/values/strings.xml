@@ -2121,6 +2121,7 @@
     <string name="options_dic_auto_speak">Auto speak selected text, when calling dictionary</string>
     <string name="device_turn_explain">Turn your device to the position, in which page should turn, and press \'fix\' button</string>
     <string name="device_page_turn_enable">Turn page by device inclination</string>
+
     <string name="device_page_turn">Turn page by device inclination settings</string>
     <string name="device_page_turn_fix">Fix (turn)</string>
     <string name="device_page_turn_fix_use_explain_turn">Select tracked coords - turn</string>
@@ -2180,4 +2181,14 @@
     <string name="cannot_open_file">Cannot open file</string>
     <string name="initial_name">Initial</string>
     <string name="name_from_metadata">Metadata</string>
+    <string name="book_info_book_series_comment">Comment</string>
+    <string name="folder_name_books_by_state_thrown">Thrown</string>
+    <string name="folder_name_books_by_state_expected_to_continue">Expected to continue</string>
+    <string name="folder_name_books_by_state_last_added">Last added</string>
+    <string name="book_state_thrown">Thrown</string>
+    <string name="book_state_expected_to_continue">Expected to continue</string>
+    <string name="show_ynd_in_file_systems_list">Show Yandex.Disk in list of file systems</string>
+    <string name="show_dbx_in_file_systems_list">Show Dropbox in list of file systems</string>
+
+
 </resources>

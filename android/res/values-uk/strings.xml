@@ -539,4 +539,12 @@
     <string name="root_item_online_catalogs">Відкрити каталоги</string>
     <string name="black_list_enforced">Cannot add this URL since it is added to black list of catalogs which may violate DMCA by request of LitRes.ru</string>
     <string name="black_list_warning">WARNING: this URL is added to black list of catalogs which may violate DMCA by request of LitRes.ru Do you really want to add this catalog?</string>
+    <string name="book_info_book_series_comment">Комментарий</string>
+    <string name="folder_name_books_by_state_thrown">Кинуті</string>
+    <string name="folder_name_books_by_state_expected_to_continue">Очикуется \n продовженя</string>
+    <string name="folder_name_books_by_state_last_added">Останні додані</string>
+    <string name="book_state_thrown">Кинута</string>
+    <string name="book_state_expected_to_continue">Очикую продовженя</string>
+    <string name="show_ynd_in_file_systems_list">Відображати Yandex.Disk у переліку файлових систем</string>
+    <string name="show_dbx_in_file_systems_list">Відображати Dropbox у переліку файлових систем</string>
 </resources>

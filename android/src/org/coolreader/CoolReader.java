@@ -1101,6 +1101,14 @@ public class CoolReader extends BaseActivity implements SensorEventListener
 				fixTurnBackCoord3 = "1".equals(value);
 			if (key.equals(Settings.PROP_APP_DEVICE_TURN + ".precision"))
 				seekPrecision = Utils.parseInt(value, 10);
+		} else if (key.equals(PROP_APP_SHOW_YND_IN_FILESYSTEM_CONTAINER_ENABLE)) {
+			//startBehaviour = Utils.parseInt(value, 0);
+			CRRootView.setShowYndInFilesystemContainer("1".equals(value));
+			log.d("PROP_APP_SHOW_YND_IN_FILESYSTEM_CONTAINER_ENABLE: " +  Utils.parseInt(value, 0));
+		} else if (key.equals(PROP_APP_SHOW_DBX_IN_FILESYSTEM_CONTAINER_ENABLE)) {
+			//startBehaviour = Utils.parseInt(value, 0);
+			CRRootView.setShowDbxInFilesystemContainer("1".equals(value));
+			log.d("PROP_APP_SHOW_YND_IN_FILESYSTEM_CONTAINER_ENABLE: " +  Utils.parseInt(value, 0));
 		}
 	}
 

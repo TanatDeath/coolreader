@@ -87,6 +87,9 @@ import java.util.Set;
 
 @SuppressLint("Registered")
 public class BaseActivity extends Activity implements Settings {
+	public boolean mShowYndInFilesystemContainer = true;
+	public	 boolean mShowDbxInFilesystemContainer = true;
+	public	 boolean mShowYndInNetworkLibrary = true;
 
 	private static final Logger log = L.create("ba");
 	private View mDecorView;
@@ -1709,7 +1712,10 @@ public class BaseActivity extends Activity implements Settings {
 	private int mEinkOnyxScreenFullUpdateMethod = 0;
 	private int mEinkOnyxExtraDelayFullRefresh = -1;
 	public boolean mOnyxDontUpdateLibrary = false;
+
 	public boolean mOnyxSwitchToA2 = true;
+
+
 
 	public EinkScreen.EinkUpdateMode getScreenUpdateMode() {
 		return mScreenUpdateMode;
@@ -1757,6 +1763,17 @@ public class BaseActivity extends Activity implements Settings {
 
 	public void setOnyxSwitchToA2(boolean swi) {
 		mOnyxSwitchToA2 = swi;
+	}
+
+	public void setShowYndInFilesystemContainer(boolean swi) {
+		mShowYndInNetworkLibrary = swi;
+
+	}
+	public void setShowDbxInFilesystemContainer(boolean swi) {
+		mShowDbxInFilesystemContainer = swi;
+	}
+	public void setShowYndInNetworkLibrary(boolean swi) {
+		mShowYndInNetworkLibrary = swi;
 	}
 
 	public void setScreenFullUpdateMethod(int method) {

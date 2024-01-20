@@ -241,8 +241,8 @@ android {
 
     compileOptions {
         // Sets Java compatibility to Java 8
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES'
@@ -254,6 +254,9 @@ android {
         exclude 'META-INF/notice.txt'
         exclude 'META-INF/ASL2.0'
     }
+    compileSdk 30
+    buildToolsVersion '28.0.3'
+    ndkVersion '21.4.7075529'
 //    ndkVersion '21.0.6113669'
 //    useLibrary 'org.apache.http.legacy'
 }
@@ -312,6 +315,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'com.github.deano2390:FlowTextView:2.0.5'
     implementation 'com.dropbox.core:dropbox-core-sdk:3.0.11'
+ //   implementation 'com.dropbox.core:dropbox-core-sdk:3.2.1'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9'
     //implementation files('libs/okhttp-3.12.3.jar')
     implementation 'com.squareup.okhttp3:okhttp:3.12.3'
